@@ -1,0 +1,21 @@
+---
+import {
+  ToggleSlashIntro,
+  ToggleSlashLinks,
+  ToggleSlashPlanned,
+  ToggleSlashToday,
+  ToggleSlashTry,
+} from "#/components/toggleslash";
+import { TOGGLESLASH_DESCRIPTION, TOGGLESLASH_TITLE } from "#/content/toggleslash";
+import Base from "#/layouts/Base.astro";
+
+// /toggleslash: what ToggleSlash is and does today. The docs stay in the ToggleSlash repository.
+---
+
+<Base title={TOGGLESLASH_TITLE} description={TOGGLESLASH_DESCRIPTION}>
+  <ToggleSlashIntro />
+  <ToggleSlashToday />
+  <ToggleSlashTry client:visible />
+  <ToggleSlashPlanned />
+  <ToggleSlashLinks />
+</Base>

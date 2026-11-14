@@ -261,8 +261,13 @@ describe("what the page does not claim", () => {
 });
 
 describe("ToggleSlash link", () => {
-  test("absent while the constant is empty, and /developers says not public yet", () => {
-    expect(developers()).toContain(TOGGLESLASH_REPO_URL || "Not public yet");
+  test("/developers links the public repository and no longer says not public yet", () => {
+    expect(TOGGLESLASH_REPO_URL).toBe("https://github.com/madangryscientist/toggleslash");
+    expect(developers()).toContain(`href="${TOGGLESLASH_REPO_URL}"`);
+    expect(developers()).not.toContain("Not public yet");
+  });
+
+  test("absent when the constant is empty, which says not public yet", () => {
     const html = renderToStaticMarkup(<ToggleSlashAccess url="" />);
     expect(html).not.toContain("href");
     expect(html).toContain("Not public yet");

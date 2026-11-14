@@ -35,8 +35,5 @@ export const PIXELSLASH_NPM_URL = "https://www.npmjs.com/package/@hackcove/pixel
 export const PIXELSLASH_COMMAND =
   "npx @hackcove/pixelslash --live-png a.png --local-png b.png --out out";
 
-/**
- * Empty while the ToggleSlash repository is private. Set it to the public URL and a link appears where
- * the tool is presented; nothing else on the page changes.
- */
-export const TOGGLESLASH_REPO_URL: string = "";
+/** The ToggleSlash repository. Empty would print "Not public yet" on /developers in place of the link. */
+export const TOGGLESLASH_REPO_URL: string = "https://github.com/madangryscientist/toggleslash";

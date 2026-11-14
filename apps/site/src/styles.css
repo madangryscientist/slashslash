@@ -837,6 +837,15 @@ pre,
   max-width: 54rem;
 }
 
+/* The ToggleSlash page's try-it steps: a line of text over each group of commands, with room between groups. */
+.try-step {
+  margin-top: 1.75rem;
+}
+.try-step > p {
+  margin: 0 0 0.75rem;
+  color: var(--ink-2);
+}
+
 /* The ask: the point of the whole page. */
 .questions {
   margin: 3rem 0 0;

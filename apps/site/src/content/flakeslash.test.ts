@@ -75,12 +75,19 @@ describe("the link in from /developers", () => {
     return found;
   }
 
-  test("only the FlakeSlash article links to /flakeslash", () => {
+  test("FlakeSlash links only /flakeslash, ToggleSlash only /toggleslash, and no other article has one", () => {
     const found = articles();
     expect([...found.keys()].toSorted()).toEqual(PRODUCTS.map((p) => p.name).toSorted());
-    expect(found.get("FlakeSlash")).toContain('href="/flakeslash"');
+    const pages: Record<string, string> = { FlakeSlash: "/flakeslash", ToggleSlash: "/toggleslash" };
     for (const [name, article] of found) {
-      if (name !== "FlakeSlash") expect(article, name).not.toContain("More about");
+      const own = pages[name];
+      for (const page of Object.values(pages)) {
+        if (page === own) expect(article, name).toContain(`href="${page}"`);
+        else expect(article, name).not.toContain(`href="${page}"`);
+      }
+      // React writes an empty comment between the text and the name.
+      if (own) expect(article, name).toMatch(new RegExp(`More about (<!-- -->)?${name}<`));
+      else expect(article, name).not.toContain("More about");
     }
   });
 });
