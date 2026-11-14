@@ -1,0 +1,93 @@
+# slashslash
+
+The source of **[slashslash.build](https://slashslash.build)**, the public site for the Slash tools
+(ToggleSlash, BundleSlash, FlakeSlash and PixelSlash).
+
+Two pages, built to static HTML with [Astro](https://astro.build):
+
+- `/` is written for a CEO, COO or CFO: "See what a change really does, before your customers do." It
+  explains, with no code on screen, how a change reaches customers today, what nobody checks, what that
+  costs and what slashslash adds, then asks four questions.
+- `/developers` holds the developer detail: the seven stops of one feature, environment variables, the
+  effect of one flag, the four tools with their status labels, how to run PixelSlash today, and its own
+  questions.
+
+Both are read by scrolling, with nothing to click. No database, accounts, form or cookie.
+
+## Develop
+
+Needs [Bun](https://bun.sh).
+
+```bash
+bun install
+bun run dev        # http://localhost:4321
+bun run build      # static output in dist/
+bun run preview    # serve dist/
+```
+
+## Check
+
+```bash
+bun run lint       # oxlint, then scripts/check-slop.ts
+bun run typecheck  # astro check
+bun run build
+bun run test       # reads the built pages in dist/, so build first
+```
+
+The tests read `dist/` and check the agreed copy and its order, that every product shows its status label,
+that made-up material says so, that no privacy claim and no forbidden word is present, that nothing is hidden
+or in a start state without motion, that the colour pairs pass AA contrast in both themes, and that the site
+is open to search engines (`robots.txt`, `sitemap.xml`, a canonical address per page, no robots meta tag).
+
+## How the page is built
+
+Astro renders every section to HTML at build time (`src/pages/`, `src/layouts/Base.astro`). The sections are
+React components in `src/components/`, one file per section, with the words in `src/content/`. Only four
+things run in the browser, as Astro islands:
+
+- the light/dark toggle (`client:load`),
+- the motion script (`src/components/motion.tsx`, `client:load`), which plays each drawing once as it scrolls
+  into view,
+- the report dialog on `/` (inside `stands.tsx`, `client:visible`),
+- the copy buttons and the count-up on `/developers` (`today.tsx` and `flags.tsx`, `client:visible`).
+
+`Base.astro` carries an inline script that runs before first paint: it applies the stored or system colour
+scheme (so there is no flash) and adds the `motion` class when the reader allows motion. If the motion
+script has not started within 3 seconds, it takes `motion` off again, so no start state can hide the copy.
+
+**Motion only decorates.** Everything is SVG and CSS. The base style of every element is its finished state;
+start states sit under `.motion ...:not(.played)`, and every animation is inside
+`@media (prefers-reduced-motion: no-preference)`. A test refuses one outside it.
+
+**Real and imagined look different.** `Frame` in `src/components/evidence.tsx` draws four kinds: `real`
+(captured by running the tool), `quoted` (printed in the tool's docs), `made-up` and `idea` (dashed and
+hatched, labelled where they appear). Never give something unbuilt a `real` frame; a test refuses it.
+
+## Things to change in one place
+
+- `src/content/site.ts`: the name, the address (`SITE_URL`, which makes the share image's URL absolute) and
+  the contact line. Never put an email address or a phone number there.
+- `src/content/products.ts`: the four products and their status labels. `src/content/flow.ts`: the seven stops.
+- `TOGGLESLASH_REPO_URL` in `src/content/site.ts` is empty while that repository is private; set it and a
+  link replaces the words "Not public yet".
+
+## Design system
+
+Status pills, copy lines, links and the theme toggle come from `@hackcove/ui-react`, on `@hackcove/themes`.
+Everything else is plain CSS in `src/styles.css` with per-theme tokens, because the pipeline, the hero panes
+and the other drawings are one-off.
+
+Fonts are self-hosted and subset (`public/fonts/`, licences beside them): Bricolage Grotesque for text,
+JetBrains Mono for code. The mono subset holds ASCII plus nbsp and the middle dot, so code on the page must
+stay within those; a missing glyph means re-subsetting.
+
+## Deploy
+
+Pushing to `main` runs `.github/workflows/deploy.yml`: it checks and builds on a GitHub-hosted runner, then a
+second job, the only one that holds the Cloudflare token (in the `production` environment), uploads `dist/`
+to Cloudflare Pages with `wrangler pages deploy`. Pull requests run only `ci.yml`, with no secrets.
+
+## Licence
+
+Code: MIT, see [LICENSE](LICENSE). The copy, images, logos and product names are not licensed for reuse; see
+[NOTICE](NOTICE).

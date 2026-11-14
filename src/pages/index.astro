@@ -1,0 +1,25 @@
+---
+import { Adds } from "#/components/adds";
+import { Ask } from "#/components/ask";
+import { Costs } from "#/components/costs";
+import { Hero } from "#/components/hero";
+import { Missing } from "#/components/missing";
+import { Motion } from "#/components/motion";
+import { ReachesToday } from "#/components/reaches-today";
+import { Stands } from "#/components/stands";
+import { VIEW } from "#/content/landing";
+import Base from "#/layouts/Base.astro";
+
+// The landing page, in the copy's order: the promise, today, the gap, the cost, the fix, where it stands, your view.
+---
+
+<Base>
+  <Hero />
+  <ReachesToday />
+  <Missing />
+  <Costs />
+  <Adds />
+  <Stands client:visible />
+  <Ask questions={VIEW.questions} title={VIEW.title} />
+  <Motion client:load />
+</Base>
