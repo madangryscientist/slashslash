@@ -5,8 +5,8 @@
  */
 export const PIXELSLASH_DEV = "https://pixelslash.dev";
 
-/** The pages this site serves under /pixelslash. SS-11 adds `/`, `/how-it-works` and `/compare`. */
-export const LOCAL: readonly string[] = ["/pricing"];
+/** The pages this site serves under /pixelslash. */
+export const LOCAL: readonly string[] = ["/", "/how-it-works", "/compare", "/pricing"];
 
 /** `/pricing` -> `/pixelslash/pricing` for a page here, else the page on pixelslash.dev. */
 export function psHref(path: string): string {

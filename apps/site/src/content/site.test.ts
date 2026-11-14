@@ -15,7 +15,7 @@ function builtHtml(): string {
 
 /**
  * Every built slashslash page: the landing page, /developers and the 404 page. The PixelSlash pages
- * (pixelslash/**) are PixelSlash's, with their own checks in src/pixelslash/pages.test.ts.
+ * (pixelslash/**) are PixelSlash's, with their own checks in src/pixelslash/pages.test.tsx.
  */
 function builtPages(): string[] {
   builtHtml();
@@ -91,6 +91,9 @@ describe("is open to search engines", () => {
     expect([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])).toEqual([
       `${SITE_URL}/`,
       `${SITE_URL}/developers`,
+      `${SITE_URL}/pixelslash`,
+      `${SITE_URL}/pixelslash/compare`,
+      `${SITE_URL}/pixelslash/how-it-works`,
       `${SITE_URL}/pixelslash/pricing`,
     ]);
   });
