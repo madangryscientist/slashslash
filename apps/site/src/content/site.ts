@@ -35,5 +35,8 @@ export const PIXELSLASH_NPM_URL = "https://www.npmjs.com/package/@hackcove/pixel
 export const PIXELSLASH_COMMAND =
   "npx @hackcove/pixelslash --live-png a.png --local-png b.png --out out";
 
-/** The ToggleSlash repository. Empty would print "Not public yet" on /developers in place of the link. */
+/**
+ * The ToggleSlash repository, public under the Elastic License 2.0. /developers links it, and /toggleslash builds its
+ * clone command and docs links from it, so it must stay a full URL.
+ */
 export const TOGGLESLASH_REPO_URL: string = "https://github.com/madangryscientist/toggleslash";

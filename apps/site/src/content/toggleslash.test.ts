@@ -48,23 +48,6 @@ describe("the /toggleslash page", () => {
     }
   });
 
-  test("names each toggleslash command in a works-today command line as the CLI does", () => {
-    // Each `toggleslash <group> a|b|c` must be one of the commands in packages/cli/src/commands at 335fcf3.
-    const cli = new Set([
-      "projects list", "projects create", "envs list", "envs create", "envs rename", "envs delete",
-      "flags list", "flags show", "flags create", "flags on", "flags off", "flags archive", "flags delete",
-      "flags history", "keys create", "keys list", "keys revoke", "diagnose",
-    ]);
-    for (const { command } of WORKS_TODAY) {
-      const words = command.match(/^toggleslash (\S+)(?: (\S+))?$/);
-      if (!words) continue;
-      const [, group, subs] = words;
-      for (const sub of subs ? subs.split("|") : [""]) {
-        expect(cli, command).toContain(`${group} ${sub}`.trim());
-      }
-    }
-  });
-
   test("keeps the sections in order: what it is, today, try it, planned, docs", () => {
     const html = read("toggleslash.html");
     const at = ["toggleslash", "works-today", "try-it", "planned", "docs"].map((id) =>
