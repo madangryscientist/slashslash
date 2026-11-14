@@ -2,6 +2,7 @@ name: Deploy
 
 # Runs on a push to main, or by hand. Pull requests never reach this workflow, so no pull request run
 # can read the Cloudflare token. Only the deploy job below uses it, through the production environment.
+# The build job writes the shared moon cache through the moon-cache-write environment (main only).
 on:
   push:
     branches: [main]
@@ -17,9 +18,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # The only job that writes the shared moon cache. The environment admits main alone, so a
+    # dispatch from another branch stops here.
+    environment: moon-cache-write
     env:
       # See ci.yml: moon diffs against the base branch first, which needs the full history.
       MOON_BASE: origin/main
+      MOON_REMOTE_TOKEN: ${{ secrets.MOON_CACHE_WRITE_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:

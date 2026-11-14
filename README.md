@@ -100,7 +100,14 @@ stay within those; a missing glyph means re-subsetting.
 
 Pushing to `main` runs `.github/workflows/deploy.yml`: it checks and builds on a GitHub-hosted runner, then a
 second job, the only one that holds the Cloudflare token (in the `production` environment), uploads
-`apps/site/dist/` to Cloudflare Pages with `wrangler pages deploy`. Pull requests run only `ci.yml`, with no secrets.
+`apps/site/dist/` to Cloudflare Pages with `wrangler pages deploy`. Pull requests run only `ci.yml`, which gets
+the moon cache read token and nothing else; the Cloudflare token stays with the deploy job.
+
+## Shared build cache
+
+moon reads a shared remote cache when `MOON_REMOTE_TOKEN` holds a read token: `export MOON_REMOTE_TOKEN=<read
+token>` before `bunx moon run`. Without it moon logs a warning about the remote and uses the local cache only.
+Only a push to `main` writes to the shared cache.
 
 ## Licence
 

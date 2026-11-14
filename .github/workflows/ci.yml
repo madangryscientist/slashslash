@@ -14,6 +14,9 @@ jobs:
       # `moon run`, and the checkout has no local `main`, so it names the remote ref. That needs the
       # full history (fetch-depth: 0 below).
       MOON_BASE: origin/main
+      # Reads the shared moon cache: moon downloads hits, and the host refuses its uploads. A fork's
+      # pull request gets no secrets, so moon logs a 401 and runs everything locally.
+      MOON_REMOTE_TOKEN: ${{ secrets.MOON_CACHE_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
