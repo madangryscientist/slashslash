@@ -9,6 +9,8 @@ export type Product = {
   question: string;
   /** What is true today, in plain words. */
   summary: string[];
+  /** The tool's own page on this site, linked from its entry on /developers. */
+  page?: string;
 };
 
 export const PRODUCTS: readonly Product[] = [
@@ -36,8 +38,9 @@ export const PRODUCTS: readonly Product[] = [
     question: "Can the test results be trusted?",
     summary: [
       "It spots automated checks that pass and fail at random, so a failure means something.",
-      "It is being built now, after the backlog hold was lifted on 2026-11-05. Its source will be public under the FSL licence, and it will be self-hosted. It would give one view of which tests flake across a company's CI systems.",
+      "It is being built now. Its source is public under the Elastic License 2.0, and you host it yourself. Today its command line tool scans GitHub Actions history and lists the jobs that failed and passed on the same commit, grouped into issues with their log excerpts. A dashboard and readers for other CI systems are planned.",
     ],
+    page: "/flakeslash",
   },
   {
     name: "BundleSlash",

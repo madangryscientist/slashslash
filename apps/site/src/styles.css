@@ -828,6 +828,15 @@ pre,
   color: var(--ink-2);
 }
 
+/* The FlakeSlash page's try-it commands: a column that can shrink, so a copy line holding one long
+   word (a URL) wraps at phone width instead of widening the page. */
+.try-lines {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6rem;
+  max-width: 54rem;
+}
+
 /* The ask: the point of the whole page. */
 .questions {
   margin: 3rem 0 0;

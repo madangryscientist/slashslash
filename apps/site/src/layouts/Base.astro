@@ -26,6 +26,8 @@ const path =
     .replace(/(^|\/)index$/, "")
     .replace(/\/+$/, "") || "/";
 const canonical = `${SITE_URL}${path}`;
+// Every page but the landing page links the brand back to it.
+const onLanding = path === "/";
 // Link previews in chat apps want an absolute URL.
 const shareImage = `${SITE_URL}/og.png`;
 
@@ -67,12 +69,12 @@ const scopeScript = `${colourSchemeScript};(function(){var r=document.documentEl
       <header class="topbar">
         <div class="wrap topbar-inner">
           {
-            onDevelopers ? (
+            onLanding ? (
+              <span class="brand" role="img" aria-label={SITE_NAME} />
+            ) : (
               <a href="/" class="brand-link">
                 <span class="brand" role="img" aria-label={SITE_NAME} />
               </a>
-            ) : (
-              <span class="brand" role="img" aria-label={SITE_NAME} />
             )
           }
           <div class="topbar-end">
