@@ -20,8 +20,3 @@ export function psAsset(path: string): string {
   return `/pixelslash${path}`;
 }
 
-/** The page's path on pixelslash.dev, from its address here: `/pixelslash/pricing` -> `/pricing`. */
-export function sitePath(pathname: string): string {
-  const path = pathname.replace(/\.html$/, "").replace(/\/+$/, "").replace(/^\/pixelslash/, "");
-  return path === "" ? "/" : path;
-}

@@ -671,10 +671,3 @@ body:has([data-art]) {
     transition-delay: 0.2s;
   }
 }
-
-/* A closed fold in the docs rail takes no room. The kit's panel keeps its padding while it is
-   hidden="until-found", which the browser still lays out, so without this the rail grows 12 px a
-   group when the page hydrates and everything under it jumps. */
-[data-testid^="docs-group-"] [hidden="until-found"] {
-  padding-block: 0;
-}

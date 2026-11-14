@@ -23,22 +23,28 @@ const PUBLIC = resolve(SITE, "public/pixelslash");
 const PUBLIC_PREFIX = "apps/site/public/";
 
 function pinnedSha(): string {
-  const sha = (process.env.PIXELSLASH_SHA ?? readFileSync(resolve(SITE, "pixelslash.sha"), "utf8")).trim();
-  if (!/^[0-9a-f]{7,40}$/.test(sha)) throw new Error(`pixelslash.sha is not a commit: "${sha}"`);
+  // An empty PIXELSLASH_SHA counts as unset.
+  const fromEnv = process.env.PIXELSLASH_SHA?.trim();
+  const source = fromEnv ? "PIXELSLASH_SHA" : "pixelslash.sha";
+  const sha = fromEnv || readFileSync(resolve(SITE, "pixelslash.sha"), "utf8").trim();
+  // A full commit SHA: a short one is not a stable pin.
+  if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error(`${source} is not a full commit SHA: "${sha}"`);
   return sha;
 }
 
 async function download(sha: string, path: string): Promise<Uint8Array> {
   const url = `https://raw.githubusercontent.com/${REPO}/${sha}/${path}`;
   let response: Response;
+  let body: ArrayBuffer;
   try {
     response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status} from ${url}`);
+    body = await response.arrayBuffer();
   } catch (error) {
-    throw new Error(`could not fetch ${path} at PixelSlash ${sha}: ${String(error)}`);
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`could not fetch ${path} at PixelSlash ${sha}: ${reason}`);
   }
-  if (!response.ok)
-    throw new Error(`could not fetch ${path} at PixelSlash ${sha}: HTTP ${response.status} from ${url}`);
-  return new Uint8Array(await response.arrayBuffer());
+  return new Uint8Array(body);
 }
 
 async function main(): Promise<void> {

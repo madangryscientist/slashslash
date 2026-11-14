@@ -70,15 +70,24 @@ describe("every PixelSlash page", () => {
             const local = path === "/pixelslash" ? "/" : path.replace(/^\/pixelslash/, "");
             expect(LOCAL, `${page} links ${ref} here, but that page is not served here`).toContain(local);
           }
-        } else if (/^https?:/.test(ref) && !ref.startsWith(PIXELSLASH_DEV)) {
-          // Off-site: the repository, or the page's own canonical address. Neither is a PixelSlash page.
-          expect(ref, `${page} links ${ref}`).toMatch(/^https:\/\/(github\.com\/|slashslash\.build\/pixelslash)/);
+        } else if (/^https?:/.test(ref)) {
+          // pixelslash.dev, the repository, or the page's own canonical address on this site.
+          const url = new URL(ref);
+          const allowed =
+            url.origin === PIXELSLASH_DEV ||
+            url.origin === "https://github.com" ||
+            (url.origin === "https://slashslash.build" && url.pathname.startsWith("/pixelslash"));
+          expect(allowed, `${page} links ${ref}`).toBe(true);
         }
       }
-      // Every link to a PixelSlash page that is not served here goes to pixelslash.dev.
-      for (const other of PAGES.filter((p) => !LOCAL.includes(p.to))) {
+      // The nav names every page of the PixelSlash site: a page served here by its /pixelslash
+      // address, every other one on pixelslash.dev, and never a /pixelslash address for those.
+      for (const other of PAGES) {
+        const served = LOCAL.includes(other.to);
         const here = other.to === "/" ? "/pixelslash" : `/pixelslash${other.to}`;
-        expect(html).not.toMatch(new RegExp(`href="${here}"`));
+        const there = `${PIXELSLASH_DEV}${other.to}`;
+        expect(html, `${page}: ${other.label}`).toContain(`href="${served ? here : there}"`);
+        if (!served) expect(html, `${page}: ${other.label}`).not.toContain(`href="${here}"`);
       }
     }
     expect(sheets.size).toBeGreaterThan(0);

@@ -6,7 +6,7 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "bun scripts/fetch-sources.ts && astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "typecheck": "astro check",
