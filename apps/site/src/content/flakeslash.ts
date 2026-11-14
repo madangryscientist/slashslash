@@ -15,7 +15,7 @@ export const FLAKESLASH_TITLE = "FlakeSlash: flaky-test detection you can self-h
 
 export const FLAKESLASH_INTRO = {
   title: "FlakeSlash",
-  lead: "FlakeSlash finds the tests and CI jobs that pass and fail at random, so a failure means something again. It is a command line tool you run yourself, its source is public under the Elastic License 2.0, and it reads GitHub Actions today.",
+  lead: "FlakeSlash finds the CI jobs that both fail and pass on the same commit, so a failure means something again. It is a command line tool you run yourself, its source is public under the Elastic License 2.0, and it reads GitHub Actions today.",
 };
 
 /** The page's description in search results and link previews. */
@@ -39,7 +39,7 @@ export const WORKS_TODAY: readonly Feature[] = [
   {
     title: "A report you open in the browser",
     command: "report.html",
-    text: "When the scan is done it writes report.html next to the store: the issues ranked by how many commits they hit in the last 30 days, each with its flake rate, the pull requests it touched and its log excerpt. Add --json to get the same results on standard output.",
+    text: "When the scan is done it writes report.html next to the store: the issues ranked by how many commits they hit in the last 30 days, each with its flake rate, the pull requests it touched and its log excerpt. Add --json to get the repos, the explanations and the catalogue as JSON on standard output instead of the summary.",
   },
   {
     title: "Failures grouped into issues, with no model",
