@@ -29,8 +29,9 @@ export const PRODUCTS: readonly Product[] = [
     question: "Which features are switched on, and for whom?",
     summary: [
       "It keeps track of feature switches, so you know what turning one on will do.",
-      "It is being built now: a feature flag service you host yourself, with FSL as the intended licence. Today it has a C# server on SQLite with an audit trail of every admin change, a small command line, a TypeScript server SDK and a dashboard. The verdict, the pull request check and the migration path are planned but not built.",
+      "It is being built now. Its source is public under the Elastic License 2.0, and you host it yourself; nothing is published yet. Today it has a C# server on SQLite with an audit trail of every admin change, a command line, a TypeScript server SDK and a dashboard. The verdict, the pull request check and the migration path are planned but not built.",
     ],
+    page: "/toggleslash",
   },
   {
     name: "FlakeSlash",

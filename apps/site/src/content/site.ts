@@ -36,7 +36,7 @@ export const PIXELSLASH_COMMAND =
   "npx @hackcove/pixelslash --live-png a.png --local-png b.png --out out";
 
 /**
- * Empty while the ToggleSlash repository is private. Set it to the public URL and a link appears where
- * the tool is presented; nothing else on the page changes.
+ * The ToggleSlash repository, public under the Elastic License 2.0. /developers links it, and /toggleslash builds its
+ * clone command and docs links from it, so it must stay a full URL.
  */
-export const TOGGLESLASH_REPO_URL: string = "";
+export const TOGGLESLASH_REPO_URL: string = "https://github.com/madangryscientist/toggleslash";
