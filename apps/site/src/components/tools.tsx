@@ -85,6 +85,11 @@ export function ToolsInDetail(): ReactNode {
               ))}
               {product.name === "ToggleSlash" ? <ToggleSlashDetail /> : null}
               {IDEA_NOTES[product.name] ? <p>{IDEA_NOTES[product.name]}</p> : null}
+              {product.page ? (
+                <p className="tool-access">
+                  <TextLink href={product.page}>More about {product.name}</TextLink>
+                </p>
+              ) : null}
             </div>
           </article>
         ))}

@@ -14,7 +14,7 @@ function builtHtml(): string {
 }
 
 /**
- * Every built slashslash page: the landing page, /developers and the 404 page. The PixelSlash pages
+ * Every built slashslash page: the landing page, /developers, /flakeslash and the 404 page. The PixelSlash pages
  * (pixelslash/**) are PixelSlash's, with their own checks in src/pixelslash/pages.test.tsx.
  */
 function builtPages(): string[] {
@@ -22,7 +22,7 @@ function builtPages(): string[] {
   const pages = globSync("**/*.html", { cwd: CLIENT }).filter(
     (page) => page !== "pixelslash.html" && !page.startsWith("pixelslash/"),
   );
-  expect(pages.toSorted()).toEqual(["404.html", "developers.html", "index.html"]);
+  expect(pages.toSorted()).toEqual(["404.html", "developers.html", "flakeslash.html", "index.html"]);
   return pages.map((page) => readFileSync(resolve(CLIENT, page), "utf8"));
 }
 
@@ -91,6 +91,7 @@ describe("is open to search engines", () => {
     expect([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])).toEqual([
       `${SITE_URL}/`,
       `${SITE_URL}/developers`,
+      `${SITE_URL}/flakeslash`,
       `${SITE_URL}/pixelslash`,
       `${SITE_URL}/pixelslash/compare`,
       `${SITE_URL}/pixelslash/how-it-works`,

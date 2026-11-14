@@ -812,6 +812,8 @@ pre,
 }
 .today li {
   display: grid;
+  /* A track that can shrink, so a copy line holding one long word (a URL) wraps instead of widening the page. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.6rem;
   min-width: 0;
 }
