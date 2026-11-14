@@ -1,7 +1,8 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
-// The tests read the built pages in dist/, so run `bun run build` first.
+// The tests read the built pages in dist/. `bunx moon run site:test` builds first; a bare
+// `vitest run` needs `bun run build` before it.
 export default defineConfig({
   resolve: { alias: { "#": fileURLToPath(new URL("./src", import.meta.url)) } },
   test: {

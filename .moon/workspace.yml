@@ -1,0 +1,20 @@
+# moon workspace. Projects are listed, not globbed, and keep their directory's short name, so
+# `bunx moon run site:build` builds the site.
+#
+# No toolchain is declared: every task runs on the `system` toolchain, so moon runs our bun commands
+# as they are and never downloads Bun or runs `bun install`. The cache lives in .moon/cache
+# (gitignored); moon has no setting to move it.
+$schema: "./cache/schemas/workspace.json"
+
+projects:
+  site: "apps/site"
+  scripts: "scripts"
+
+vcs:
+  client: "git"
+  defaultBranch: "main"
+
+pipeline:
+  installDependencies: false
+
+telemetry: false

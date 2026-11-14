@@ -14,27 +14,42 @@ Two pages, built to static HTML with [Astro](https://astro.build):
 
 Both are read by scrolling, with nothing to click. No database, accounts, form or cookie.
 
+## Layout
+
+A [Bun workspaces](https://bun.sh/docs/install/workspaces) monorepo run with [moon](https://moonrepo.dev):
+
+- `apps/site`: the site (moon project `site`).
+- `scripts`: repo checks, such as `scripts/check-slop.ts` (moon project `scripts`).
+- `packages/`: shared packages, none yet.
+
+`.moon/workspace.yml` lists the projects, each project's `moon.yml` holds its tasks, and
+`.moon/tasks/all.yml` the root files every task depends on. moon caches each task in `.moon/cache`, so an
+unchanged task is a cache hit. From here on, a path such as `src/content/site.ts` is under `apps/site/`.
+
 ## Develop
 
 Needs [Bun](https://bun.sh).
 
 ```bash
 bun install
-bun run dev        # http://localhost:4321
-bun run build      # static output in dist/
-bun run preview    # serve dist/
+bun run dev                     # the site's dev server, http://localhost:4321
+bunx moon run site:build        # static output in apps/site/dist/
+cd apps/site && bun run preview # serve apps/site/dist/
 ```
 
 ## Check
 
 ```bash
-bun run lint       # oxlint, then scripts/check-slop.ts
-bun run typecheck  # astro check
-bun run build
-bun run test       # reads the built pages in dist/, so build first
+bun run lint       # site:lint (oxlint) and scripts:lint (scripts/check-slop.ts)
+bun run typecheck  # site:typecheck (astro check) and scripts:typecheck (tsc)
+bun run build      # site:build
+bun run test       # site:test, which builds first
 ```
 
-The tests read `dist/` and check the agreed copy and its order, that every product shows its status label,
+Each runs `moon run --concurrency 3 :<task>` across the projects; CI runs all four in one
+`bunx moon run --concurrency 3 :lint :typecheck :build :test`.
+
+The tests read `apps/site/dist/` and check the agreed copy and its order, that every product shows its status label,
 that made-up material says so, that no privacy claim and no forbidden word is present, that nothing is hidden
 or in a start state without motion, that the colour pairs pass AA contrast in both themes, and that the site
 is open to search engines (`robots.txt`, `sitemap.xml`, a canonical address per page, no robots meta tag).
@@ -77,15 +92,15 @@ Status pills, copy lines, links and the theme toggle come from `@hackcove/ui-rea
 Everything else is plain CSS in `src/styles.css` with per-theme tokens, because the pipeline, the hero panes
 and the other drawings are one-off.
 
-Fonts are self-hosted and subset (`public/fonts/`, licences beside them): Bricolage Grotesque for text,
+Fonts are self-hosted and subset (`apps/site/public/fonts/`, licences beside them): Bricolage Grotesque for text,
 JetBrains Mono for code. The mono subset holds ASCII plus nbsp and the middle dot, so code on the page must
 stay within those; a missing glyph means re-subsetting.
 
 ## Deploy
 
 Pushing to `main` runs `.github/workflows/deploy.yml`: it checks and builds on a GitHub-hosted runner, then a
-second job, the only one that holds the Cloudflare token (in the `production` environment), uploads `dist/`
-to Cloudflare Pages with `wrangler pages deploy`. Pull requests run only `ci.yml`, with no secrets.
+second job, the only one that holds the Cloudflare token (in the `production` environment), uploads
+`apps/site/dist/` to Cloudflare Pages with `wrangler pages deploy`. Pull requests run only `ci.yml`, with no secrets.
 
 ## Licence
 

@@ -1,6 +1,7 @@
 /**
  * The anti-slop rules Oxlint has no rule for: a TODO/FIXME with no ticket ref, and
- * commented-out code. Run by `bun run lint` after oxlint; any hit fails the gate.
+ * commented-out code. Run from the repo root by `bun run lint` (the `scripts:lint` task); any hit
+ * fails the gate.
  */
 import { globSync, readFileSync } from "node:fs";
 
@@ -10,7 +11,12 @@ const CODE_IN_COMMENT =
   /^\s*\/\/\s*(?:const|let|var|import|export|return|await|if|for|while|function|throw)\b.*[;{})]\s*$/;
 
 const hits: string[] = [];
-for (const path of globSync("{src,scripts}/**/*.{ts,tsx}")) {
+// Every project's src and scripts, plus the root scripts, so a new project is covered with no edit.
+const files = [
+  ...globSync("{apps,packages}/*/{src,scripts}/**/*.{ts,tsx}"),
+  ...globSync("scripts/**/*.{ts,tsx}"),
+];
+for (const path of files) {
   if (path === "scripts/check-slop.ts") continue;
   readFileSync(path, "utf8")
     .split("\n")

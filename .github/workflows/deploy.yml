@@ -17,18 +17,21 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # See ci.yml: moon diffs against the base branch first, which needs the full history.
+      MOON_BASE: origin/main
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run lint
-      - run: bun run typecheck
-      - run: bun run build
-      - run: bun run test
+      - run: bunx moon run --concurrency 3 :lint :typecheck :build :test
+      # Uploaded as the `dist` artifact; the deploy job downloads it to dist/ in its own checkout.
       - uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist
+          path: apps/site/dist
           if-no-files-found: error
 
   deploy:

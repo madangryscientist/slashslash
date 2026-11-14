@@ -1,0 +1,18 @@
+# Inherited by every project.
+$schema: "../cache/schemas/tasks.json"
+
+# Root files every task's result depends on, so a change to one is never a cache hit.
+implicitInputs:
+  - "/package.json"
+  - "/bun.lock"
+  - "/scripts/check-slop.ts"
+  # Generated or installed, never a source: leave them out of every task's hash.
+  - "!/**/node_modules/**"
+  - "!/**/dist/**"
+  - "!/**/.astro/**"
+  - "!/**/.wrangler/**"
+
+# The gate runs every task and relies on the cache, never on affected detection: without this, a
+# `moon run` in CI would skip the tasks it judges unaffected against the base branch.
+taskOptions:
+  runInCI: "always"
