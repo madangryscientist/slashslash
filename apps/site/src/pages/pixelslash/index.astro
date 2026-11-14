@@ -1,0 +1,13 @@
+---
+import PixelSlash from "#/layouts/PixelSlash.astro";
+import { HomePage } from "#ps/components/pages/home";
+---
+
+<PixelSlash path="/">
+  <HomePage />
+</PixelSlash>
+<script>
+  import { wireReveal } from "#ps/scripts/reveal";
+
+  wireReveal();
+</script>

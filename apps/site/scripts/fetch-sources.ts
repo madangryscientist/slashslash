@@ -14,6 +14,12 @@ export const PIXELSLASH_FILES = [
   "apps/site/public/favicon.svg",
   "apps/site/public/fonts/inter-latin-wght-normal.woff2",
   "apps/site/public/fonts/OFL.txt",
+  "apps/site/public/hero/main.png",
+  "apps/site/public/hero/branch.png",
+  "apps/site/public/report.png",
+  // Imported, not served: hero.json describes the two hero images, so it comes from the same commit.
+  "apps/site/src/content/hero.json",
+  "docs/capabilities/data.json",
 ] as const;
 
 /** Files the stylesheet imports, so Vite serves them hashed; copying them to public/ would ship them twice. */
