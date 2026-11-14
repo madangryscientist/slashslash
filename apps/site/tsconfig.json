@@ -11,6 +11,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "paths": { "#/*": ["./src/*"] }
+    "paths": {
+      "#/*": ["./src/*"],
+      "#ps/*": ["./src/pixelslash/*"],
+      "@pixelslash-src/*": ["./.sources/pixelslash/*"]
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { DEVELOPER_QUESTIONS } from "#/components/ask";
@@ -276,10 +276,17 @@ describe("ToggleSlash link", () => {
   });
 });
 
+/** The stylesheets the slashslash pages link. The PixelSlash pages' own sheet is theirs, not this site's. */
 const css = (): string => {
-  const dir = resolve(DIST, "_astro");
-  const files = readdirSync(dir).filter((f) => f.endsWith(".css"));
-  return files.map((f) => readFileSync(resolve(dir, f), "utf8")).join("\n");
+  const sheets = new Set(
+    ["index.html", "developers.html", "404.html"].flatMap((page) =>
+      [...readFileSync(resolve(DIST, page), "utf8").matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map(
+        (m) => m[1] ?? "",
+      ),
+    ),
+  );
+  expect(sheets.size).toBeGreaterThan(0);
+  return [...sheets].map((sheet) => readFileSync(resolve(DIST, `.${sheet}`), "utf8")).join("\n");
 };
 
 /** CSS with every `@media (prefers-reduced-motion: no-preference) { ... }` block cut out, by brace depth. */
