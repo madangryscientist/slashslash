@@ -48,7 +48,7 @@ export const WORKS_TODAY: readonly Feature[] = [
   },
   {
     title: "Correct the catalogue by hand",
-    command: "flakeslash issue confirm",
+    command: "flakeslash issue confirm|dismiss|rename|merge|split",
     text: "When the grouping is wrong you fix that one entry, and the fix survives every later scan: issue confirm marks a real flake, issue dismiss hides one, issue rename names it, issue merge folds two into one and issue split moves the matching failures into a new issue.",
   },
   {
@@ -57,7 +57,7 @@ export const WORKS_TODAY: readonly Feature[] = [
     text: "Failures no known pattern recognises can be explained by your own OpenAI-compatible endpoint. You set a hard spending cap with --cap-usd and both prices; it never spends past the cap. One redacted excerpt is sent per unexplained issue, so a failure repeated 50 times costs one call. The flake list never depends on the answer.",
   },
   {
-    title: "Only excerpts are kept",
+    title: "What is kept, and where",
     command: "--store",
     text: "For each failed job it reads the log once, keeps the lines around the failure with secrets removed, and links to the full log. The whole log is never stored. The store is one SQLite file on your machine (.flakeslash/flakeslash.db unless --store names another), and with no endpoint named, nothing is sent anywhere.",
   },

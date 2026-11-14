@@ -29,6 +29,7 @@ describe("the /flakeslash page", () => {
     expect(html.match(/<link rel="canonical" href="([^"]+)"/)?.[1]).toBe(`${SITE_URL}/flakeslash`);
     expect(html).toContain(`<title>${FLAKESLASH_TITLE}</title>`);
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(html).toMatch(/<a [^>]*href="\/"[^>]*class="brand-link"/);
   });
 
   test("shows every command it says works today, and the try-it commands", () => {

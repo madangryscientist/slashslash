@@ -39,13 +39,11 @@ export function FlakeSlashToday(): ReactNode {
 export function FlakeSlashTry(): ReactNode {
   return (
     <Section id="try-it" hunk="try it" title="Try it on your own repo" lead={TRY_IT.lead}>
-      <ul className="today">
-        <li>
-          {TRY_IT.commands.map((command) => (
-            <CopyLine key={command} text={command} />
-          ))}
-        </li>
-      </ul>
+      <div className="try-lines">
+        {TRY_IT.commands.map((command) => (
+          <CopyLine key={command} text={command} />
+        ))}
+      </div>
     </Section>
   );
 }
@@ -59,11 +57,14 @@ export function FlakeSlashPlanned(): ReactNode {
       title="Planned, not built"
       lead="The design in the repository plans these. None of them works yet."
     >
-      <ul className="tool-points">
-        {PLANNED.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
+      {/* The div takes the gap under the lead, which .tool-points' own margin would cancel. */}
+      <div>
+        <ul className="tool-points">
+          {PLANNED.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
     </Section>
   );
 }
