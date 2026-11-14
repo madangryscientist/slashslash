@@ -1,0 +1,188 @@
+name: PixelSlash pin
+
+# Keeps apps/site/pixelslash.sha on PixelSlash main. Every hour it compares the pin with PixelSlash
+# main; when a file the site fetches (the list in apps/site/scripts/fetch-sources.ts) has changed, it
+# moves the pin on branch bot/pixelslash-pin, opens a pull request, runs the full gate here, merges
+# the pull request when the gate is green and starts the deploy.
+#
+# Events made with GITHUB_TOKEN start no workflow runs (but for a dispatch), so ci.yml never runs on
+# the bot's pull request and the merge starts no deploy. That is why this job runs the gate itself
+# and dispatches deploy.yml. It changes the pin file and nothing else.
+#
+# By hand: `gh workflow run pixelslash-pin.yml`, or with `-f force_sha=<full sha>` to compare from
+# that PixelSlash commit instead of the pin. The pin is still set to PixelSlash main.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      force_sha:
+        description: "Compare from this full PixelSlash commit SHA instead of the pin"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: pixelslash-pin
+  cancel-in-progress: false
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    env:
+      PIXELSLASH: https://github.com/madangryscientist/pixelslash
+      BRANCH: bot/pixelslash-pin
+      # As in ci.yml: moon diffs against the base branch, which needs the full history, and reads
+      # the shared cache with the read token only.
+      MOON_BASE: origin/main
+      MOON_REMOTE_TOKEN: ${{ secrets.MOON_CACHE_READ_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Check
+        id: check
+        env:
+          FORCE_SHA: ${{ inputs.force_sha }}
+        run: |
+          set -euo pipefail
+          NEW=$(git ls-remote "$PIXELSLASH" refs/heads/main | cut -f1)
+          if [[ ! $NEW =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::could not read PixelSlash main: '$NEW'"
+            exit 1
+          fi
+          if [ -n "$FORCE_SHA" ]; then
+            if [[ ! $FORCE_SHA =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::force_sha must be a full 40 character commit SHA: '$FORCE_SHA'"
+              exit 1
+            fi
+            OLD=$FORCE_SHA
+          else
+            OLD=$(tr -d '[:space:]' < apps/site/pixelslash.sha)
+          fi
+          echo "pixelslash pin: OLD=$OLD NEW=$NEW"
+          if [ "$OLD" = "$NEW" ]; then
+            echo "pixelslash pin: up to date at $NEW"
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Commits and trees only, enough to list changed paths. Without rename detection a rename
+          # shows as a delete and an add, so a move into or out of a fetched path counts.
+          git init -q --bare "$RUNNER_TEMP/pixelslash.git"
+          git -C "$RUNNER_TEMP/pixelslash.git" fetch -q --filter=blob:none "$PIXELSLASH" refs/heads/main
+          # Through a file, so a failing --list stops the job instead of leaving the list empty.
+          bun apps/site/scripts/fetch-sources.ts --list > "$RUNNER_TEMP/fetched.txt"
+          mapfile -t FETCHED < "$RUNNER_TEMP/fetched.txt"
+          if [ "${#FETCHED[@]}" -eq 0 ]; then
+            echo "::error::fetch-sources.ts --list printed no paths"
+            exit 1
+          fi
+          CHANGED=$(git -C "$RUNNER_TEMP/pixelslash.git" diff --name-only --no-renames "$OLD" "$NEW" -- "${FETCHED[@]}")
+          if [ -z "$CHANGED" ]; then
+            echo "pixelslash pin: no fetched file changed between $OLD and $NEW"
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "pixelslash pin: fetched files changed:"
+          echo "$CHANGED"
+          {
+            echo "bump=true"
+            echo "old=$OLD"
+            echo "new=$NEW"
+            echo "changed<<CHANGED_EOF"
+            echo "$CHANGED"
+            echo "CHANGED_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Bump the pin
+        id: bump
+        if: steps.check.outputs.bump == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OLD: ${{ steps.check.outputs.old }}
+          NEW: ${{ steps.check.outputs.new }}
+          CHANGED: ${{ steps.check.outputs.changed }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # One bot branch only, always rebuilt from main.
+          git checkout -B "$BRANCH" origin/main
+          echo "$NEW" > apps/site/pixelslash.sha
+          if git diff --quiet; then
+            echo "pixelslash pin: up to date at $NEW"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          COMPARE="$PIXELSLASH/compare/$OLD...$NEW"
+          TITLE="build(site): pin pixelslash to ${NEW:0:7}"
+          {
+            echo "$TITLE"
+            echo
+            echo "$COMPARE"
+            echo
+            echo "Fetched files changed:"
+            echo "$CHANGED" | sed 's/^/- /'
+          } > "$RUNNER_TEMP/message.txt"
+          git add apps/site/pixelslash.sha
+          git commit -q -F "$RUNNER_TEMP/message.txt"
+          git push -q --force origin "$BRANCH"
+          tail -n +3 "$RUNNER_TEMP/message.txt" > "$RUNNER_TEMP/body.md"
+          PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -z "$PR" ]; then
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr edit "$PR" --title "$TITLE" --body-file "$RUNNER_TEMP/body.md"
+          fi
+          {
+            echo "pushed=true"
+            echo "head=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Gate
+        if: steps.bump.outputs.pushed == 'true'
+        run: |
+          set -euo pipefail
+          # The push is done, so the gate runs with no write credential: drop the one checkout stored.
+          git config --local --unset-all "http.https://github.com/.extraheader" || true
+          bun install --frozen-lockfile
+          bunx moon run --concurrency 3 :lint :typecheck :build :test 2>&1 | tee "$RUNNER_TEMP/gate.log"
+
+      - name: Merge and deploy
+        id: merge
+        if: steps.bump.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD: ${{ steps.bump.outputs.head }}
+        run: |
+          set -euo pipefail
+          gh pr merge "$BRANCH" --squash --delete-branch --match-head-commit "$HEAD"
+          # Merged: a failure from here on fails the job but must not report a failed gate on the PR.
+          echo "merged=true" >> "$GITHUB_OUTPUT"
+          gh workflow run deploy.yml --ref main
+
+      - name: Report a red gate on the pull request
+        if: failure() && steps.bump.outputs.pushed == 'true' && steps.merge.outputs.merged != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          {
+            cat "$RUNNER_TEMP/body.md"
+            echo
+            echo "## The gate or the merge failed"
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo
+            echo '```'
+            tail -n 60 "$RUNNER_TEMP/gate.log" 2>/dev/null || echo "no gate output"
+            echo '```'
+          } > "$RUNNER_TEMP/failed.md"
+          gh pr edit "$BRANCH" --body-file "$RUNNER_TEMP/failed.md"

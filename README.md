@@ -37,6 +37,11 @@ bunx moon run site:build        # static output in apps/site/dist/
 cd apps/site && bun run preview # serve apps/site/dist/
 ```
 
+The `/pixelslash` pages are built from PixelSlash files fetched at the commit in `apps/site/pixelslash.sha`.
+`.github/workflows/pixelslash-pin.yml` moves that pin: every hour, when a fetched file has changed on PixelSlash
+main, it opens a pull request that moves the pin, gates it, merges it when green and starts the deploy. Run it
+by hand with `gh workflow run pixelslash-pin.yml`.
+
 ## Check
 
 ```bash

@@ -4,6 +4,9 @@
  * .sources/pixelslash/<path>; those under apps/site/public/ (but the font, which the stylesheet
  * imports) are also copied to public/pixelslash/, so the built site serves them under /pixelslash/. Both folders are gitignored. A failed download exits
  * non-zero naming the path and the commit.
+ *
+ * `--list` prints PIXELSLASH_FILES, one per line, and exits without fetching or deleting anything. The
+ * pin bot (.github/workflows/pixelslash-pin.yml) reads it to decide whether a PixelSlash change matters.
  */
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -75,9 +78,16 @@ async function main(): Promise<void> {
   console.log(`fetched ${PIXELSLASH_FILES.length} PixelSlash files at ${sha}`);
 }
 
-try {
-  await main();
-} catch (error) {
-  console.error(`fetch-sources: ${error instanceof Error ? error.message : String(error)}`);
-  process.exit(1);
+// Run only as a script, so a test can import PIXELSLASH_FILES without a fetch.
+if (import.meta.main) {
+  if (process.argv.includes("--list")) {
+    console.log(PIXELSLASH_FILES.join("\n"));
+  } else {
+    try {
+      await main();
+    } catch (error) {
+      console.error(`fetch-sources: ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    }
+  }
 }
