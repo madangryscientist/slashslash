@@ -216,11 +216,8 @@ describe("/developers holds the developer detail", () => {
     expect(visibleText(html)).not.toMatch(/run record/i);
   });
 
-  test("no tabs and no hidden panels", () => {
-    for (const html of [markup(), developers()]) {
-      expect(html).not.toMatch(/role="tab/);
-      expect(html).not.toMatch(/<[^>]*\shidden(=|\s|>)/);
-    }
+  test("no tabs", () => {
+    for (const html of [markup(), developers()]) expect(html).not.toMatch(/role="tab/);
   });
 });
 

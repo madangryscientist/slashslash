@@ -16,6 +16,10 @@ export const SITE_DESCRIPTION: string = HERO.lead;
 /** What public/og.png really shows, for og:image:alt. Change it whenever the image changes. */
 export const OG_IMAGE_ALT = `The ${SITE_NAME} logo above the words: ${LANDING_HEADLINE}.`;
 
+/** The /developers page lead, also its description in search results and link previews. */
+export const DEVELOPERS_DESCRIPTION =
+  "The details behind slashslash.build: how the tools would work in a CI pipeline, what exists today, and how to try PixelSlash.";
+
 /** The title of the /developers page, in the tab and in link previews. */
 export const DEVELOPERS_TITLE = `${SITE_NAME}: for developers`;
 

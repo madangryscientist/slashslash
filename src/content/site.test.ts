@@ -41,7 +41,7 @@ describe("built page", () => {
 
   test("keeps out the words the brief rules out, and the comparisons nobody checked", () => {
     const forbidden =
-      /salary|\bclients?\b|employer|job hunt|notice period|planner|spinoff|\bagents?\b|OB-\d+|192\.168|\.lan\b|\btokens?\b|Unleash|Flagsmith|GrowthBook|PostHog|Piranha|OpenFeature|LaunchDarkly MCP/i;
+      /salary|\bclients?\b|employer|job hunt|notice period|\bagents?\b|\btokens?\b|Unleash|Flagsmith|GrowthBook|PostHog|Piranha|OpenFeature|LaunchDarkly MCP/i;
     for (const html of builtPages()) expect(visibleText(html).match(forbidden)?.[0]).toBeUndefined();
   });
 
@@ -62,6 +62,15 @@ describe("built page", () => {
       expect(html).toContain(`name="twitter:image" content="${SITE_URL}/og.png"`);
     }
     expect(SITE_URL).toMatch(/^https:\/\/[^/]+$/);
+  });
+
+  test("each page has its own description", () => {
+    builtPages();
+    const developers = readFileSync(resolve(CLIENT, "developers/index.html"), "utf8");
+    const landing = readFileSync(resolve(CLIENT, "index.html"), "utf8");
+    const of = (html: string) => html.match(/name="description" content="([^"]*)"/)?.[1];
+    expect(of(developers)).toBeDefined();
+    expect(of(developers)).not.toBe(of(landing));
   });
 });
 

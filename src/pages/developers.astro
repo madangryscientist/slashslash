@@ -7,19 +7,19 @@ import { Section } from "#/components/section";
 import { Today } from "#/components/today";
 import { ToolsInDetail } from "#/components/tools";
 import { Walkthrough } from "#/components/walkthrough";
-import { DEVELOPERS_TITLE } from "#/content/site";
+import { DEVELOPERS_DESCRIPTION, DEVELOPERS_TITLE } from "#/content/site";
 import Base from "#/layouts/Base.astro";
 
 // /developers: the detail the landing page leaves out.
 ---
 
-<Base title={DEVELOPERS_TITLE}>
+<Base title={DEVELOPERS_TITLE} description={DEVELOPERS_DESCRIPTION}>
   <Section
     id="for-developers"
     hunk="for developers"
     title="For developers"
     heading="h1"
-    lead="The details behind slashslash.build: how the tools would work in a CI pipeline, what exists today, and how to try PixelSlash."
+    lead={DEVELOPERS_DESCRIPTION}
   />
   <Walkthrough />
   <Env />

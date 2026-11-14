@@ -10,8 +10,8 @@ const CODE_IN_COMMENT =
   /^\s*\/\/\s*(?:const|let|var|import|export|return|await|if|for|while|function|throw)\b.*[;{})]\s*$/;
 
 const hits: string[] = [];
-for (const path of globSync("{src,e2e,smoke,scripts}/**/*.{ts,tsx}")) {
-  if (path.endsWith("routeTree.gen.ts") || path === "scripts/check-slop.ts") continue;
+for (const path of globSync("{src,scripts}/**/*.{ts,tsx}")) {
+  if (path === "scripts/check-slop.ts") continue;
   readFileSync(path, "utf8")
     .split("\n")
     .forEach((line, i) => {
