@@ -17,8 +17,8 @@
       "dependencies": {
         "@astrojs/check": "^0.9.12",
         "@astrojs/react": "^7.1.9",
-        "@hackcove/themes": "0.1.0",
-        "@hackcove/ui-react": "^0.8.3",
+        "@hackcove/themes": "^0.2.1",
+        "@hackcove/ui-react": "^0.10.2",
         "@tailwindcss/vite": "^4.3.5",
         "astro": "^7.4.12",
         "react": "^19.3.1",
@@ -211,9 +211,9 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.28.2", "", { "os": "win32", "cpu": "x64" }, "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g=="],
 
-    "@hackcove/themes": ["@hackcove/themes@0.1.0", "", { "peerDependencies": { "tailwindcss": "^4" } }, "sha512-rCT6rZhBrnfg5i+8Yp/B/jRioDhBt5GN6wcdsTREqwnD6Wx/iEKghgA5vM4yMbLJY77BZIyQQ6ZgiBdKU7LG9g=="],
+    "@hackcove/themes": ["@hackcove/themes@0.2.3", "", { "peerDependencies": { "tailwindcss": "^4" } }, "sha512-WFprxtjBMfCuHtjsZ4Qc6VLZuvgGAwiktnq988BRAg7EfJ9SOG3XlO2wf//1+RSli63HoSK1tV1No0UQ9XBCew=="],
 
-    "@hackcove/ui-react": ["@hackcove/ui-react@0.8.3", "", { "dependencies": { "@internationalized/date": "^3.12.4", "react-aria-components": "^1.22.1" }, "peerDependencies": { "@types/react": ">=18", "@types/react-dom": ">=18", "react": ">=18", "react-dom": ">=18", "tailwindcss": "^4" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-SsNExrAP8kvG3rMgWVQOZyawK0GJjlyhJuxDkabv97K/0UfLsfxg8x9a9eOpAEQVFaCI6KB8Pv+3hREJsAwTwg=="],
+    "@hackcove/ui-react": ["@hackcove/ui-react@0.10.4", "", { "dependencies": { "@internationalized/date": "^3.12.4", "react-aria-components": "^1.22.1" }, "peerDependencies": { "@types/react": ">=18", "@types/react-dom": ">=18", "react": ">=18", "react-dom": ">=18", "tailwindcss": "^4" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-qkyhqRBMCbh24kxy34jLOINF/FbW7J58ynj40CjrvRCQb2GKyV8zNmWt6HSPg145EhMfPvUV8kUwbpsTmLwh/A=="],
 
     "@img/colour": ["@img/colour@1.1.0", "", {}, "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ=="],
 

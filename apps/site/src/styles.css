@@ -3,6 +3,11 @@
 @import "@hackcove/themes/catppuccin-latte.css";
 /* Tailwind skips node_modules: scan the design system for the utilities its components use. */
 @source "../node_modules/@hackcove/ui-react/dist";
+/*
+ * The site renders no chat message. Its motion-safe:animate-pulse would put a top-level @keyframes
+ * pulse in this stylesheet, and every animation here lives inside the no-preference query.
+ */
+@source not "../node_modules/@hackcove/ui-react/dist/ChatMessage.js";
 
 /*
  * Catppuccin Mocha and Latte palettes © 2021 Catppuccin, MIT license (notice in

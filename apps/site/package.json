@@ -15,8 +15,8 @@
   "dependencies": {
     "@astrojs/check": "^0.9.12",
     "@astrojs/react": "^7.1.9",
-    "@hackcove/themes": "0.1.0",
-    "@hackcove/ui-react": "^0.8.3",
+    "@hackcove/themes": "^0.2.1",
+    "@hackcove/ui-react": "^0.10.2",
     "@tailwindcss/vite": "^4.3.5",
     "astro": "^7.4.12",
     "react": "^19.3.1",
