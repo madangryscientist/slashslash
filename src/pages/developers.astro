@@ -1,0 +1,31 @@
+---
+import { Ask, DEVELOPER_QUESTIONS } from "#/components/ask";
+import { Env } from "#/components/env";
+import { Flags } from "#/components/flags";
+import { Motion } from "#/components/motion";
+import { Section } from "#/components/section";
+import { Today } from "#/components/today";
+import { ToolsInDetail } from "#/components/tools";
+import { Walkthrough } from "#/components/walkthrough";
+import { DEVELOPERS_DESCRIPTION, DEVELOPERS_TITLE } from "#/content/site";
+import Base from "#/layouts/Base.astro";
+
+// /developers: the detail the landing page leaves out.
+---
+
+<Base title={DEVELOPERS_TITLE} description={DEVELOPERS_DESCRIPTION}>
+  <Section
+    id="for-developers"
+    hunk="for developers"
+    title="For developers"
+    heading="h1"
+    lead={DEVELOPERS_DESCRIPTION}
+  />
+  <Walkthrough />
+  <Env />
+  <Flags client:visible />
+  <ToolsInDetail />
+  <Today client:visible />
+  <Ask questions={DEVELOPER_QUESTIONS} hunk="feedback" />
+  <Motion client:load />
+</Base>

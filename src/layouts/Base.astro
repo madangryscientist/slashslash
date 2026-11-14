@@ -1,0 +1,95 @@
+---
+import { ColourSchemeToggle, appShellRootClassFor, colourSchemeScript } from "@hackcove/ui-react";
+import {
+  LANDING_HEADLINE,
+  OG_IMAGE_ALT,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+} from "#/content/site";
+import { SCHEMES } from "#/content/schemes";
+import "#/styles.css";
+
+interface Props {
+  /** The page title, which link previews repeat. The landing page's is the promise. */
+  title?: string;
+  /** The description in search results and link previews. The landing page uses the hero lead. */
+  description?: string;
+}
+
+const { title = `${SITE_NAME}: ${LANDING_HEADLINE}`, description = SITE_DESCRIPTION } = Astro.props;
+const onDevelopers = Astro.url.pathname.startsWith("/developers");
+// The page's own address on the live site, with no trailing slash (Cloudflare Pages serves `/developers`).
+const path =
+  Astro.url.pathname
+    .replace(/\.html$/, "")
+    .replace(/(^|\/)index$/, "")
+    .replace(/\/+$/, "") || "/";
+const canonical = `${SITE_URL}${path}`;
+// Link previews in chat apps want an absolute URL.
+const shareImage = `${SITE_URL}/og.png`;
+
+// colourSchemeScript knows the `dark` class only. The page is built with `latte` on <html>, so
+// once that script has decided, this takes `latte` off a dark page: exactly one scope is ever set.
+// It also sets `motion` before first paint when the reader allows motion, so the hero starts in its start
+// state instead of showing finished and rewinding at hydration. With no JS it never runs: finished state.
+// If the motion island has not mounted within 3 s (bundle blocked or broken), it takes `motion` off again,
+// so no start state can hide the copy for good.
+const scopeScript = `${colourSchemeScript};(function(){var r=document.documentElement;r.classList.toggle("${SCHEMES.light}",!r.classList.contains("${SCHEMES.dark}"));if(matchMedia("(prefers-reduced-motion: no-preference)").matches){r.classList.add("motion");setTimeout(function(){if(!("motionReady" in r.dataset))r.classList.remove("motion")},3000)}})()`;
+---
+
+<html lang="en" class={appShellRootClassFor("light", SCHEMES)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:alt" content={OG_IMAGE_ALT} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={shareImage} />
+    <link rel="preload" href="/fonts/bricolage-grotesque-latin-opsz-wght-subset.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/jetbrains-mono-latin-wght-subset.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Before first paint: the visitor's stored choice, else the system's light or dark. No cookie. -->
+    <script is:inline set:html={scopeScript} />
+  </head>
+  <body class="antialiased">
+    <div class="page">
+      <header class="topbar">
+        <div class="wrap topbar-inner">
+          {
+            onDevelopers ? (
+              <a href="/" class="brand-link">
+                <span class="brand" role="img" aria-label={SITE_NAME} />
+              </a>
+            ) : (
+              <span class="brand" role="img" aria-label={SITE_NAME} />
+            )
+          }
+          <div class="topbar-end">
+            {
+              onDevelopers ? null : (
+                <a href="/developers" class="topbar-link">
+                  For developers
+                </a>
+              )
+            }
+            <ColourSchemeToggle client:load schemes={SCHEMES} size="sm" />
+          </div>
+        </div>
+      </header>
+      <main>
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

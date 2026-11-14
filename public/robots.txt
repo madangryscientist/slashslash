@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://slashslash.build/sitemap.xml
