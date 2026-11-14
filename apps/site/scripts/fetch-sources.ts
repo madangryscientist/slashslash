@@ -1,8 +1,8 @@
 /**
  * Downloads the few PixelSlash repository files the /pixelslash pages need, at the commit pinned in
  * pixelslash.sha (PIXELSLASH_SHA overrides it, for trying another commit locally). Each file lands in
- * .sources/pixelslash/<path>; those under apps/site/public/ are also copied to public/pixelslash/, so
- * the built site serves them under /pixelslash/. Both folders are gitignored. A failed download exits
+ * .sources/pixelslash/<path>; those under apps/site/public/ (but the font, which the stylesheet
+ * imports) are also copied to public/pixelslash/, so the built site serves them under /pixelslash/. Both folders are gitignored. A failed download exits
  * non-zero naming the path and the commit.
  */
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -15,6 +15,9 @@ export const PIXELSLASH_FILES = [
   "apps/site/public/fonts/inter-latin-wght-normal.woff2",
   "apps/site/public/fonts/OFL.txt",
 ] as const;
+
+/** Files the stylesheet imports, so Vite serves them hashed; copying them to public/ would ship them twice. */
+const IMPORTED = new Set<string>(["apps/site/public/fonts/inter-latin-wght-normal.woff2"]);
 
 const REPO = "madangryscientist/pixelslash";
 const SITE = resolve(import.meta.dirname, "..");
@@ -57,7 +60,7 @@ async function main(): Promise<void> {
     const target = resolve(SOURCES, path);
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, bodies[i] ?? new Uint8Array());
-    if (path.startsWith(PUBLIC_PREFIX)) {
+    if (path.startsWith(PUBLIC_PREFIX) && !IMPORTED.has(path)) {
       const served = resolve(PUBLIC, path.slice(PUBLIC_PREFIX.length));
       mkdirSync(dirname(served), { recursive: true });
       copyFileSync(target, served);

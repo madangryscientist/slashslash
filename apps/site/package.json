@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "bun scripts/fetch-sources.ts && astro dev",
-    "build": "astro build",
+    "build": "bun scripts/fetch-sources.ts && astro build",
     "preview": "astro preview",
-    "typecheck": "astro check",
+    "typecheck": "bun scripts/fetch-sources.ts && astro check",
     "test": "vitest run"
   },
   "dependencies": {

@@ -1,2 +1,2 @@
-/** The class each scheme puts on <html>: Latte's scope for light, Mocha's for dark. */
-export const SCHEMES = { light: "latte", dark: "dark" } as const;
+/** The class each scheme puts on <html>: Latte's scope for light, Mocha's for dark. One value for both sites. */
+export { SCHEMES } from "#/content/schemes";

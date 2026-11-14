@@ -122,8 +122,14 @@ describe("every PixelSlash page", () => {
     expect(pixelslashSheets.size).toBeGreaterThan(0);
     expect(slashslashSheets.size).toBeGreaterThan(0);
     for (const sheet of pixelslashSheets) expect(slashslashSheets.has(sheet), sheet).toBe(false);
-    // The PixelSlash sheet is the one carrying Inter; the slashslash sheet carries Bricolage.
-    for (const sheet of pixelslashSheets) expect(read(`.${sheet}`)).not.toContain("Bricolage");
-    for (const sheet of slashslashSheets) expect(read(`.${sheet}`)).not.toContain('font-family:"Inter"');
+    // Each sheet carries its own site's font file and not the other's.
+    for (const sheet of pixelslashSheets) {
+      expect(read(`.${sheet}`)).toContain("inter-latin-wght-normal");
+      expect(read(`.${sheet}`)).not.toContain("bricolage-grotesque");
+    }
+    for (const sheet of slashslashSheets) {
+      expect(read(`.${sheet}`)).toContain("bricolage-grotesque");
+      expect(read(`.${sheet}`)).not.toContain("inter-latin-wght-normal");
+    }
   });
 });

@@ -22,8 +22,8 @@
 /*
  * The type face (PS-307): Inter, variable (weights 100-900), served from this origin. The file is
  * the PixelSlash repo's public/fonts/inter-latin-wght-normal.woff2 (the Latin subset of
- * @fontsource-variable/inter 5.3.0), fetched at the pinned commit; its licence, the SIL OFL 1.1, is
- * served beside the fetched copy as /pixelslash/fonts/OFL.txt. Characters outside that range (arrows,
+ * @fontsource-variable/inter 5.3.0), fetched at the pinned commit and served hashed from /_astro/;
+ * its licence, the SIL OFL 1.1, is served as /pixelslash/fonts/OFL.txt. Characters outside that range (arrows,
  * CJK) fall through to the fallback face below and then the system stack. The layout preloads the file.
  *
  * "Inter Fallback" is Arial (or its metric twin Liberation Sans) scaled to Inter's metrics (the same figures Next.js ships for Inter), so
