@@ -1,0 +1,19 @@
+$schema: "../../.moon/cache/schemas/project.json"
+
+# The tools live in node_modules/.bin, which moon does not put on PATH, so `bun run` finds them.
+# No task sets its own `inputs`: that would replace the default `**/*` of the project.
+tasks:
+  build:
+    command: "bun run astro build"
+    # .astro/ is generated types that check and build rewrite each run; the tests read dist/ alone.
+    outputs:
+      - "dist"
+  typecheck:
+    command: "bun run astro check"
+  lint:
+    command: "bun run oxlint --deny-warnings"
+  test:
+    # The tests read the built pages in dist/.
+    command: "bun run vitest run"
+    deps:
+      - "~:build"

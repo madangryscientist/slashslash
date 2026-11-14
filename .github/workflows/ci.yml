@@ -9,11 +9,15 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # moon diffs the head against the base branch before any task runs, even for a plain
+      # `moon run`, and the checkout has no local `main`, so it names the remote ref. That needs the
+      # full history (fetch-depth: 0 below).
+      MOON_BASE: origin/main
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run lint
-      - run: bun run typecheck
-      - run: bun run build
-      - run: bun run test
+      - run: bunx moon run --concurrency 3 :lint :typecheck :build :test
