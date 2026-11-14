@@ -95,6 +95,16 @@ describe("every PixelSlash page", () => {
     }
   });
 
+  test("loads no script: the two small layout scripts are inline and import nothing, React included", () => {
+    for (const page of pixelslashPages()) {
+      const html = read(page);
+      expect(html, page).not.toMatch(/<script[^>]*\ssrc=/);
+      expect(html, page).not.toMatch(/<link[^>]*rel="modulepreload"/);
+      for (const [, body] of html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g))
+        expect(body, page).not.toMatch(/\bimport\s*[{(*"'\w]/);
+    }
+  });
+
   test("links the PixelSlash stylesheet and not the slashslash one, and the reverse holds", () => {
     const pixelslashSheets = new Set(pixelslashPages().flatMap((page) => stylesheets(read(page))));
     const slashslashSheets = new Set(
