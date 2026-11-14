@@ -79,6 +79,10 @@ describe.each(SERVED)("/pixelslash$path", ({ path, file, Page }) => {
     expect(html).toContain(`property="og:url" content="${address}"`);
   });
 
+  test("ends with its body: nothing, a page script included, comes after </html>", () => {
+    expect(html.trimEnd()).toMatch(/<\/body><\/html>$/);
+  });
+
   test("its title is its entry of the ported pages list", () => {
     const entry = PAGES.find((page) => page.to === path);
     expect(decode(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "")).toBe(entry?.title);
