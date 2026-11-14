@@ -1,10 +1,11 @@
 $schema: "../.moon/cache/schemas/project.json"
 
 tasks:
-  # The anti-slop check reads every project's src and scripts, so it runs from the root and hashes
-  # them too. A task's own `inputs` replace the default project glob, so `**/*` is listed again.
+  # oxlint on scripts/, then the anti-slop check. That check reads every project's src and scripts, so
+  # it runs from the root and hashes them too. A task's own `inputs` replace the default project
+  # glob, so `**/*` is listed again.
   lint:
-    command: "bun scripts/check-slop.ts"
+    script: "bun run oxlint --deny-warnings scripts && bun scripts/check-slop.ts"
     inputs:
       - "**/*"
       - "/apps/*/src/**/*.{ts,tsx}"
