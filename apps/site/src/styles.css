@@ -8,6 +8,10 @@
  * pulse in this stylesheet, and every animation here lives inside the no-preference query.
  */
 @source not "../node_modules/@hackcove/ui-react/dist/ChatMessage.js";
+/* The PixelSlash pages bring their own sheet (src/pixelslash/styles.css): none of their classes here. */
+@source not "./pixelslash";
+@source not "./pages/pixelslash";
+@source not "./layouts/PixelSlash.astro";
 
 /*
  * Catppuccin Mocha and Latte palettes © 2021 Catppuccin, MIT license (notice in
