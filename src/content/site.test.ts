@@ -17,7 +17,7 @@ function builtHtml(): string {
 function builtPages(): string[] {
   builtHtml();
   const pages = globSync("**/*.html", { cwd: CLIENT });
-  expect(pages.toSorted()).toEqual(["404.html", "developers/index.html", "index.html"]);
+  expect(pages.toSorted()).toEqual(["404.html", "developers.html", "index.html"]);
   return pages.map((page) => readFileSync(resolve(CLIENT, page), "utf8"));
 }
 
@@ -32,7 +32,7 @@ function visibleText(html: string): string {
 describe("built page", () => {
   test("every product has its status label next to its name on /developers", () => {
     builtHtml();
-    const html = readFileSync(resolve(CLIENT, "developers/index.html"), "utf8");
+    const html = readFileSync(resolve(CLIENT, "developers.html"), "utf8");
     for (const product of PRODUCTS) {
       const label = new RegExp(`data-status-for="${product.name}"[^>]*>${product.status}<`);
       expect(html, `${product.name} should carry "${product.status}"`).toMatch(label);
@@ -66,7 +66,7 @@ describe("built page", () => {
 
   test("each page has its own description", () => {
     builtPages();
-    const developers = readFileSync(resolve(CLIENT, "developers/index.html"), "utf8");
+    const developers = readFileSync(resolve(CLIENT, "developers.html"), "utf8");
     const landing = readFileSync(resolve(CLIENT, "index.html"), "utf8");
     const of = (html: string) => html.match(/name="description" content="([^"]*)"/)?.[1];
     expect(of(developers)).toBeDefined();
@@ -101,6 +101,6 @@ describe("is open to search engines", () => {
     const canonical = (page: string): string | undefined =>
       readFileSync(resolve(CLIENT, page), "utf8").match(/<link rel="canonical" href="([^"]+)"/)?.[1];
     expect(canonical("index.html")).toBe(`${SITE_URL}/`);
-    expect(canonical("developers/index.html")).toBe(`${SITE_URL}/developers`);
+    expect(canonical("developers.html")).toBe(`${SITE_URL}/developers`);
   });
 });

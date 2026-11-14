@@ -32,7 +32,7 @@ const unescape = (html: string): string => html.replaceAll("&#x27;", "'").replac
 /** The prerendered landing page without the hydration payload, so a match means it is in the markup. */
 const markup = (): string => unescape(withoutScripts(built())).replaceAll("<!-- -->", "");
 /** The same for /developers. */
-const developers = (): string => withoutScripts(read("developers/index.html"));
+const developers = (): string => withoutScripts(read("developers.html"));
 
 /** Visible text only: tags, scripts and styles removed. */
 function visibleText(html: string): string {
@@ -175,7 +175,7 @@ describe("with no JavaScript, or reduced motion, every drawing is finished", () 
 
 describe("the hard lines", () => {
   test("no em dash or en dash on either page", () => {
-    for (const html of [built(), read("developers/index.html")]) expect(html).not.toMatch(/[\u2013\u2014]/);
+    for (const html of [built(), read("developers.html")]) expect(html).not.toMatch(/[\u2013\u2014]/);
   });
 });
 
@@ -207,7 +207,7 @@ describe("/developers holds the developer detail", () => {
   });
 
   test("keeps its own title and links the brand back to the landing page", () => {
-    const html = read("developers/index.html");
+    const html = read("developers.html");
     expect(html).toContain(`<title>${DEVELOPERS_TITLE}</title>`);
     expect(html).toContain(`property="og:title" content="${DEVELOPERS_TITLE}"`);
     expect(html).toContain(`name="twitter:title" content="${DEVELOPERS_TITLE}"`);

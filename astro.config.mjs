@@ -9,6 +9,8 @@ export default defineConfig({
   trailingSlash: "never",
   integrations: [react()],
   build: {
+    // developers.html, not developers/index.html: Cloudflare Pages serves it at /developers with no redirect.
+    format: "file",
     // The stylesheet stays a file, so the tests can read it and the browser can cache it.
     inlineStylesheets: "never",
   },

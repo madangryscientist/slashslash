@@ -20,7 +20,11 @@ interface Props {
 const { title = `${SITE_NAME}: ${LANDING_HEADLINE}`, description = SITE_DESCRIPTION } = Astro.props;
 const onDevelopers = Astro.url.pathname.startsWith("/developers");
 // The page's own address on the live site, with no trailing slash (Cloudflare Pages serves `/developers`).
-const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const path =
+  Astro.url.pathname
+    .replace(/\.html$/, "")
+    .replace(/(^|\/)index$/, "")
+    .replace(/\/+$/, "") || "/";
 const canonical = `${SITE_URL}${path}`;
 // Link previews in chat apps want an absolute URL.
 const shareImage = `${SITE_URL}/og.png`;
