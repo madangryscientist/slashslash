@@ -1,10 +1,15 @@
 $schema: "../.moon/cache/schemas/project.json"
 
-# The one self-host image. Its only task is the smoke test, which builds the image and runs it under
-# Docker: minutes of work, so it is never cached, and there is deliberately no build, test, lint or
-# typecheck task here, because the gate and deploy.yml run those across every project.
+# The one self-host image. The smoke test builds the image and runs it under Docker: minutes of
+# work, so it is never cached and the gate does not run it (self-host.yml does). The test task is the
+# Proxmox install script's dry runs and ShellCheck, which build nothing, so the gate's `:test` runs
+# it. There is no build, lint or typecheck task here.
 tasks:
   smoke:
     command: "bun smoke.ts"
     options:
       cache: false
+  test:
+    command: "bun test proxmox"
+    inputs:
+      - "proxmox/**"
