@@ -156,7 +156,7 @@ jobs:
           # checkout v6 and later keep it in a file under RUNNER_TEMP that the local config includes,
           # so remove the includes and the file as well as any header set the old way.
           git config --local --unset-all "http.https://github.com/.extraheader" || true
-          { git config --local --name-only --get-regexp '^includeif\.' || true; } | while read -r key; do
+          { git config --local --name-only --get-regexp '^includeif\.' || true; } | sort -u | while read -r key; do
             git config --local --unset-all "$key"
           done
           rm -f "$RUNNER_TEMP"/git-credentials-*.config
