@@ -1,6 +1,7 @@
 # Stand-ins
 
-Each file here stands in for one Hack Cove ticket: a component or token the kit does not ship yet. Its
-first comment names that ticket as `HC-<n>`, and `stand-ins.test.ts` fails on a file without one.
+Each file here stands in for one part the Hack Cove kit does not ship yet: a component or a token. Its
+first comment names the package it stands in for (`@hackcove/ui-react` or `@hackcove/themes`) and the
+part, and `stand-ins.test.ts` fails on a file without one.
 
-When the ticket ships in the kit, the page imports the kit's version and the stand-in is deleted.
+When the kit ships that part, the page imports the kit's version and the stand-in is deleted.
