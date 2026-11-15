@@ -22,6 +22,62 @@ docker run -d --name slashslash --restart unless-stopped \
 
 amd64 only. To build the image yourself instead, see "How it is built" below.
 
+For a guided setup on Proxmox, Docker, Compose, Kubernetes or another platform, follow
+[`skills/self-host`](../skills/self-host/SKILL.md): a step-by-step guide any coding agent (or person)
+can work through, with the checks that prove each step.
+
+## On Proxmox, in one line
+
+Run this in the Proxmox host's shell, as root:
+
+```sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh)"
+```
+
+It asks for what it needs, makes one unprivileged Debian 13 container with Docker in it (2 cores,
+2 GB, an 8 GB root disk, started on boot, tagged `slashslash`), runs the image there with its data
+on a mount of its own at `/var/lib/slashslash`, waits until it is healthy and prints both
+addresses and the command that reads the ToggleSlash admin token. It refuses a container id that is
+taken and touches no other container or VM.
+
+Without a terminal it reads everything from the environment instead:
+
+| Name | Default | What |
+| --- | --- | --- |
+| `CTID` | the next free id | The new container's id |
+| `IP` | `dhcp` | `dhcp`, or an address with its prefix, `192.168.0.40/24` |
+| `GATEWAY` | none | Required with a fixed address |
+| `BRIDGE` | `vmbr0` | The network bridge |
+| `STORAGE` | `local-lvm` | Storage for the root disk (Docker's own files live there) |
+| `DATA_STORAGE`, `DATA_GB` | `STORAGE`, `8` | A new data volume, on that storage at that size |
+| `DATA_PATH` | unset | A host folder for the data instead, such as a ZFS dataset's mountpoint. It must be empty or already slashslash's, and no other container may mount it. It is given to UID 101654, the image's user as the host sees it |
+| `DATA_VOLUME` | unset | A volume `--uninstall` kept, used again under the same `CTID` |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | none, required | PixelSlash's GitHub sign-in. The callback is `http://<address>:3000/auth/github/callback` |
+| `VERSION` | `latest` | The image tag to run |
+| `CT_HOSTNAME` | `slashslash` | The container's host name |
+
+The GitHub values go into `/etc/slashslash/.env` in the container (mode 0600) over stdin, never on
+a command line. `DRY_RUN=1` prints every command that would change something and changes nothing.
+
+The other modes take arguments after the line's `_`:
+
+```sh
+url=https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh
+bash -c "$(curl -fsSL $url)" _ --upgrade <CTID> [VERSION]  # pull VERSION (default latest), recreate on the same data
+bash -c "$(curl -fsSL $url)" _ --uninstall <CTID>          # remove the container, keep the data
+bash -c "$(curl -fsSL $url)" _ --uninstall <CTID> --purge  # remove the container and its data volume
+```
+
+An upgrade prints the old and new version and the upgrade backup the new version wrote (see
+"Backup, restore and rollback"). Uninstall keeps a data volume by taking it out of the container's
+config first and tells you how to use it again. The volume stays filed under that id, so give the
+id to no other guest until then. `--purge` deletes it. A host folder (`DATA_PATH`)
+is never deleted, even with `--purge`. Upgrade and uninstall act only on a container tagged
+`slashslash`.
+
+A root disk on ZFS storage is untested: Docker inside may need `fuse-overlayfs` there. `local-lvm`
+works.
+
 ## Versions
 
 The image is published at `ghcr.io/madangryscientist/slashslash`:
