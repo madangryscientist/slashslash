@@ -1,20 +1,26 @@
 $schema: "../.moon/cache/schemas/project.json"
 
 tasks:
-  # oxlint on scripts/, then the anti-slop check. That check reads every project's src and scripts, so
-  # it runs from the root and hashes them too. A task's own `inputs` replace the default project
+  # oxlint on scripts/, then the anti-slop check, then the personas check. The anti-slop check reads
+  # every project's src and scripts, so it runs from the root and hashes them too. The personas check
+  # reads docs/personas, so that is an input as well. A task's own `inputs` replace the default project
   # glob, so `**/*` is listed again.
   lint:
-    script: "bun run oxlint --deny-warnings scripts && bun scripts/check-slop.ts"
+    script: "bun run oxlint --deny-warnings scripts && bun scripts/check-slop.ts && bun scripts/personas.ts --check"
     inputs:
       - "**/*"
+      - "/docs/personas/**"
       - "/apps/*/src/**/*.{ts,tsx}"
       - "/apps/*/scripts/**/*.{ts,tsx}"
       - "/packages/*/src/**/*.{ts,tsx}"
       - "/packages/*/scripts/**/*.{ts,tsx}"
     options:
       runFromWorkspaceRoot: true
+  # The personas check runs here too, so a typecheck on its own cannot pass a bad persona file.
   typecheck:
-    command: "bun run tsc --noEmit -p scripts/tsconfig.json"
+    script: "bun run tsc --noEmit -p scripts/tsconfig.json && bun scripts/personas.ts --check"
+    inputs:
+      - "**/*"
+      - "/docs/personas/**"
     options:
       runFromWorkspaceRoot: true
