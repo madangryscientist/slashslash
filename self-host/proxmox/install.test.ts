@@ -25,7 +25,10 @@ has() { case " $1 " in *" $2 "*) return 0 ;; esac; return 1; }
 case "$tool" in
   pct)
     case "$1" in
-      status) has "$FAKE_CTS" "$2" && { echo "status: running"; exit 0; }; echo "no such ct" >&2; exit 2 ;;
+      status)
+        has "$FAKE_CTS" "$2" || { echo "no such ct" >&2; exit 2; }
+        if grep -qx "pct stop $2" "$FAKE_LOG" && [ -z "$FAKE_STOP_FAILS" ]; then echo "status: stopped"; else echo "status: running"; fi
+        exit 0 ;;
       config)
         has "$FAKE_CTS" "$2" || exit 2
         # A config file written by the test stands for the real one.
@@ -40,6 +43,11 @@ case "$tool" in
           *"slashslash version"*) echo "\${FAKE_OLD_VERSION:-0.1.0}" ;;
           *"ls -1"*) echo "upgrade-20261115T100000Z-0.1.0.tgz" ;;
         esac
+        exit 0 ;;
+      destroy)
+        echo "pct $*" >>"$FAKE_LOG"
+        # What the config held when destroy ran: the volume must be gone from it by then.
+        [ -f "$PVE_LXC_DIR/$2.conf" ] && sed 's/^/  conf: /' "$PVE_LXC_DIR/$2.conf" >>"$FAKE_LOG"
         exit 0 ;;
       *) echo "pct $*" >>"$FAKE_LOG"; exit 0 ;;
     esac ;;
@@ -87,6 +95,7 @@ function sh(args: string[], env: Record<string, string> = {}): Run {
       FAKE_MP0: "",
       FAKE_NO_TEMPLATE: "",
       FAKE_PING_UP: "",
+      FAKE_STOP_FAILS: "",
       ...env,
     },
     stdin: "ignore",
@@ -292,7 +301,7 @@ describe("uninstall", () => {
     expect(r.out).toContain("DATA_VOLUME=local-lvm:vm-140-disk-1");
   });
 
-  test("for real, the volume leaves the config before the stop and destroy calls", () => {
+  test("for real, it stops, then the volume leaves the config, then it destroys", () => {
     const conf = join(lxcDir, "140.conf");
     writeFileSync(
       conf,
@@ -304,8 +313,23 @@ describe("uninstall", () => {
     expect(r.err).toBe("");
     expect(r.code).toBe(0);
     expect(left).toBe("hostname: slashslash\ntags: slashslash\n");
-    expect(r.calls).toBe("pct stop 140\npct destroy 140 --purge 1 --destroy-unreferenced-disks 0\n");
+    expect(r.calls).toBe(
+      "pct stop 140\npct destroy 140 --purge 1 --destroy-unreferenced-disks 0\n  conf: hostname: slashslash\n  conf: tags: slashslash\n",
+    );
     expect(r.out).toContain("still filed under id 140");
+  });
+
+  test("for real, a container that does not stop is left as it was", () => {
+    const conf = join(lxcDir, "140.conf");
+    const before = "mp0: local-lvm:vm-140-disk-1,mp=/var/lib/slashslash\ntags: slashslash\n";
+    writeFileSync(conf, before);
+    const r = sh(["--uninstall", "140"], { ...ours, DRY_RUN: "0", FAKE_STOP_FAILS: "1" });
+    const left = readFileSync(conf, "utf8");
+    rmSync(conf);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("did not stop; nothing was changed");
+    expect(left).toBe(before);
+    expect(r.calls).toBe("pct stop 140\n");
   });
 
   test("refuses to keep a volume that snapshots still hold", () => {

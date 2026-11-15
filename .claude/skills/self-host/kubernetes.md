@@ -11,7 +11,8 @@ runs under the restricted Pod Security profile.
   class the person chose.
 - **`fsGroup: 1654`** (and `runAsUser`/`runAsGroup: 1654`, `runAsNonRoot: true`) so the volume is
   writable. If it is not, the container exits at once with one line naming the path.
-- **An `emptyDir` at `/run`** when the root filesystem is read-only.
+- **`emptyDir`s at `/run`, `/tmp` and `/home/app`** if the root filesystem is read-only (the
+  manifest below leaves it writable). Those and `/data` are the only places the container writes.
 - **The GitHub values in a Secret**, made from a file or stdin, never a literal on the command line:
   ```sh
   kubectl create secret generic slashslash-github -n slashslash --from-env-file=/dev/stdin

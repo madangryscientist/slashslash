@@ -11,7 +11,7 @@ ToggleSlash on 8080, everything on one volume at `/data`, as UID 1654, never roo
 parts a step names instead of guessing.
 
 The person owns the machine and the GitHub account. You run the commands they let you run; they make
-the GitHub OAuth app and sign in. Secrets reach the instance through stdin, a 0600 env file or the
+the GitHub OAuth app, sign in, and run any command that takes the client secret themselves. Secrets reach the instance through stdin, a 0600 env file or the
 platform's secret store, never a command line, a chat message or the repo.
 
 ## 1. Ask what they run

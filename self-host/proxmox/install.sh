@@ -306,6 +306,10 @@ do_uninstall() { # ctid purge
 
   step "remove container $CTID, keep its data"
   run pct stop "$CTID" || true
+  # The config is edited only on a stopped container, so a failed stop leaves everything as it was.
+  if [ "$DRY_RUN" != 1 ] && [[ "$(pct status "$CTID")" != *stopped* ]]; then
+    die "REFUSING: container $CTID did not stop; nothing was changed"
+  fi
   case "$vol" in
     "" | /*) ;; # No data mount, or a host directory, which destroying the container never touches.
     *)

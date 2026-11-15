@@ -28,18 +28,22 @@ DRY_RUN=1 CTID=<id> IP=<ip/prefix> GATEWAY=<gw> DATA_PATH=<dir> GITHUB_CLIENT_ID
   bash -c "$(curl -fsSL $url)"
 ```
 
-Check the `pct create` line names only the new id, the right storage and the right data mount. In a
-terminal on the host, the real run asks for anything missing itself: `bash -c "$(curl -fsSL $url)"`.
-Over ssh, send the GitHub values on stdin so no process list shows them:
+Check the `pct create` line names only the new id, the right storage and the right data mount.
+
+The real run takes the GitHub secret, which only the person holds, so **the person runs it, in their
+own terminal**. On the host, the script asks for anything missing itself: `bash -c "$(curl -fsSL
+$url)"`. From another machine over ssh, they read the values without echoing them and send them on
+stdin, so no process list shows them:
 
 ```sh
+read -r CLIENT_ID; read -rs CLIENT_SECRET
 printf '%s\n%s\n' "$CLIENT_ID" "$CLIENT_SECRET" | ssh root@<host> '
   read -r GITHUB_CLIENT_ID; read -r GITHUB_CLIENT_SECRET; export GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET
   export CTID=<id> IP=<ip/prefix> GATEWAY=<gw> DATA_PATH=<dir> VERSION=<version>
   bash -c "$(curl -fsSL '"$url"')" </dev/null'
 ```
 
-Done when it ends with `healthy`, a `slashslash version` line and both URLs. Then diff the saved
+Done when they report it ended with `healthy`, a `slashslash version` line and both URLs. Then diff the saved
 configs: the new container's section is the only change, and `storage.cfg` is identical.
 
 ## For the checks
