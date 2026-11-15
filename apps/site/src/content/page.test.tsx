@@ -7,6 +7,7 @@ import { ToggleSlashAccess } from "#/components/tools";
 import { FLOW } from "#/content/flow";
 import { ADDS, COSTS, HERO, MISSING, STANDS, TODAY, VIEW } from "#/content/landing";
 import { PRODUCTS } from "#/content/products";
+import { STAGES } from "#/content/stages";
 import {
   CONTACT_LINE,
   DEVELOPERS_TITLE,
@@ -90,7 +91,13 @@ describe("the landing page carries the agreed copy, in order", () => {
     expect(html).toContain(STANDS.text);
     expect(html).toContain(STANDS.hosted);
     for (const chip of STANDS.chips) {
-      expect(html).toMatch(new RegExp(`data-chip-for="${chip.tool}"[^>]*>${chip.status}<`));
+      const { stage } = PRODUCTS.find((p) => p.name === chip.tool)!;
+      const label = STAGES[stage].label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const sentence = STAGES[stage].sentence.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      expect(html).toMatch(new RegExp(`data-chip-for="${chip.tool}"[^>]*>${label}<`));
+      expect(html).toMatch(new RegExp(`<li[^>]*><span class="chip-tool">${chip.tool}</span>`));
+      // The sentence sits in the same list item as the chip's pill.
+      expect(html).toMatch(new RegExp(`<li[^>]*>(?:(?!</li>)[\\s\\S])*data-chip-for="${chip.tool}"(?:(?!</li>)[\\s\\S])*${sentence}</span></li>`));
     }
     expect(html).toMatch(new RegExp(`<a [^>]*href="/developers"[^>]*>${STANDS.developers}</a>`));
   });
@@ -230,15 +237,15 @@ describe("real and imagined stay apart", () => {
     expect(env).toContain("FS_TIMEOUT");
   });
 
-  test("a tool's label in the walkthrough is the label in the product data", () => {
+  test("a tool's stage in the walkthrough is the stage in the product data", () => {
     for (const fit of FLOW.flatMap((step) => step.fits)) {
       const product = PRODUCTS.find((p) => p.name === fit.tool);
-      expect(fit.status).toBe(product?.status);
+      expect(fit.stage).toBe(product?.stage);
     }
   });
 
   test("a planned tool never shows real output", () => {
-    const planned = FLOW.flatMap((step) => step.fits).filter((fit) => fit.status === "Planned");
+    const planned = FLOW.flatMap((step) => step.fits).filter((fit) => fit.stage === "planned");
     expect(planned.map((fit) => fit.output?.kind).filter((kind) => kind === "real")).toEqual([]);
   });
 });

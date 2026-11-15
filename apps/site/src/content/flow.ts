@@ -1,5 +1,6 @@
 /** One feature's trip from ticket to cleanup, and where each tool would plug in. Plain data. */
-import type { Product, ProductStatus } from "#/content/products";
+import type { Product } from "#/content/products";
+import type { StageId } from "#/content/stages";
 
 /**
  * What the reader sees back from a tool at this stop. `real` was captured by running the tool for this
@@ -14,7 +15,8 @@ export type Output = {
 
 type Fit = {
   tool: Product["name"];
-  status: ProductStatus;
+  /** The stage of the tool this fit is for, from the shared `STAGES` table. */
+  stage: StageId;
   text: string;
   output?: Output;
 };
@@ -26,10 +28,6 @@ type FlowStep = {
   story: string;
   fits: readonly Fit[];
 };
-
-const PLANNED: ProductStatus = "Planned";
-const EARLY: ProductStatus = "In early development";
-const AVAILABLE: ProductStatus = "Available now";
 
 const CHECKOUT = "run from a checkout on a test project";
 
@@ -43,7 +41,7 @@ export const FLOW: readonly FlowStep[] = [
     fits: [
       {
         tool: "ToggleSlash",
-        status: EARLY,
+        stage: "alpha",
         text: "The flag starts off everywhere, and the audit trail begins before any code exists.",
         output: {
           kind: "real",
@@ -68,7 +66,7 @@ export const FLOW: readonly FlowStep[] = [
     fits: [
       {
         tool: "ToggleSlash",
-        status: EARLY,
+        stage: "alpha",
         text: "The app reads the flag with the TypeScript SDK.",
         output: {
           kind: "real",
@@ -82,7 +80,7 @@ export const FLOW: readonly FlowStep[] = [
       },
       {
         tool: "PixelSlash",
-        status: AVAILABLE,
+        stage: "alpha",
         text: "Comparing Main and Branch shows a change elsewhere on the page before others see it.",
         output: {
           kind: "real",
@@ -106,7 +104,7 @@ export const FLOW: readonly FlowStep[] = [
     fits: [
       {
         tool: "PixelSlash",
-        status: AVAILABLE,
+        stage: "alpha",
         text: "With a review server you run and a GitHub App, a pull request check stays pending until a person accepts or rejects the change. The build waits only if CI waits for that verdict.",
         output: {
           kind: "quoted",
@@ -129,7 +127,7 @@ export const FLOW: readonly FlowStep[] = [
     fits: [
       {
         tool: "PixelSlash",
-        status: AVAILABLE,
+        stage: "alpha",
         text: "A comparison alone exits 0 however many pixels changed, so the guide adds a script to fail the job.",
         output: {
           kind: "quoted",
@@ -145,12 +143,12 @@ export const FLOW: readonly FlowStep[] = [
       },
       {
         tool: "BundleSlash",
-        status: PLANNED,
+        stage: "planned",
         text: "It would report how much the flagged code added to the bundle.",
       },
       {
         tool: "FlakeSlash",
-        status: EARLY,
+        stage: "alpha",
         text: "It would report whether a failure happens only with the flag on.",
       },
     ],
@@ -163,7 +161,7 @@ export const FLOW: readonly FlowStep[] = [
     fits: [
       {
         tool: "PixelSlash",
-        status: AVAILABLE,
+        stage: "alpha",
         text: "The report shows Main, Branch and the Diff side by side. The review server lets a reviewer accept the change or reject it with a reason.",
         output: {
           kind: "real",
@@ -186,7 +184,7 @@ export const FLOW: readonly FlowStep[] = [
     fits: [
       {
         tool: "ToggleSlash",
-        status: EARLY,
+        stage: "alpha",
         text: "The flag can be switched from the dashboard or the command line. Each change enters the audit trail, and daily counts show how often each variation is served, never who received it.",
         output: {
           kind: "real",
@@ -211,7 +209,7 @@ export const FLOW: readonly FlowStep[] = [
     fits: [
       {
         tool: "ToggleSlash",
-        status: EARLY,
+        stage: "alpha",
         text: "A person can use the audit trail and counts to decide whether to remove the flag. The tool does not recommend removal yet.",
         output: {
           kind: "real",

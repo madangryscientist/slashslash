@@ -1,10 +1,11 @@
 /** The four tools, each with the label that is shown next to its name. Plain data, so a test can check it. */
 
-export type ProductStatus = "Available now" | "In early development" | "Planned";
+import type { StageId } from "#/content/stages";
 
 export type Product = {
   name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash";
-  status: ProductStatus;
+  /** The release stage, from the shared `STAGES` table. */
+  stage: StageId;
   /** The one question it answers about a CI run. */
   question: string;
   /** What is true today, in plain words. */
@@ -16,7 +17,7 @@ export type Product = {
 export const PRODUCTS: readonly Product[] = [
   {
     name: "PixelSlash",
-    status: "Available now",
+    stage: "alpha",
     question: "Does the page look different?",
     summary: [
       "It compares screenshots from before and after a change and points out what really changed.",
@@ -25,7 +26,7 @@ export const PRODUCTS: readonly Product[] = [
   },
   {
     name: "ToggleSlash",
-    status: "In early development",
+    stage: "alpha",
     question: "Which features are switched on, and for whom?",
     summary: [
       "It keeps track of feature switches, so you know what turning one on will do.",
@@ -35,7 +36,7 @@ export const PRODUCTS: readonly Product[] = [
   },
   {
     name: "FlakeSlash",
-    status: "In early development",
+    stage: "alpha",
     question: "Can the test results be trusted?",
     summary: [
       "It spots automated checks that pass and fail at random, so a failure means something.",
@@ -45,7 +46,7 @@ export const PRODUCTS: readonly Product[] = [
   },
   {
     name: "BundleSlash",
-    status: "Planned",
+    stage: "planned",
     question: "Did the app get heavier to load?",
     summary: [
       "It measures how much code customers have to download after a change.",
@@ -53,11 +54,3 @@ export const PRODUCTS: readonly Product[] = [
     ],
   },
 ];
-
-type StatusTone = "emerald" | "amber" | "slate";
-
-export const STATUS_TONE: Record<ProductStatus, StatusTone> = {
-  "Available now": "emerald",
-  "In early development": "amber",
-  "Planned": "slate",
-};

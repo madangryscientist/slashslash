@@ -98,22 +98,17 @@ export const ADDS = {
 
 export const STANDS = {
   title: "Where it stands",
-  text: "PixelSlash works today. It takes a picture of every changed page before and after, marks what moved, and already runs inside a team's existing automated checks. Showing its report directly on the change, where it is approved, comes next. ToggleSlash and FlakeSlash are in early development. BundleSlash is planned.",
+  text: "PixelSlash works today. It takes a picture of every changed page before and after, marks what moved, and already runs inside a team's existing automated checks. Showing its report directly on the change, where it is approved, comes next. All three are in alpha: PixelSlash is furthest along, and ToggleSlash and FlakeSlash are earlier. BundleSlash is planned.",
   hosted: "A hosted version, run for you, is planned. Pricing will follow once running costs are known.",
   developers: "Developers: how it works and how to try it.",
-  /** The four chips' words, from the visuals brief. Their colour comes from each product's status. */
-  chips: [
-    { tool: "PixelSlash", status: "Works today" },
-    { tool: "ToggleSlash", status: "Early development" },
-    { tool: "FlakeSlash", status: "Early development" },
-    { tool: "BundleSlash", status: "Planned" },
-  ],
+  /** The four chips, one per tool. Each shows its product's stage label, tone and sentence. */
+  chips: [{ tool: "PixelSlash" }, { tool: "ToggleSlash" }, { tool: "FlakeSlash" }, { tool: "BundleSlash" }],
   reportAlt:
     "The real PixelSlash report for a checkout change: the page before, the page after with a tax line added and the pay button turned from blue to green, and the changed area marked.",
   reportOpen: "Open the report full screen",
   reportClose: "Close",
 } as const satisfies {
-  chips: readonly { tool: Product["name"]; status: string }[];
+  chips: readonly { tool: Product["name"] }[];
 } & Record<string, unknown>;
 
 export const VIEW = {

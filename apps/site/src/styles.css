@@ -722,7 +722,7 @@ pre,
   padding-block: 2rem;
   border-bottom: 1.5px solid var(--line);
 }
-.tool[data-status="Planned"] {
+.tool[data-status="planned"] {
   border-bottom-style: dashed;
 }
 .tool-head {
@@ -737,6 +737,12 @@ pre,
   font-size: clamp(1.875rem, 4vw, 2.75rem);
   font-weight: 800;
   line-height: 1;
+}
+.tool-stage {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
 }
 .tool-q {
   flex-basis: 100%;
@@ -1635,6 +1641,12 @@ pre,
 }
 .chip-tool {
   font-weight: 800;
+}
+.chip-stage {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
 }
 .stands {
   display: grid;
