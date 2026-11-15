@@ -7,7 +7,8 @@ name: Self-host image
 # The image the smoke passed is then pushed to ghcr.io/madangryscientist/slashslash, from the same
 # job, so what is published is exactly what was tested. A pull request pushes nothing. A push to
 # main pushes `:edge` and `:<VERSION>-edge.<sha7>`. A tag `self-host-vX.Y.Z` (X.Y.Z must be
-# self-host/VERSION, checked before anything is built) pushes `:X.Y.Z` and `:latest`.
+# self-host/VERSION, checked before anything is built) pushes `:X.Y.Z` and `:latest`, and then the
+# Helm chart in self-host/chart to oci://ghcr.io/madangryscientist/charts. Main pushes no chart.
 on:
   pull_request:
     paths:
@@ -65,6 +66,9 @@ jobs:
             echo "version=$v-dev" >> "$GITHUB_OUTPUT"
           fi
       - run: bun install --frozen-lockfile
+      # Before the image build: helm lint, both renders, kubeconform, the restricted pod standard,
+      # the committed render and Chart.yaml's version. No cluster.
+      - run: bunx moon run self-host:chart
       # Restored here and saved straight after the build, so a red smoke still keeps a fresh product.
       - id: pixelslash
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -118,3 +122,9 @@ jobs:
             docker tag slashslash:smoke "ghcr.io/madangryscientist/slashslash:$t"
             docker push "ghcr.io/madangryscientist/slashslash:$t"
           done
+      # Only on a release tag, after the tested image is pushed.
+      - name: Push the Helm chart
+        if: github.ref_type == 'tag'
+        run: bun self-host/chart.ts publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

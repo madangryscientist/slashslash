@@ -1,0 +1,2 @@
+# The rendered manifest is for kubectl-only installs, not part of the chart package.
+slashslash.yaml

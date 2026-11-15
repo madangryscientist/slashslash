@@ -1,103 +1,56 @@
 # Kubernetes
 
-Untested on a cluster so far; tell the person so, and run every check in SKILL.md step 5. The image
-runs under the restricted Pod Security profile.
+Untested on a live cluster so far; tell the person so, and run every check in SKILL.md step 5. The
+source is the Helm chart in [`self-host/chart`](../../self-host/chart/README.md): its README has
+every value, how it runs and its limits. It is checked with `helm lint`, `helm template`,
+`kubeconform` and against the restricted Pod Security Standard, never on a real cluster.
 
-## What the pod needs
+## What it gives
 
-- **One replica, `Recreate`.** Both tools keep SQLite on the volume, so two pods on one volume
-  corrupt it. A rolling update would start the second before the first stops.
-- **A volume at `/data`**: a `ReadWriteOnce` PersistentVolumeClaim, 8 GiB to start, on the storage
-  class the person chose.
-- **`fsGroup: 1654`** (and `runAsUser`/`runAsGroup: 1654`, `runAsNonRoot: true`) so the volume is
-  writable. If it is not, the container exits at once with one line naming the path.
-- **`emptyDir`s at `/run`, `/tmp` and `/home/app`** if the root filesystem is read-only (the
-  manifest below leaves it writable). Those and `/data` are the only places the container writes.
-- **The GitHub values in a Secret**, made from a file or stdin, never a literal on the command line:
-  ```sh
-  kubectl create secret generic slashslash-github -n slashslash --from-env-file=/dev/stdin
-  # then paste GITHUB_CLIENT_ID=<id> and GITHUB_CLIENT_SECRET=<secret> on two lines, then Ctrl-D
-  ```
-- **Probes**: Kubernetes ignores the image's Docker health check, so give it one. The first start
-  can take two minutes.
+One pod (a StatefulSet of one, so two pods never share the SQLite files), a volume claim
+`data-slashslash-0` at `/data` (8 GiB, the default storage class unless the person picks one; both
+are fixed at install), a ClusterIP Service with PixelSlash on 3000 and ToggleSlash on 8080, and
+optionally an Ingress for `pixelslash.<host>` and `toggleslash.<host>`. The pod runs under the
+restricted profile with a read-only root filesystem.
 
-## Manifest
+## Install
 
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata: { name: slashslash-data, namespace: slashslash }
-spec:
-  accessModes: [ReadWriteOnce]
-  resources: { requests: { storage: 8Gi } }
----
-apiVersion: apps/v1
-kind: Deployment
-metadata: { name: slashslash, namespace: slashslash }
-spec:
-  replicas: 1
-  strategy: { type: Recreate }
-  selector: { matchLabels: { app: slashslash } }
-  template:
-    metadata: { labels: { app: slashslash } }
-    spec:
-      securityContext:
-        runAsUser: 1654
-        runAsGroup: 1654
-        fsGroup: 1654
-        runAsNonRoot: true
-        seccompProfile: { type: RuntimeDefault }
-      containers:
-        - name: slashslash
-          image: ghcr.io/madangryscientist/slashslash:<version>
-          envFrom: [{ secretRef: { name: slashslash-github } }]
-          ports:
-            - { name: pixelslash, containerPort: 3000 }
-            - { name: toggleslash, containerPort: 8080 }
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities: { drop: [ALL] }
-          startupProbe:
-            httpGet: { path: /health, port: 8080 }
-            periodSeconds: 5
-            failureThreshold: 48
-          readinessProbe:
-            httpGet: { path: /, port: 3000 }
-          livenessProbe:
-            httpGet: { path: /health, port: 8080 }
-            periodSeconds: 30
-          volumeMounts:
-            - { name: data, mountPath: /data }
-            - { name: run, mountPath: /run }
-      volumes:
-        - { name: data, persistentVolumeClaim: { claimName: slashslash-data } }
-        - { name: run, emptyDir: {} }
----
-apiVersion: v1
-kind: Service
-metadata: { name: slashslash, namespace: slashslash }
-spec:
-  selector: { app: slashslash }
-  ports:
-    - { name: pixelslash, port: 3000, targetPort: 3000 }
-    - { name: toggleslash, port: 8080, targetPort: 8080 }
+The GitHub values go in a Secret made from stdin, never a literal on the command line:
+
+```sh
+kubectl create namespace slashslash
+kubectl create secret generic slashslash-github -n slashslash --from-env-file=/dev/stdin
+# then paste GITHUB_CLIENT_ID=<id> and GITHUB_CLIENT_SECRET=<secret> on two lines, then Ctrl-D
 ```
 
-`kubectl create namespace slashslash`, the Secret, then `kubectl apply -f` the manifest. For access
-from outside, an Ingress (HTTPS) or a `LoadBalancer`/`NodePort` Service, whichever the cluster has;
-with an Ingress, remember SKILL.md step 3's second callback.
+Then one of:
 
-Done when `kubectl rollout status deploy/slashslash -n slashslash` finishes and the pod is Ready.
+```sh
+# with Helm
+helm install slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash \
+  --set existingSecret=slashslash-github
+# without Helm: the chart rendered with its defaults
+kubectl apply -f https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/chart/slashslash.yaml
+```
+
+For access from outside: `kubectl port-forward -n slashslash svc/slashslash 3000:3000 8080:8080`,
+`--set service.type=LoadBalancer` (or `NodePort`), or the chart's Ingress (`--set ingress.enabled=true
+--set ingress.host=<domain>`). GitHub sign-in over HTTPS needs a PixelSlash fix first (see the
+chart README), so use plain HTTP or the port-forward until then.
+
+Done when `kubectl rollout status statefulset/slashslash -n slashslash` finishes and `slashslash-0`
+is Ready. The first start can take two minutes.
 
 ## For the checks
 
-- Inside the container: `kubectl exec -n slashslash deploy/slashslash -- slashslash <command>`.
-- Restart: `kubectl rollout restart deploy/slashslash -n slashslash`, then wait for Ready.
+- Inside the container: `kubectl exec -n slashslash slashslash-0 -- slashslash <command>`.
+- Restart: `kubectl rollout restart statefulset/slashslash -n slashslash`, then wait for Ready.
 
 ## Upgrade and remove
 
-- Upgrade: change the image tag and apply; `Recreate` stops the old pod first, and the new version
-  writes its upgrade backup before the tools start.
-- Remove: `kubectl delete deploy,svc slashslash -n slashslash` keeps the PVC; deleting the PVC
-  deletes the data (depending on the class's reclaim policy). Take a `slashslash backup` and
-  `kubectl cp` it out first.
+- Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash
+  --reuse-values --version <new>` (or apply the newer rendered file). The old pod stops first, and the
+  new version writes its upgrade backup before the tools start.
+- Remove: `helm uninstall slashslash -n slashslash` (or `kubectl delete -f` the rendered file) keeps
+  the claim; deleting `data-slashslash-0` deletes the data (depending on the class's reclaim
+  policy). Take a `slashslash backup` and `kubectl cp` it out first.

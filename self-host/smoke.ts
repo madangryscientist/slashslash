@@ -11,6 +11,8 @@
  * - every log line carries its service's name and none carries the token;
  * - the container writes nowhere outside /run, /tmp, /home/app and /data;
  * - a /data that UID 1654 cannot write stops the container with one line naming the path and UID;
+ * - it starts and turns healthy on a fresh volume with a read-only root filesystem and empty
+ *   writable folders at /run, /tmp and /home/app, as the Helm chart (chart/) runs it;
  * - `slashslash version` and the version label are the version it was built with, and every
  *   licence the image owes is under /usr/share/licenses/slashslash;
  * - `slashslash backup` and `restore` bring back a wiped volume (the ToggleSlash project and token,
@@ -207,6 +209,23 @@ async function readOnlyDataStops(): Promise<void> {
   }
 }
 
+/** The way the Helm chart runs it: read-only root, and an empty folder at each other writable path. */
+async function readOnlyRootRuns(): Promise<void> {
+  const name = `${NAME}-rootro`;
+  const empty = ["/run", "/tmp", "/home/app"].flatMap((path) => ["--tmpfs", `${path}:exec`]);
+  try {
+    docker(["run", "-d", "--name", name, ...LIMITS, "--read-only", ...empty, ...DUMMY_GITHUB, "-v", `${name}:/data`, IMAGE]);
+    const status = () => docker(["inspect", "-f", "{{.State.Health.Status}}", name], true);
+    const until = Date.now() + 180_000;
+    while (status() !== "healthy" && docker(["inspect", "-f", "{{.State.Running}}", name]) === "true" && Date.now() < until)
+      await Bun.sleep(1000);
+    check(status() === "healthy", "healthy on a fresh volume with a read-only root filesystem", docker(["logs", "--tail", "40", name], true));
+  } finally {
+    docker(["rm", "-f", name], true);
+    docker(["volume", "rm", name], true);
+  }
+}
+
 async function main(): Promise<void> {
   if (!process.env["SMOKE_IMAGE"]) build(IMAGE, VERSION);
 
@@ -272,6 +291,7 @@ async function main(): Promise<void> {
   console.log(`measured: memory after the run ${docker(["stats", "--no-stream", "--format", "{{.MemUsage}}", NAME])}`);
 
   await readOnlyDataStops();
+  await readOnlyRootRuns();
   console.log("smoke: all checks passed");
 }
 

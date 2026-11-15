@@ -3,7 +3,9 @@ $schema: "../.moon/cache/schemas/project.json"
 # The one self-host image. The smoke test builds the image and runs it under Docker: minutes of
 # work, so it is never cached and the gate does not run it (self-host.yml does). The test task is the
 # Proxmox install script's dry runs and ShellCheck, which build nothing, so the gate's `:test` runs
-# it. There is no build, lint or typecheck task here.
+# it. The chart task checks the Helm chart in chart/ (lint, renders, kubeconform, the restricted
+# pod standard, the committed render): it downloads helm and kubeconform, so the gate does not run it
+# either (self-host.yml does). There is no build, lint or typecheck task here.
 tasks:
   smoke:
     command: "bun smoke.ts"
@@ -13,3 +15,10 @@ tasks:
     command: "bun test proxmox"
     inputs:
       - "proxmox/**"
+  chart:
+    command: "bun chart.ts"
+    inputs:
+      - "chart/**"
+      - "chart.ts"
+      - "build.ts"
+      - "VERSION"

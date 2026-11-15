@@ -1,0 +1,109 @@
+{{- $fullname := include "slashslash.fullname" . }}
+# One pod, always: both tools keep SQLite on the volume, and one SQLite file takes one writer. With
+# one replica a StatefulSet's rolling update deletes the old pod before it makes the new one, so two
+# pods never share the volume.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "slashslash.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: {{ $fullname }}
+  selector:
+    matchLabels:
+      {{- include "slashslash.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "slashslash.labels" . | nindent 8 }}
+      {{- if not .Values.existingSecret }}
+      annotations:
+        # A changed GitHub value restarts the pod, which reads its environment only at start.
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      {{- end }}
+    spec:
+      # The image takes its own settings from the environment (SLASHSLASH_PORT among them), so
+      # Kubernetes must not add a variable for every Service in the namespace.
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: slashslash
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ include "slashslash.secretName" . }}
+          ports:
+            - name: pixelslash
+              containerPort: 3000
+            - name: toggleslash
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          # The first start migrates PixelSlash's database before it listens.
+          startupProbe:
+            httpGet:
+              path: /
+              port: pixelslash
+            periodSeconds: 5
+            failureThreshold: 36
+          # The image's own check asks both tools through its front door.
+          readinessProbe:
+            exec:
+              command: [/usr/local/bin/healthcheck]
+            periodSeconds: 10
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command: [/usr/local/bin/healthcheck]
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # The only places the container writes.
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: run
+              mountPath: /run
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/app
+      volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: home
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "slashslash.selectorLabels" . | nindent 10 }}
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- with .Values.persistence.storageClassName }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
