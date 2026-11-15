@@ -1,4 +1,4 @@
-"""SS-18 logo drafts: three directions for the Slash suite mark and its four tool marks.
+"""Logo drafts: three directions for the Slash suite mark and its four tool marks.
 
 Run from the repo root:
   uvx --with brotli==1.2.1 --with uharfbuzz==0.57.0 --from fonttools==4.68.0 python design/logos/src/gen.py
@@ -78,7 +78,7 @@ def style_fixed(accent, theme):
 
 
 # ================================================================ Direction A: the cut slash
-# The suite mark as it was before SS-21 (the old public/favicon.svg, since removed): a slash, then a second slash with a piece cut out of it.
+# The suite mark as it was before direction C (the old public/favicon.svg, since removed): a slash, then a second slash with a piece cut out of it.
 # Each tool keeps the first slash and redraws the second one in its own way and colour.
 def sx(x0, y):
     """x of a slash's left edge at height y; the slash leans 30 across over 84 up, as today's mark."""
@@ -125,7 +125,7 @@ def a_word(tool, h=64):
 
 
 # ================================================================ Direction B: pixel
-# PixelSlash's own pixel art (PS-287) becomes the suite's: Hack Cove letterforms on a 16-row grid.
+# PixelSlash's own pixel art becomes the suite's: Hack Cove letterforms on a 16-row grid.
 # P, I, X, E, L, S, A, H are lifted verbatim from apps/site/src/pixelslash/components/logo.tsx;
 # the rest are drawn here to the same rules (3-pixel stems, chamfered corners, tapered ends).
 GLYPHS = {
@@ -137,7 +137,7 @@ GLYPHS = {
     "S": "..####### .######## ###...### ###...##. ###...#.. ###...... ###...... ########. .######## ......### ......### ..#...### .##...### ###...### ########. #######..",
     "A": "...###### ..####### .###...## .###...## .###...## .###...## .###...## ######### ######### .###...## .###...## .###...## .###...## .###...## .###...## .###...#.",
     "H": "...#...#... ..##...##.. .###...###. .###...###. .###...###. .###...###. .###...###. ########### ##########. .###...###. .###...###. .###...###. .###...###. .###...###. .###...##.. .###...#...",
-    # drawn for SS-18
+    # drawn for the logo drafts
     "F": "..####### .######## ###...### ###...##. ###...#.. ###...... ###...... ########. #######.. ###...... ###...... ###...... ###...... ###...... ##....... #........",
     "K": "..#...### .##...### ###..###. ###..###. ###.###.. ###.###.. ######... #####.... #####.... ######... ###.###.. ###.###.. ###..###. ###..###. ###...### ###...###",
     "T": "######### ######### ...###... ...###... ...###... ...###... ...###... ...###... ...###... ...###... ...###... ...###... ...###... ...###... ...##.... ...#.....",
