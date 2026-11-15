@@ -20,6 +20,9 @@
  *   next start write exactly one upgrade backup that restores, a backup from a newer version is
  *   refused with nothing touched, and only the last five manual backups are kept.
  *
+ * With SMOKE_UPGRADE_FROM set to a released image (CI sets the `:latest` one), it first checks
+ * that the image under test upgrades an install that image made: see upgradeFrom.
+ *
  * The GitHub values are dummies, as PixelSlash's own e2e build uses: never a real secret. It also
  * prints the container's memory. Set SMOKE_IMAGE to test an image that is
  * already built instead of building one, and SMOKE_VERSION to the version it was built with (default
@@ -51,17 +54,17 @@ function check(ok: boolean, what: string, detail = ""): void {
   console.log(`ok: ${what}`);
 }
 
-async function waitFor(what: string, test: () => boolean | Promise<boolean>, seconds: number): Promise<void> {
+async function waitFor(what: string, test: () => boolean | Promise<boolean>, seconds: number, name = NAME): Promise<void> {
   const until = Date.now() + seconds * 1000;
   while (Date.now() < until) {
     if (await test()) return;
     await Bun.sleep(1000);
   }
-  throw new Error(`FAILED: ${what} within ${seconds} s\n${docker(["logs", "--tail", "40", NAME], true)}`);
+  throw new Error(`FAILED: ${what} within ${seconds} s\n${docker(["logs", "--tail", "40", name], true)}`);
 }
 
-const health = () => docker(["inspect", "-f", "{{.State.Health.Status}}", NAME], true);
-const hostPort = (port: number) => docker(["port", NAME, `${port}/tcp`]).split("\n")[0]!.replace("0.0.0.0", "127.0.0.1");
+const health = (name = NAME) => docker(["inspect", "-f", "{{.State.Health.Status}}", name], true);
+const hostPort = (port: number, name = NAME) => docker(["port", name, `${port}/tcp`]).split("\n")[0]!.replace("0.0.0.0", "127.0.0.1");
 
 /** The pid of the first process whose command line contains `needle`. */
 function pidOf(needle: string): number | null {
@@ -71,10 +74,10 @@ function pidOf(needle: string): number | null {
   return line ? Number(line.trim().split(/\s+/)[0]) : null;
 }
 
-async function healthyOnFrontDoor(): Promise<boolean> {
+async function healthyOnFrontDoor(name = NAME): Promise<boolean> {
   try {
-    const ps = await fetch(`http://${hostPort(3000)}/`, { signal: AbortSignal.timeout(3000) });
-    const ts = await fetch(`http://${hostPort(8080)}/health`, { signal: AbortSignal.timeout(3000) });
+    const ps = await fetch(`http://${hostPort(3000, name)}/`, { signal: AbortSignal.timeout(3000) });
+    const ts = await fetch(`http://${hostPort(8080, name)}/health`, { signal: AbortSignal.timeout(3000) });
     return ps.status < 500 && ts.status === 200;
   } catch {
     return false;
@@ -114,9 +117,10 @@ function exec(command: string): { code: number; out: string } {
   return { code: result.exitCode ?? 1, out: (result.stdout.toString() + result.stderr.toString()).trim() };
 }
 
-const sh = (command: string) => docker(["exec", NAME, "sh", "-c", command]);
-const secretHashes = () => sh("cd /data/pixelslash/secrets && sha256sum * | sort");
-const backups = (prefix: string) => sh(`ls /data/backups | grep '^${prefix}-' || true`).split("\n").filter(Boolean);
+const sh = (command: string, name = NAME) => docker(["exec", name, "sh", "-c", command]);
+const secretHashes = (name = NAME) => sh("cd /data/pixelslash/secrets && sha256sum * | sort", name);
+const backups = (prefix: string, name = NAME) =>
+  sh(`ls /data/backups | grep '^${prefix}-' || true`, name).split("\n").filter(Boolean);
 
 async function projectAndTokenAreThere(token: string, what: string): Promise<void> {
   await waitFor(`healthy after ${what}`, async () => health() === "healthy" && (await healthyOnFrontDoor()), 180);
@@ -231,8 +235,64 @@ async function readOnlyRootRuns(): Promise<void> {
   }
 }
 
+/**
+ * An install the released image made, started again on the image under test: the released image
+ * runs on a fresh volume, makes a ToggleSlash project, and is stopped; the new image then starts on
+ * that volume and must keep the project, the token and PixelSlash's secrets, and write exactly one
+ * upgrade backup (none when the two versions are the same, as on a re-run of a release tag).
+ */
+async function upgradeFrom(released: string): Promise<void> {
+  const name = `${NAME}-upgrade`;
+  const volume = `${name}-data`;
+  const start = (image: string) =>
+    docker(["run", "-d", "--name", name, ...LIMITS, ...DUMMY_GITHUB, "-p", "127.0.0.1::3000", "-p", "127.0.0.1::8080",
+      "-v", `${volume}:/data`, image]);
+  const healthy = (what: string) =>
+    waitFor(what, async () => health(name) === "healthy" && (await healthyOnFrontDoor(name)), 180, name);
+  const project = async (token: string) =>
+    (await fetch(`http://${hostPort(8080, name)}/api/v1/projects/upgrade`, { headers: { authorization: `Bearer ${token}` } })).status;
+  try {
+    docker(["pull", released]);
+    start(released);
+    await healthy(`${released} healthy on a fresh volume`);
+    const from = docker(["exec", name, "slashslash", "version"]);
+    const token = docker(["exec", name, "slashslash", "secret", "toggleslash-admin-token"]);
+    const created = await fetch(`http://${hostPort(8080, name)}/api/v1/projects`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      body: JSON.stringify({ key: "upgrade", name: "Upgrade" }),
+    });
+    check(created.status === 201, `${released} (${from}) makes a ToggleSlash project (${created.status})`);
+    const hashes = secretHashes(name);
+    check(hashes.split("\n").length >= 2, `${released} generated PixelSlash's secret files`, hashes);
+    docker(["stop", "--time", "60", name]);
+    docker(["rm", name]);
+
+    start(IMAGE);
+    await healthy(`the image under test healthy on the volume ${from} wrote`);
+    console.log(`ok: upgrade from ${from}: healthy on the old volume`);
+    const reported = docker(["exec", name, "slashslash", "version"]);
+    check(reported === VERSION, `upgrade from ${from}: slashslash version is ${VERSION} (${reported})`);
+    const upgrades = backups("upgrade", name);
+    if (from === VERSION)
+      check(upgrades.length === 0, `upgrade from ${from}: the same version, so no upgrade backup (${upgrades.join(" ")})`);
+    else
+      check(upgrades.length === 1 && upgrades[0]!.endsWith(`-${from}.tgz`),
+        `upgrade from ${from}: exactly one upgrade backup (${upgrades.join(" ")})`);
+    const status = await project(token);
+    check(status === 200, `upgrade from ${from}: the ToggleSlash project is there (${status})`);
+    check(docker(["exec", name, "slashslash", "secret", "toggleslash-admin-token"]) === token, `upgrade from ${from}: the token is the same`);
+    check(secretHashes(name) === hashes, `upgrade from ${from}: PixelSlash's secret files hash the same`);
+  } finally {
+    docker(["rm", "-f", name], true);
+    docker(["volume", "rm", volume], true);
+  }
+}
+
 async function main(): Promise<void> {
   if (!process.env["SMOKE_IMAGE"]) build(IMAGE, VERSION);
+  const released = process.env["SMOKE_UPGRADE_FROM"];
+  if (released) await upgradeFrom(released);
 
   docker(["run", "-d", "--name", NAME, ...LIMITS, ...DUMMY_GITHUB, "-p", "127.0.0.1::3000", "-p", "127.0.0.1::8080",
     "-v", `${VOLUME}:/data`, IMAGE]);

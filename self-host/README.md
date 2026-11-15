@@ -255,8 +255,26 @@ read-only root filesystem (as the Helm chart runs it), and that the image report
 version it was built with and holds every licence. It also backs up, wipes and restores the
 volume, makes a start on an older recorded version write one upgrade backup and restores it, has a
 backup from a newer version refused with nothing touched, and checks that five manual backups are
-kept. CI runs it on every change here
-(`.github/workflows/self-host.yml`), and only the image that passed it is pushed to ghcr.
+kept. With `SMOKE_UPGRADE_FROM=<image>` it first runs that image on a fresh volume, makes a
+ToggleSlash project and stops it, then starts the image under test on the same volume and checks
+that it is healthy, reports its own version, wrote exactly one upgrade backup (none when the two
+versions are the same) and kept the project, the token and PixelSlash's secrets. Unset, that stage
+is skipped, so a local run needs no network. CI runs the smoke on every change here
+(`.github/workflows/self-host.yml`), always with `SMOKE_UPGRADE_FROM` set to the released
+`:latest`, and only the image that passed it is pushed to ghcr.
+
+## Move a product to a newer commit
+
+```sh
+bun self-host/bump.ts pixelslash          # to PixelSlash main
+bun self-host/bump.ts toggleslash <sha>   # to one full 40-character commit
+```
+
+It checks that GitHub serves the commit for that product's repo (a commit not on `main` is allowed,
+with a warning), writes `pins/<product>.sha` and prints the old and new sha and the compare URL. It
+does not commit or push. Open a pull request with the pin change and that output, merge it once
+the `smoke` check is green (that run also starts an install on the released image and upgrades it
+to the new one), then tag a release (below) when you want it published as `:latest`.
 
 ## Releasing
 
