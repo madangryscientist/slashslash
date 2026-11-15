@@ -6,7 +6,11 @@ cd /app
 unset ASPNETCORE_HTTP_PORTS
 export TOGGLESLASH_DB_PATH=/data/toggleslash/toggleslash.db ASPNETCORE_URLS=http://127.0.0.1:8180 TOGGLESLASH_TRUSTED_PROXIES=127.0.0.1
 if [ -z "${TOGGLESLASH_ADMIN_TOKEN:-}" ]; then
-  TOGGLESLASH_ADMIN_TOKEN="$(cat /data/secrets/toggleslash-admin-token)"
+  TOGGLESLASH_ADMIN_TOKEN="$(cat /data/secrets/toggleslash-admin-token 2>/dev/null)" || true
+  if [ -z "$TOGGLESLASH_ADMIN_TOKEN" ]; then
+    echo "no admin token: /data/secrets/toggleslash-admin-token is missing or empty"
+    exit 1
+  fi
   export TOGGLESLASH_ADMIN_TOKEN
 fi
 exec dotnet ToggleSlash.Server.dll

@@ -35,13 +35,14 @@ jobs:
         with:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
+      # Restored here and saved straight after the build, so a red smoke still keeps a fresh product.
       - id: pixelslash
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/product-images/pixelslash.tar.gz
           key: self-host-pixelslash-${{ hashFiles('self-host/pins/pixelslash.sha') }}
       - id: toggleslash
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/product-images/toggleslash.tar.gz
           key: self-host-toggleslash-${{ hashFiles('self-host/pins/toggleslash.sha') }}
@@ -49,13 +50,23 @@ jobs:
         run: for f in "$RUNNER_TEMP/product-images"/*.tar.gz; do [ -e "$f" ] && docker load -i "$f"; done; true
       - name: Build the image (and any product whose pin has no cached image)
         run: bun self-host/build.ts --tag slashslash:smoke
-      - name: Keep the product images for the next run
+      - name: Export the product images that were built
         if: steps.pixelslash.outputs.cache-hit != 'true' || steps.toggleslash.outputs.cache-hit != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/product-images"
           for p in pixelslash toggleslash; do
             [ -e "$RUNNER_TEMP/product-images/$p.tar.gz" ] || docker save "slashslash-product/$p:$(cat self-host/pins/$p.sha)" | gzip -1 > "$RUNNER_TEMP/product-images/$p.tar.gz"
           done
+      - if: steps.pixelslash.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/product-images/pixelslash.tar.gz
+          key: ${{ steps.pixelslash.outputs.cache-primary-key }}
+      - if: steps.toggleslash.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/product-images/toggleslash.tar.gz
+          key: ${{ steps.toggleslash.outputs.cache-primary-key }}
       - run: bunx moon run self-host:smoke
         env:
           SMOKE_IMAGE: slashslash:smoke

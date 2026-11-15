@@ -170,7 +170,10 @@ async function main(): Promise<void> {
 
   const status = docker(["exec", NAME, "slashslash", "status"]);
   console.log(status.replace(/^/gm, "  | "));
-  check(!/unhealthy|down/.test(status), "slashslash status shows every service up and healthy");
+  const statusOk =
+    ["pixelslash", "toggleslash", "caddy"].every((s) => new RegExp(`^${s} +up \\(pid \\d+`, "m").test(status)) &&
+    ["pixelslash", "toggleslash"].every((s) => new RegExp(`^${s} +healthy `, "m").test(status));
+  check(statusOk, "slashslash status shows every service up and both products healthy");
 
   const logs = docker(["logs", NAME]).split("\n").filter(Boolean);
   const unlabelled = logs.filter((l) => !/^\[(init-data|pixelslash|toggleslash|caddy)\] /.test(l));

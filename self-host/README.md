@@ -75,7 +75,8 @@ set `fsGroup: 1654`, and mount an `emptyDir` at `/run` if the root filesystem is
   pin here is separate from the site's `apps/site/pixelslash.sha`, which a bot moves hourly.
 - `Dockerfile` copies PixelSlash (`/opt/pixelslash` and Bun) and Caddy onto the ToggleSlash runtime
   image (aspnet 10 on Ubuntu 24.04), adds s6-overlay as the supervisor, and labels the image with
-  each pin (`build.slashslash.<product>.revision`). The licences are in `/usr/share/licenses/slashslash`.
+  each pin (`build.slashslash.<product>.revision`). The licences (the tools', Caddy's and s6-overlay's) are in
+  `/usr/share/licenses/slashslash`.
 - `rootfs/` holds the supervisor's services: `init-data` (makes the folders and the token, every
   start), `pixelslash`, `toggleslash` and `caddy`, each with a logger that puts the service's name
   in front of every line it writes (`[pixelslash] ...`). It also holds the `slashslash` command and

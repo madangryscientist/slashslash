@@ -17,13 +17,9 @@
 ARG PIXELSLASH_REVISION
 ARG TOGGLESLASH_REVISION
 
-FROM pixelslash AS pixelslash
-FROM toggleslash AS toggleslash
-FROM pixelslash-src AS pixelslash-src
-FROM toggleslash-src AS toggleslash-src
-
 # Caddy's binary without its file capability (cap_net_bind_service): it binds no low port here, and
-# nothing in the image may gain privilege. s6-overlay unpacked from its release tarballs, checked.
+# nothing in the image may gain privilege. s6-overlay unpacked from its release tarballs, checked,
+# and both licences fetched at the same versions.
 FROM caddy:2.11.9@sha256:4e2425f6009577e7c651010f16679c28f7d12df3e7b1914f941a7a3370746b3c AS tools
 ARG S6=3.2.1.0
 ADD --checksum=sha256:42e038a9a00fc0fef70bf0bc42f625a9c14f8ecdfe77d4ad93281edf717e10c5 \
@@ -36,6 +32,10 @@ RUN apk add --no-cache libcap xz \
  && mkdir /s6 \
  && tar -C /s6 -Jxpf /tmp/s6-overlay-noarch.tar.xz \
  && tar -C /s6 -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+ADD --checksum=sha256:cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30 \
+    https://raw.githubusercontent.com/caddyserver/caddy/v2.11.9/LICENSE /licenses/caddy/LICENSE
+ADD --checksum=sha256:7a3a86cd4e1e2c17dd3f4a972e946773e8bed86e52099d1624c8c9f9fda7d9e3 \
+    https://raw.githubusercontent.com/just-containers/s6-overlay/v${S6}/COPYING /licenses/s6-overlay/COPYING
 
 # The ToggleSlash runtime stage is the base: aspnet 10.0.14 on Ubuntu 24.04, whose `app` user (1654)
 # is the one user everything runs as.
@@ -52,6 +52,7 @@ COPY self-host/Caddyfile self-host/domain.caddy /etc/caddy/
 COPY LICENSE NOTICE /usr/share/licenses/slashslash/
 COPY --from=pixelslash-src LICENSE NOTICE /usr/share/licenses/slashslash/pixelslash/
 COPY --from=toggleslash-src LICENSE NOTICE /usr/share/licenses/slashslash/toggleslash/
+COPY --from=tools /licenses/ /usr/share/licenses/slashslash/
 
 # /data and its folders, /run (s6 and Caddy write there) and HOME belong to `app` in the image, so a
 # Docker named volume starts owned right and nothing needs root, a chown or a tmpfs at start. No file
@@ -66,7 +67,6 @@ ENV HOME=/home/app \
     PIXELSLASH_PORT=3000 \
     TOGGLESLASH_PORT=8080 \
     SLASHSLASH_PORT=8000 \
-    TOGGLESLASH_DB_PATH=/data/toggleslash/toggleslash.db \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_VERBOSITY=1
@@ -74,7 +74,7 @@ ENV HOME=/home/app \
 LABEL org.opencontainers.image.title="slashslash" \
       org.opencontainers.image.description="PixelSlash and ToggleSlash in one image" \
       org.opencontainers.image.source="https://github.com/madangryscientist/slashslash" \
-      org.opencontainers.image.licenses="MIT AND Elastic-2.0" \
+      org.opencontainers.image.licenses="MIT AND Elastic-2.0 AND Apache-2.0 AND ISC" \
       build.slashslash.pixelslash.revision="${PIXELSLASH_REVISION}" \
       build.slashslash.toggleslash.revision="${TOGGLESLASH_REVISION}"
 

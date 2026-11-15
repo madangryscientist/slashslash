@@ -13,19 +13,19 @@ import { join, resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "..");
 
-export const PRODUCTS = [
+const PRODUCTS = [
   { name: "pixelslash", dockerfile: "docker/self-host/Dockerfile" },
   { name: "toggleslash", dockerfile: "apps/server/Dockerfile" },
 ] as const;
 
-export function pin(product: string): string {
+function pin(product: string): string {
   const sha = readFileSync(join(ROOT, "self-host/pins", `${product}.sha`), "utf8").trim();
   if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error(`self-host/pins/${product}.sha is not a full commit SHA`);
   return sha;
 }
 
-export const repo = (product: string) => `https://github.com/madangryscientist/${product}.git`;
-export const productImage = (product: string) => `slashslash-product/${product}:${pin(product)}`;
+const repo = (product: string) => `https://github.com/madangryscientist/${product}.git`;
+const productImage = (product: string) => `slashslash-product/${product}:${pin(product)}`;
 
 function run(args: string[], quiet = false): number {
   if (!quiet) console.log(`$ docker ${args.join(" ")}`);
