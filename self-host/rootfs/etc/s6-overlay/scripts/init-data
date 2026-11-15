@@ -1,0 +1,18 @@
+#!/command/with-contenv sh
+# Every start: the folders on /data, and the ToggleSlash admin token generated once and kept on the
+# volume unless the environment sets it. Runs as the image's user, so it never changes an owner;
+# a /data that user cannot write stops the container with one line saying so.
+set -eu
+uid="$(id -u)"
+for dir in /data /data/pixelslash /data/toggleslash /data/secrets /data/caddy; do
+  if ! { [ -d "$dir" ] || mkdir "$dir" 2>/dev/null; } || [ ! -w "$dir" ]; then
+    echo "[init-data] $dir is not writable by UID $uid: give the folder mounted at /data to UID $uid (chown -R $uid:$uid <folder>)"
+    exit 1
+  fi
+done
+chmod 700 /data/secrets
+token=/data/secrets/toggleslash-admin-token
+if [ -z "${TOGGLESLASH_ADMIN_TOKEN:-}" ] && [ ! -s "$token" ]; then
+  (umask 077 && od -An -tx1 -N32 /dev/urandom | tr -d ' \n' > "$token")
+  echo "[init-data] generated the ToggleSlash admin token; read it with: slashslash secret toggleslash-admin-token"
+fi

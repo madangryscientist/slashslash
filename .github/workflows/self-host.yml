@@ -1,0 +1,61 @@
+name: Self-host image
+
+# Builds the one self-host image and runs its smoke test, on any change to self-host/ or to this
+# file. Nothing is pushed to a registry. Each product image takes minutes to build, so it is kept in
+# the Actions cache under its pin and rebuilt only when that pin moves.
+on:
+  pull_request:
+    paths:
+      - "self-host/**"
+      - ".github/workflows/self-host.yml"
+  push:
+    branches: [main]
+    paths:
+      - "self-host/**"
+      - ".github/workflows/self-host.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: self-host-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      # See ci.yml: moon diffs against the base branch first, which needs the full history.
+      MOON_BASE: origin/main
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - id: pixelslash
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/product-images/pixelslash.tar.gz
+          key: self-host-pixelslash-${{ hashFiles('self-host/pins/pixelslash.sha') }}
+      - id: toggleslash
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/product-images/toggleslash.tar.gz
+          key: self-host-toggleslash-${{ hashFiles('self-host/pins/toggleslash.sha') }}
+      - name: Load the cached product images
+        run: for f in "$RUNNER_TEMP/product-images"/*.tar.gz; do [ -e "$f" ] && docker load -i "$f"; done; true
+      - name: Build the image (and any product whose pin has no cached image)
+        run: bun self-host/build.ts --tag slashslash:smoke
+      - name: Keep the product images for the next run
+        if: steps.pixelslash.outputs.cache-hit != 'true' || steps.toggleslash.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/product-images"
+          for p in pixelslash toggleslash; do
+            [ -e "$RUNNER_TEMP/product-images/$p.tar.gz" ] || docker save "slashslash-product/$p:$(cat self-host/pins/$p.sha)" | gzip -1 > "$RUNNER_TEMP/product-images/$p.tar.gz"
+          done
+      - run: bunx moon run self-host:smoke
+        env:
+          SMOKE_IMAGE: slashslash:smoke

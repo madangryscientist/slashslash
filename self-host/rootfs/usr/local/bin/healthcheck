@@ -1,0 +1,3 @@
+#!/bin/sh
+# Docker's HEALTHCHECK: healthy only when both products answer through the front door.
+exec bun /usr/local/lib/slashslash/health.ts

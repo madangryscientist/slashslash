@@ -1,0 +1,12 @@
+#!/command/with-contenv sh
+# ToggleSlash on loopback behind Caddy, its database on /data/toggleslash. The admin token is the
+# environment's when set, else the one init-data generated on the volume.
+exec 2>&1
+cd /app
+unset ASPNETCORE_HTTP_PORTS
+export TOGGLESLASH_DB_PATH=/data/toggleslash/toggleslash.db ASPNETCORE_URLS=http://127.0.0.1:8180 TOGGLESLASH_TRUSTED_PROXIES=127.0.0.1
+if [ -z "${TOGGLESLASH_ADMIN_TOKEN:-}" ]; then
+  TOGGLESLASH_ADMIN_TOKEN="$(cat /data/secrets/toggleslash-admin-token)"
+  export TOGGLESLASH_ADMIN_TOKEN
+fi
+exec dotnet ToggleSlash.Server.dll
