@@ -1,3 +1,6 @@
 # Downloaded by scripts/fetch-sources.ts at the commit in pixelslash.sha.
 .sources
 public/pixelslash
+# Playwright run output.
+test-results
+playwright-report
