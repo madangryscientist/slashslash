@@ -4,3 +4,5 @@ dist
 .wrangler
 *.log
 .moon/cache
+design/logos/out/
+__pycache__/

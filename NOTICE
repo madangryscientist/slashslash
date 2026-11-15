@@ -9,7 +9,7 @@ It does not cover, and nothing here licenses you to reuse:
 
   - the site copy, meaning the words on the pages (src/content/ and the text in src/components/);
   - the images, including report.png, og.png and the favicon;
-  - the logos (logo-dark.svg, logo-light.svg) and the slashslash.build name and wordmark;
+  - the logos in public/brand/ (the marks and lockups) and the slashslash.build name and wordmark;
   - the names ToggleSlash, BundleSlash, FlakeSlash and PixelSlash.
 
 Fonts in public/fonts/ are under the SIL Open Font License; each licence sits beside its font.

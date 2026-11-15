@@ -188,14 +188,15 @@ pre,
   display: block;
   line-height: 0;
 }
+/* The suite lockup (public/brand, 708 x 100 in its viewBox). Its height stays 10.5rem x 100 / 602, as the old logo's was. */
 .brand {
   display: block;
-  width: 10.5rem;
-  aspect-ratio: 602 / 100;
-  background: url("/logo-light.svg") left center / contain no-repeat;
+  width: calc(10.5rem * 708 / 602);
+  aspect-ratio: 708 / 100;
+  background: url("/brand/slash-lockup-light.svg") left center / contain no-repeat;
 }
 .dark .brand {
-  background-image: url("/logo-dark.svg");
+  background-image: url("/brand/slash-lockup-dark.svg");
 }
 
 /* Evidence frames: what kind of thing am I looking at. Solid for real, dashed for imagined. */
