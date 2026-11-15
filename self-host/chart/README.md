@@ -29,8 +29,12 @@ kubectl rollout status statefulset/slashslash -n slashslash
 Without Helm, apply the rendered manifest instead (it expects the same namespace and Secret):
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/chart/slashslash.yaml
+kubectl apply -f https://raw.githubusercontent.com/madangryscientist/slashslash/self-host-v<version>/self-host/chart/slashslash.yaml
 ```
+
+`<version>` is a release (see "Versions" in `self-host/README.md`), so the file names an image that
+is already published. Both ways need a release made after the chart was added: 0.1.1 and older
+have no chart.
 
 The first start takes up to two minutes (PixelSlash migrates its database before it listens).
 

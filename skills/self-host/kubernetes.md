@@ -30,7 +30,7 @@ Then one of:
 helm install slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash \
   --set existingSecret=slashslash-github
 # without Helm: the chart rendered with its defaults
-kubectl apply -f https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/chart/slashslash.yaml
+kubectl apply -f https://raw.githubusercontent.com/madangryscientist/slashslash/self-host-v<version>/self-host/chart/slashslash.yaml
 ```
 
 For access from outside: `kubectl port-forward -n slashslash svc/slashslash 3000:3000 8080:8080`,

@@ -233,6 +233,9 @@ async function main(): Promise<void> {
     "-v", `${VOLUME}:/data`, IMAGE]);
   await waitFor("the container reports healthy", () => health() === "healthy", 180);
   check(await healthyOnFrontDoor(), "PixelSlash / and ToggleSlash /health answer through Caddy");
+  // The Helm chart's startup probe is an HTTP GET of PixelSlash's /, which passes only on 200 to 399.
+  const front = await fetch(`http://${hostPort(3000)}/`, { redirect: "manual", signal: AbortSignal.timeout(3000) });
+  check(front.status >= 200 && front.status < 400, `PixelSlash / answers ${front.status}, which the chart's startup probe accepts`);
 
   check(docker(["inspect", "-f", "{{.Config.User}}", IMAGE]) === "app", "the image's user is app");
   const users = docker(["exec", NAME, "ps", "-eo", "user="]).split("\n").map((u) => u.trim());

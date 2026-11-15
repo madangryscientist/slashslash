@@ -95,7 +95,7 @@ function parse(yaml: string): Doc[] {
  * plus what this image needs to run under it: UID and GID 1654 and a read-only root with its four
  * writable paths mounted.
  */
-export function restrictedProblems(docs: Doc[]): string[] {
+function restrictedProblems(docs: Doc[]): string[] {
   const problems: string[] = [];
   const pods = docs.filter((d) => d?.spec?.template?.spec).map((d) => ({ name: `${d.kind}/${d.metadata?.name}`, spec: d.spec.template.spec }));
   if (pods.length === 0) problems.push("no pod template in the render");
