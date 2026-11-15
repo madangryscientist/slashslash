@@ -265,8 +265,6 @@ async function upgradeFrom(released: string): Promise<void> {
     check(created.status === 201, `${released} (${from}) makes a ToggleSlash project (${created.status})`);
     const hashes = secretHashes(name);
     check(hashes.split("\n").length >= 2, `${released} generated PixelSlash's secret files`, hashes);
-    // PLANTED FAULT, reverted next commit: the project is deleted between the two starts.
-    sh("/command/s6-svc -wD -T 60000 -d /run/service/toggleslash; rm -rf /data/toggleslash", name);
     docker(["stop", "--time", "60", name]);
     docker(["rm", name]);
 
