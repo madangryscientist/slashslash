@@ -21,6 +21,8 @@ A [Bun workspaces](https://bun.sh/docs/install/workspaces) monorepo run with [mo
 - `apps/site`: the site (moon project `site`).
 - `scripts`: repo checks, such as `scripts/check-slop.ts` (moon project `scripts`).
 - `packages/`: shared packages, none yet.
+- `self-host`: the one self-host image and the Proxmox install script (moon project `self-host`).
+- `skills/`: guides for coding agents, such as `skills/self-host` for running your own instance.
 
 `.moon/workspace.yml` lists the projects, each project's `moon.yml` holds its tasks, and
 `.moon/tasks/all.yml` the root files every task depends on. moon caches each task in `.moon/cache`, so an

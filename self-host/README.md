@@ -22,6 +22,10 @@ docker run -d --name slashslash --restart unless-stopped \
 
 amd64 only. To build the image yourself instead, see "How it is built" below.
 
+For a guided setup on Proxmox, Docker, Compose, Kubernetes or another platform, follow
+[`skills/self-host`](../skills/self-host/SKILL.md): a step-by-step guide any coding agent (or person)
+can work through, with the checks that prove each step.
+
 ## On Proxmox, in one line
 
 Run this in the Proxmox host's shell, as root:
