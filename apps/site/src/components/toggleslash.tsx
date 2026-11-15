@@ -1,6 +1,7 @@
 import { CopyLine, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { Section } from "#/components/section";
+import { StageLine } from "#/components/stage-line";
 import { LINKS, PLANNED, TOGGLESLASH_INTRO, TRY_IT, WORKS_TODAY } from "#/content/toggleslash";
 
 /** /toggleslash: the page's h1 and what ToggleSlash is. */
@@ -12,7 +13,9 @@ export function ToggleSlashIntro(): ReactNode {
       title={TOGGLESLASH_INTRO.title}
       heading="h1"
       lead={TOGGLESLASH_INTRO.lead}
-    />
+    >
+      <StageLine name="ToggleSlash" />
+    </Section>
   );
 }
 

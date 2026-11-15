@@ -1,7 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
+import { PRODUCTS } from "#/content/products";
 import { SITE_URL } from "#/content/site";
+import { STAGES } from "#/content/stages";
 import { LINKS, PLANNED, TOGGLESLASH_TITLE, TRY_IT, WORKS_TODAY } from "#/content/toggleslash";
 
 const DIST = resolve(import.meta.dirname, "../../dist");
@@ -67,5 +69,21 @@ describe("the /toggleslash page", () => {
   test("links the docs in the ToggleSlash repository", () => {
     const html = read("toggleslash.html");
     for (const link of LINKS) expect(html).toContain(`href="${link.href}"`);
+  });
+});
+
+describe("the /toggleslash stage line", () => {
+  test("names ToggleSlash's release stage from the shared table, once, inside the intro section", () => {
+    const html = read("toggleslash.html");
+    const product = PRODUCTS.find((p) => p.name === "ToggleSlash");
+    if (!product) throw new Error("No ToggleSlash in PRODUCTS.");
+    const { label, sentence } = STAGES[product.stage];
+    expect(html.match(/data-testid="stage"/g)).toHaveLength(1);
+    const h1 = html.search(/<h1[\s>]/);
+    const intro = html.slice(html.lastIndexOf("<section", h1), html.indexOf("<section", h1));
+    const line = intro.match(/<p [^>]*data-testid="stage"[^>]*>[\s\S]*?<\/p>/)?.[0];
+    expect(line).toBeDefined();
+    expect(intro.indexOf(line ?? "")).toBeGreaterThan(intro.search(/<h1[\s>]/));
+    expect(visibleText(line ?? "").trim()).toBe(`${label}. ${sentence}`);
   });
 });

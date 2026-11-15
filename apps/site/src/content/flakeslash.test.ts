@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 import { FLAKESLASH_TITLE, LINKS, PLANNED, TRY_IT, WORKS_TODAY } from "#/content/flakeslash";
 import { PRODUCTS } from "#/content/products";
 import { SITE_URL } from "#/content/site";
+import { STAGES } from "#/content/stages";
 
 const DIST = resolve(import.meta.dirname, "../../dist");
 
@@ -89,5 +90,21 @@ describe("the link in from /developers", () => {
       if (own) expect(article, name).toMatch(new RegExp(`More about (<!-- -->)?${name}<`));
       else expect(article, name).not.toContain("More about");
     }
+  });
+});
+
+describe("the /flakeslash stage line", () => {
+  test("names FlakeSlash's release stage from the shared table, once, inside the intro section", () => {
+    const html = read("flakeslash.html");
+    const product = PRODUCTS.find((p) => p.name === "FlakeSlash");
+    if (!product) throw new Error("No FlakeSlash in PRODUCTS.");
+    const { label, sentence } = STAGES[product.stage];
+    expect(html.match(/data-testid="stage"/g)).toHaveLength(1);
+    const h1 = html.search(/<h1[\s>]/);
+    const intro = html.slice(html.lastIndexOf("<section", h1), html.indexOf("<section", h1));
+    const line = intro.match(/<p [^>]*data-testid="stage"[^>]*>[\s\S]*?<\/p>/)?.[0];
+    expect(line).toBeDefined();
+    expect(intro.indexOf(line ?? "")).toBeGreaterThan(intro.search(/<h1[\s>]/));
+    expect(visibleText(line ?? "").trim()).toBe(`${label}. ${sentence}`);
   });
 });
