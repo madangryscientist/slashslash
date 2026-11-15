@@ -493,7 +493,7 @@ if __name__ == "__main__":
         slugs = {entry["slug"] for entry in pages}
         for name in os.listdir(OG_OUT) if os.path.isdir(OG_OUT) else []:
             stem, ext = os.path.splitext(name)
-            if ext in (".svg", ".png") and stem not in slugs:
+            if ext in (".svg", ".png") and stem not in slugs and os.path.isfile(os.path.join(OG_OUT, name)):
                 os.remove(os.path.join(OG_OUT, name))
         for entry in pages:
             og(entry)

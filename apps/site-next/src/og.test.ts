@@ -52,7 +52,7 @@ describe("share cards", () => {
       expect(existsSync(png), `${file}: ${png}`).toBe(true);
       const bytes = readFileSync(png);
       // A PNG's IHDR chunk holds its width and height as big-endian 32-bit numbers at bytes 16 and 20.
-      expect(bytes.subarray(1, 4).toString("latin1"), png).toBe("PNG");
+      expect(bytes.subarray(0, 8).toString("hex"), png).toBe("89504e470d0a1a0a");
       expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)], png).toEqual([1200, 630]);
     }
   });
