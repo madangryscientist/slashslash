@@ -62,9 +62,9 @@ run() {
   printf '%s\n' "$line"
 }
 # A script run inside the container, as root.
-in_ct() { run pct exec "$CTID" -- bash -ec "$1" </dev/null; }
+in_ct() { run pct exec "$CTID" -- env LC_ALL=C.UTF-8 bash -ec "$1" </dev/null; }
 # The same, but read-only: it runs in a dry run too.
-ask_ct() { pct exec "$CTID" -- bash -ec "$1" </dev/null; }
+ask_ct() { pct exec "$CTID" -- env LC_ALL=C.UTF-8 bash -ec "$1" </dev/null; }
 
 ct_exists() { pct status "$1" >/dev/null 2>&1; }
 vm_exists() { qm status "$1" >/dev/null 2>&1; }
