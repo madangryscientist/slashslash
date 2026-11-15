@@ -1,0 +1,21 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client"],
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "paths": {
+      "#next/*": ["./src/*"],
+      "#content/*": ["../site/src/content/*"],
+      "#ps/*": ["../site/src/pixelslash/*"],
+      "@pixelslash-src/*": ["../site/.sources/pixelslash/*"]
+    }
+  }
+}

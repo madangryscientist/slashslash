@@ -1,8 +1,17 @@
 import { existsSync, globSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
+import { PAGES } from "./pages";
 
-const DIST = resolve(import.meta.dirname, "../../dist");
+/** The built site to check: this app's dist/, or the one SITE_DIST names (the next app's vitest config sets it). */
+const DIST = process.env["SITE_DIST"] ?? resolve(import.meta.dirname, "../../dist");
+
+/**
+ * Set only by the next app's vitest config. Until the flip, a link there to a page in PAGES that the next
+ * app has not built yet counts as live, because the live app serves that page.
+ */
+const SITE_NEXT = process.env["SITE_NEXT"] === "1";
+const PAGE_PATHS: ReadonlySet<string> = new Set(PAGES.map((page) => page.path));
 
 /**
  * Dead internal links written in PixelSlash's fetched content (.sources, public/pixelslash), which this repo cannot fix,
@@ -11,7 +20,7 @@ const DIST = resolve(import.meta.dirname, "../../dist");
 const EXCEPTIONS: ReadonlyMap<string, string> = new Map();
 
 const pages = (): string[] => {
-  if (!existsSync(resolve(DIST, "index.html")))
+  if (!["404.html", "index.html"].some((file) => existsSync(resolve(DIST, file))))
     throw new Error(`No built page in ${DIST}. Run the build first: bun run build.`);
   return globSync("**/*.html", { cwd: DIST }).toSorted();
 };
@@ -56,6 +65,7 @@ function deadLinks(): string[] {
       if (!(href.startsWith("/") || href.startsWith("#")) || href.startsWith("//")) continue;
       const [rest = "", hash] = href.split("#", 2);
       const path = rest.split("?", 1)[0] ?? "";
+      if (SITE_NEXT && PAGE_PATHS.has(path) && target(path) === undefined) continue;
       const file = path === "" ? page : target(path);
       const ok = file !== undefined && (!hash || (file.endsWith(".html") && idsOf(file).has(decode(hash) ?? "")));
       if (!ok) dead.push(`${page} ${href}`);

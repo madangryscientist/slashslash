@@ -34,3 +34,5 @@ jobs:
       - run: bunx playwright install --with-deps chromium webkit
         working-directory: apps/site
       - run: bunx moon run site:e2e
+      # The reskinned site, built beside the live one and never deployed: its pages and its 404.
+      - run: bunx moon run site-next:e2e
