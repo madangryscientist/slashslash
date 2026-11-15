@@ -152,7 +152,7 @@ Everything lives on the one volume at `/data`:
 
 Both tools change their data when a new version starts (database migrations), and neither can
 change it back. A copy of the volume taken while either one is writing can miss data. So use the
-image's own commands, which stop both tools for the few seconds it takes:
+image's own commands, which stop both tools while it runs (seconds on a small volume, longer on a large one):
 
 ```sh
 docker exec slashslash slashslash backup

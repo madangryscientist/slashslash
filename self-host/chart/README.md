@@ -113,7 +113,7 @@ Secret too.
   slashslash-0 -- ls /data/backups` and `slashslash restore /data/backups/<that file>`.
 - Backup: `kubectl exec -n slashslash slashslash-0 -- slashslash backup`, then copy it out with
   `kubectl cp slashslash/slashslash-0:/data/backups/<file> ./<file>`. Both tools are stopped while
-  it runs, so it must finish within about 90 s (see Limits).
+  it runs, so it must finish within about a minute, stopping them included (see Limits).
 - Remove: `helm uninstall slashslash -n slashslash` keeps the volume claim. Deleting it
   (`kubectl delete pvc data-slashslash-0 -n slashslash`) deletes the data, depending on the storage
   class's reclaim policy.
@@ -130,7 +130,7 @@ Secret too.
   kubelet restarts the pod mid-backup, each attempt can leave an `upgrade-*.partial` file in
   `/data/backups` that fills the volume, and the pod stops for want of space.
 - A manual `slashslash backup` stops both tools until the archive is written, and the liveness
-  probe restarts the pod after about 90 s of that, killing the backup. On a volume too large to
+  probe restarts the pod after 60 to 90 s of that, killing the backup, so allow about a minute in all. On a volume too large to
   archive in that time, copy the claim with your storage's own snapshot instead. A killed backup
   can leave a `*.partial` file in `/data/backups`; delete it.
 - amd64 only, like the image.
