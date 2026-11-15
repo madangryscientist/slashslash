@@ -345,7 +345,8 @@ def embed(path, x, y, h, theme=None):
         inner = re.sub(r"<style>(.*?)@media\(prefers-color-scheme:dark\)\{(.*)\}</style>", r"<style>\1\2</style>", inner)
     else:
         inner = re.sub(r"@media\(prefers-color-scheme:dark\)\{.*\}</style>", "</style>", inner)
-    rendering = ' shape-rendering="crispEdges"' if "pixel" in path else ""
+    # Only Direction B's pixel art is crisp: Direction C's PixelSlash mark is rounded and its wordmark is type.
+    rendering = ' shape-rendering="crispEdges"' if path.startswith("b-pixel/") else ""
     return f'<svg x="{fmt(x)}" y="{fmt(y)}" width="{fmt(w)}" height="{fmt(h)}" viewBox="{" ".join(vb)}"{rendering}>{inner}</svg>', w
 
 
@@ -435,12 +436,16 @@ INTER = (("wght", 600),)
 TOOL_OF = {("slash" if k == "suite" else v.lower()): k for k, v in NAME.items()}
 
 
+def width(text, size):
+    return text_path(text, face="inter", axes=INTER, size=size)[1]
+
+
 def wrap(text, size):
     """Greedy word wrap of `text` in Inter 600 at `size`, to OG_WIDTH. Returns the lines."""
     lines, line = [], ""
     for word in text.split():
         trial = f"{line} {word}" if line else word
-        if line and text_path(trial, face="inter", axes=INTER, size=size)[1] > OG_WIDTH:
+        if line and width(trial, size) > OG_WIDTH:
             lines.append(line)
             line = word
         else:
@@ -454,8 +459,11 @@ def og(entry):
     t = THEME[OG_THEME]
     size, step = OG_SIZE, OG_STEP
     lines = wrap(entry["headline"], size)
-    while len(lines) > OG_LINES:  # never shorten the words: shrink this card's type until they fit
+    # Never shorten the words: shrink this card's type until they fit (a single word can be wider than a line too).
+    while len(lines) > OG_LINES or any(width(line, size) > OG_WIDTH for line in lines):
         size -= 4
+        if size < 32:
+            sys.exit(f"og: {entry['slug']} headline does not fit {OG_LINES} lines even at {size + 4} px: {entry['headline']!r}")
         step = round(size * OG_STEP / OG_SIZE)
         lines = wrap(entry["headline"], size)
     if size != OG_SIZE:

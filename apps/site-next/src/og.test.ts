@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -61,11 +62,15 @@ describe("share cards", () => {
     expect(globSync("*", { cwd: PUBLIC_OG }).toSorted()).toEqual(want);
   });
 
-  test("each committed card was drawn from its current og.ts entry", () => {
-    // gen.py writes the entry's alt as the SVG's label, so a headline changed without a re-run shows here.
+  test("each committed card was drawn from its current og.ts entry, and its PNG from that SVG", () => {
     for (const card of OG_CARDS) {
+      // gen.py writes the entry's alt as the SVG's label, so a headline changed without a re-run shows here.
       const svg = readFileSync(resolve(PUBLIC_OG, `${card.slug}.svg`), "utf8");
       expect(decode(svg.match(/aria-label="([^"]*)"/)?.[1]), card.slug).toBe(card.alt);
+      // og-png.ts writes the SVG's hash into the PNG, so a PNG not re-made after its SVG changed shows here.
+      const png = readFileSync(resolve(PUBLIC_OG, `${card.slug}.png`)).toString("latin1");
+      const hash = createHash("sha256").update(svg).digest("hex");
+      expect(png.match(/tEXtsvg-sha256\0([0-9a-f]{64})/)?.[1], `${card.slug}.png`).toBe(hash);
     }
   });
 });
