@@ -1,0 +1,42 @@
+import { describe, expect, test } from "vitest";
+import { HERO } from "#/content/landing";
+import { OG_CARDS, ogCardFor } from "#/content/og";
+import { PAGES } from "#/content/pages";
+import { PRODUCTS } from "#/content/products";
+import { STATEMENT } from "#/pixelslash/content/pricing";
+
+const card = (path: string) => OG_CARDS.find((item) => item.path === path);
+
+describe("the share card list", () => {
+  test("has exactly one card per page, in PAGES order", () => {
+    expect(OG_CARDS.map((item) => item.path)).toEqual(PAGES.map((page) => page.path));
+  });
+
+  test("gives every card a unique slug made from its path", () => {
+    expect(new Set(OG_CARDS.map((item) => item.slug)).size).toBe(OG_CARDS.length);
+    expect(card("/")?.slug).toBe("slashslash");
+    expect(card("/pixelslash/compare")?.slug).toBe("pixelslash-compare");
+    for (const item of OG_CARDS) expect(item.slug, item.path).toMatch(/^[a-z0-9-]+$/);
+  });
+
+  test("gives every card a headline and an alt that names it, with no long dashes", () => {
+    for (const item of OG_CARDS) {
+      expect(item.headline.trim(), item.path).not.toBe("");
+      expect(item.alt, item.path).toContain(item.headline);
+      expect(`${item.headline}${item.alt}`, item.path).not.toMatch(/[\u2013\u2014]/);
+    }
+  });
+
+  test("takes its headlines from the content modules that hold them", () => {
+    const question = (name: string) => PRODUCTS.find((product) => product.name === name)?.question;
+    expect(card("/")?.headline).toBe(HERO.title);
+    expect(card("/flakeslash")?.headline).toBe(question("FlakeSlash"));
+    expect(card("/toggleslash")?.headline).toBe(question("ToggleSlash"));
+    expect(card("/pixelslash/pricing")?.headline).toBe(STATEMENT);
+  });
+
+  test("gives the 404 page the suite's card and refuses a page it does not know", () => {
+    expect(ogCardFor("/404")).toBe(card("/"));
+    expect(() => ogCardFor("/nowhere")).toThrow(/og\.ts/);
+  });
+});

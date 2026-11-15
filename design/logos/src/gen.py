@@ -2,10 +2,14 @@
 
 Run from the repo root:
   uvx --with brotli==1.2.1 --with uharfbuzz==0.57.0 --from fonttools==4.68.0 python design/logos/src/gen.py
-Writes SVGs under ../out (gitignored): a-cut, b-pixel, c-glyph, and a board + OG drafts per direction under ../out/boards.
-Direction C is the one the suite ships: its six marks and twelve lockups also go to apps/site/public/brand/ (tracked).
+Writes SVGs under ../out (gitignored): a-cut, b-pixel, c-glyph, and a board per direction under ../out/boards.
+Direction C is the one the suite ships: its seven marks and fourteen lockups also go to apps/site/public/brand/ (tracked).
+
+With `--og <file>` (or `--og -` for stdin) it also writes one share card per page, from the JSON list that
+og-pages.ts prints, to apps/site-next/public/og/<slug>.svg (tracked); og-png.ts then rasterises them.
 Every mark is hand-placed geometry (no tracing); wordmarks are the site's own fonts, outlined (outline.py).
 """
+import json
 import os
 import re
 import sys
@@ -33,11 +37,14 @@ ACCENT = {
     "toggle": {"light": "#2d7d1d", "text": "#286f1a", "dark": "#a6e3a1"},
     "bundle": {"light": "#9a5b00", "text": "#9a5b00", "dark": "#f9e2af"},
     "task": {"light": "#1e66f5", "text": "#1a5fe6", "dark": "#89b4fa"},
+    # SightSlash (Jacobus, 2026-11-15: Catppuccin pink). Latte pink #ea76cb is 2.3:1 on the Latte ground, so the
+    # light fill is darkened to #c8399a (4.1:1) and its text tone to #b8338a (4.8:1).
+    "sight": {"light": "#c8399a", "text": "#b8338a", "dark": "#f5c2e7"},
 }
 TOOLS = ["pixel", "flake", "toggle", "bundle"]
-# TaskSlash (Jacobus, 2026-11-15) is drawn in Direction C only, the direction he picked.
-C_TOOLS = [*TOOLS, "task"]
-NAME = {"suite": "slashslash", "pixel": "PixelSlash", "flake": "FlakeSlash", "toggle": "ToggleSlash", "bundle": "BundleSlash", "task": "TaskSlash"}
+# TaskSlash and SightSlash (Jacobus, 2026-11-15) are drawn in Direction C only, the direction he picked.
+C_TOOLS = [*TOOLS, "task", "sight"]
+NAME = {"suite": "slashslash", "pixel": "PixelSlash", "flake": "FlakeSlash", "toggle": "ToggleSlash", "bundle": "BundleSlash", "task": "TaskSlash", "sight": "SightSlash"}
 TILE = "#181825"  # Mocha mantle: the pixel tiles carry their own ground in both themes
 
 
@@ -264,6 +271,8 @@ def c_mark(tool, uid):
             f'<polygon points="{fmt(x(84))},84 {fmt(x(84) + 12)},84 {fmt(x(-10) + 12)},-10 {fmt(x(-10))},-10" fill="#000"/>'
             '<polyline points="24,54 50,80" fill="none" stroke="#000" stroke-width="12" stroke-linecap="round"/>'
         )
+    elif tool == "sight":  # a component frame with a pupil inside, cut by the slash
+        shape = '<rect x="10" y="16" width="80" height="68" rx="12" fill="none" stroke="#fff" stroke-width="10"/><circle cx="50" cy="50" r="15"/>'
     return (
         f'<mask id="m{uid}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">'
         f'<g fill="#fff">{shape}</g>{cuts}</mask>'
@@ -273,7 +282,7 @@ def c_mark(tool, uid):
 
 def c_word(tool):
     """JetBrains Mono 700: the first half in ink, `slash` in the tool's text tone (class `t`); the suite adds `.build`."""
-    first = {"suite": "slash", "pixel": "pixel", "flake": "flake", "toggle": "toggle", "bundle": "bundle", "task": "task"}[tool]
+    first = {"suite": "slash", "pixel": "pixel", "flake": "flake", "toggle": "toggle", "bundle": "bundle", "task": "task", "sight": "sight"}[tool]
     d1, w1 = text_path(first, face="mono", axes=(("wght", 700),), size=60, x=122, y=70)
     d2, w2 = text_path("slash", face="mono", axes=(("wght", 700),), size=60, x=122 + w1, y=70)
     body = f'<path class="i" d="{d1}"/><path class="t" d="{d2}"/>'
@@ -378,7 +387,7 @@ def board(d):
         parts.append(f'<text x="{ox + 30}" y="160" font-family="sans-serif" font-size="15" fill="{t["mute"]}">{th}</text>')
         y = 190
         tools = C_TOOLS if d == "c-glyph" else TOOLS
-        sizes = (40, 24, 16) if len(tools) > 4 else (64, 32, 16)
+        sizes = (32, 20, 16) if len(tools) > 5 else (40, 24, 16) if len(tools) > 4 else (64, 32, 16)
         for tool in ["suite", *tools]:
             lock, mark = files_for(d, tool, th)
             if d == "b-pixel":
@@ -414,42 +423,64 @@ def board(d):
     write(f"boards/{d}.svg", f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">{"".join(parts)}</svg>\n')
 
 
-def og(d, tool, th):
-    """The OG template: the tool's colour as a rule along the top, the lockup, one headline, the address."""
-    t = THEME[th]
-    a = ACCENT[tool][th]
-    headline = {
-        "suite": ["See what a change", "really does, before", "your customers do."],
-        "pixel": ["Visual review for", "every pull request."],
-        "flake": ["Find the flaky tests", "before they find you."],
-        "toggle": ["Feature flags", "you can self-host."],
-        "bundle": ["Know what each", "change adds to the bundle."],
-        "task": ["TaskSlash"],
-    }[tool]
-    addr = "slashslash.build" + ("" if tool == "suite" else "/" + NAME[tool].lower())
-    lock, mark = files_for(d, tool, th)
-    parts = [f'<rect width="1200" height="630" fill="{t["bg"]}"/>', f'<rect width="1200" height="14" fill="{a}"/>']
-    if d == "b-pixel":
-        tile, tw = embed(mark, 90, 96, 80)
-        word, _ = embed(lock, 90 + tw + 24, 96 + 24, 32)
-        parts += [tile, word]
-    else:
-        lk, _ = embed(lock, 90, 96, 80, th)
-        parts.append(lk)
-    for i, line in enumerate(headline):
-        dpath, _ = text_path(line, size=76, x=90, y=360 + i * 84)
+# ================================================================ share cards
+# The next app's share cards, one per page, written beside the PNGs og-png.ts makes from them.
+OG_OUT = os.path.join(HERE, "..", "..", "..", "apps", "site-next", "public", "og")
+# Light only: chat apps show the card on their own ground, whatever the reader's theme.
+OG_THEME = "light"
+OG_SIZE, OG_STEP, OG_LINES = 72, 80, 3
+OG_LEFT, OG_WIDTH = 90, 1020  # the card is 1200 wide: 90 either side
+INTER = (("wght", 600),)
+# brand slug (og.ts's `tool`) -> the generator's key
+TOOL_OF = {("slash" if k == "suite" else v.lower()): k for k, v in NAME.items()}
+
+
+def wrap(text, size):
+    """Greedy word wrap of `text` in Inter 600 at `size`, to OG_WIDTH. Returns the lines."""
+    lines, line = [], ""
+    for word in text.split():
+        trial = f"{line} {word}" if line else word
+        if line and text_path(trial, face="inter", axes=INTER, size=size)[1] > OG_WIDTH:
+            lines.append(line)
+            line = word
+        else:
+            line = trial
+    return [*lines, line]
+
+
+def og(entry):
+    """One page's card: the tool's colour as a rule along the top, its lockup, the page's headline, its address."""
+    tool = TOOL_OF[entry["tool"]]
+    t = THEME[OG_THEME]
+    size, step = OG_SIZE, OG_STEP
+    lines = wrap(entry["headline"], size)
+    while len(lines) > OG_LINES:  # never shorten the words: shrink this card's type until they fit
+        size -= 4
+        step = round(size * OG_STEP / OG_SIZE)
+        lines = wrap(entry["headline"], size)
+    if size != OG_SIZE:
+        print(f"og: {entry['slug']} headline set at {size} px to fit {OG_LINES} lines", file=sys.stderr)
+    addr = "slashslash.build" + ("" if entry["path"] == "/" else entry["path"])
+    lock, _ = files_for("c-glyph", tool, OG_THEME)
+    parts = [f'<rect width="1200" height="630" fill="{t["bg"]}"/>', f'<rect width="1200" height="14" fill="{ACCENT[tool][OG_THEME]}"/>']
+    lk, _ = embed(lock, OG_LEFT, 96, 80, OG_THEME)
+    parts.append(lk)
+    for i, line in enumerate(lines):
+        dpath, _ = text_path(line, face="inter", axes=INTER, size=size, x=OG_LEFT, y=320 + i * step)
         parts.append(f'<path fill="{t["ink"]}" d="{dpath}"/>')
-    dpath, _ = text_path(addr, face="mono", axes=(("wght", 500),), size=28, x=90, y=585)
+    dpath, _ = text_path(addr, face="mono", axes=(("wght", 500),), size=28, x=OG_LEFT, y=570)
     parts.append(f'<path fill="{t["mute"]}" d="{dpath}"/>')
-    write(f"boards/og-{d}-{tool}-{th}.svg", f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">{"".join(parts)}</svg>\n')
+    label = entry["alt"].replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+    write(f"{entry['slug']}.svg", svg("0 0 1200 630", "".join(parts), 1200, 630, label), root=OG_OUT)
 
 
 if __name__ == "__main__":
     build()
     for d in DIRS:
         board(d)
-        for tool, th in (("suite", "light"), ("flake", "light"), ("pixel", "dark")):
-            og(d, tool, th)
-    og("c-glyph", "task", "light")
-    og("c-glyph", "task", "dark")
+    if "--og" in sys.argv:
+        src = sys.argv[sys.argv.index("--og") + 1]
+        pages = json.load(sys.stdin if src == "-" else open(src))
+        for entry in pages:
+            og(entry)
     print("ok")
