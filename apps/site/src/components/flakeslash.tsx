@@ -1,6 +1,7 @@
 import { CopyLine, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { Section } from "#/components/section";
+import { StageLine } from "#/components/stage-line";
 import { FLAKESLASH_INTRO, LINKS, PLANNED, TRY_IT, WORKS_TODAY } from "#/content/flakeslash";
 
 /** /flakeslash: the page's h1 and what FlakeSlash is. */
@@ -12,7 +13,9 @@ export function FlakeSlashIntro(): ReactNode {
       title={FLAKESLASH_INTRO.title}
       heading="h1"
       lead={FLAKESLASH_INTRO.lead}
-    />
+    >
+      <StageLine name="FlakeSlash" />
+    </Section>
   );
 }
 

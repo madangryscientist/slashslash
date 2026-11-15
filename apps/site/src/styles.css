@@ -382,6 +382,12 @@ pre,
 .sec-lead + * {
   margin-top: 2rem;
 }
+/* The stage line sits close under the lead, so it wins over the rule above at equal specificity. */
+.sec-stage {
+  margin: 0.75rem 0 0;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
 
 /* Same commit, two runs: a split diff of the run, not of the code. */
 .runs-frame {
