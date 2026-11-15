@@ -17,6 +17,8 @@ docker run -d --name slashslash --restart unless-stopped \
   `docker exec slashslash slashslash secret toggleslash-admin-token`. It never goes to the logs.
 - `docker exec slashslash slashslash status` shows each service and whether each tool answers.
 - `docker exec slashslash slashslash version` prints the image's version.
+- `docker exec slashslash slashslash backup` and `slashslash restore <file>` back up and restore the
+  volume (see "Backup, restore and rollback").
 
 amd64 only. To build the image yourself instead, see "How it is built" below.
 
@@ -33,7 +35,8 @@ The image is published at `ghcr.io/madangryscientist/slashslash`:
 
 To pin a release, put its tag in place of `latest` in the `docker run` above. An upgrade is
 `docker pull` of the new tag, then `docker rm -f slashslash` and the same `docker run`: everything
-lives on the volume. The version is also on the image as the `org.opencontainers.image.version`
+lives on the volume, and the first start of the new version backs the volume up before either tool
+touches it (see "Backup, restore and rollback" below). The version is also on the image as the `org.opencontainers.image.version`
 label, next to each tool's commit (`build.slashslash.pixelslash.revision`,
 `build.slashslash.toggleslash.revision`).
 
@@ -84,8 +87,63 @@ Everything lives on the one volume at `/data`:
 | `/data/toggleslash/toggleslash.db` | ToggleSlash's SQLite database |
 | `/data/secrets` | Secrets for you to read: today `toggleslash-admin-token` (mode 0700) |
 | `/data/caddy` | The front door's own state |
+| `/data/backups` | Backups: yours (`manual-*`) and the ones taken before an upgrade (`upgrade-*`) |
+| `/data/restore-*` | What a restore replaced, in case you want it back |
 
-Back up the volume and you have backed up everything.
+## Backup, restore and rollback
+
+Both tools change their data when a new version starts (database migrations), and neither can
+change it back. A copy of the volume taken while either one is writing can miss data. So use the
+image's own commands, which stop both tools for the few seconds it takes:
+
+```sh
+docker exec slashslash slashslash backup
+```
+
+It prints the file it wrote, `/data/backups/manual-<UTC time>-<version>.tgz`, and keeps the last
+five. To keep one off the server, copy it out:
+
+```sh
+docker cp slashslash:/data/backups/manual-20261115T101500Z-0.1.0.tgz .
+```
+
+`slashslash backup <file>` writes to a path of your choosing instead (inside the container, so pick
+one on the volume or copy it out). A backup holds `pixelslash/`, `toggleslash/`, `secrets/` and
+`caddy/` (PixelSlash's `tmp/` is left out) and the version that made it.
+
+To restore one:
+
+```sh
+docker cp manual-20261115T101500Z-0.1.0.tgz slashslash:/data/backups/
+docker exec slashslash slashslash restore /data/backups/manual-20261115T101500Z-0.1.0.tgz
+```
+
+It checks the whole file first, then stops both tools, moves what is on the volume now into
+`/data/restore-<UTC time>/` (the last three are kept), unpacks the backup and starts both tools.
+Your other backups stay where they are. A backup made by a newer version than the running image is
+refused before anything is touched, naming both versions, because an older tool cannot read data a
+newer one has migrated. Restore it with that version or a newer one.
+
+**Upgrades back themselves up.** The volume records the version that last ran on it
+(`/data/.slashslash-version`). When a different version starts, it writes
+`/data/backups/upgrade-<UTC time>-<old version>.tgz` before either tool starts, and only then lets
+them migrate. If that backup fails (a full disk), the container stops instead. The last three
+upgrade backups are kept; manual backups never push them out. A volume from before versions were
+recorded gets one too, labelled `0.0.0`.
+
+**To roll back an upgrade,** run the previous image again and restore the upgrade backup taken
+before the upgrade:
+
+```sh
+docker rm -f slashslash
+docker run -d --name slashslash ... ghcr.io/madangryscientist/slashslash:<previous version>
+docker exec slashslash ls /data/backups
+docker exec slashslash slashslash restore /data/backups/upgrade-<UTC time>-<previous version>.tgz
+```
+
+Anything written since the upgrade is lost, so take a manual backup first if you may want it. After
+a restore the volume records the backup's version, so the next start of a newer image takes a fresh
+upgrade backup. That is intended.
 
 ## It runs as one user, never root
 
@@ -117,8 +175,9 @@ set `fsGroup: 1654`, and mount an `emptyDir` at `/run` if the root filesystem is
   release tag; any other build says `<VERSION>-dev`, or `<VERSION>-edge.<sha7>` on main.
 - `rootfs/` holds the supervisor's services: `init-data` (makes the folders and the token, every
   start), `pixelslash`, `toggleslash` and `caddy`, each with a logger that puts the service's name
-  in front of every line it writes (`[pixelslash] ...`). It also holds the `slashslash` command and
-  the health check, which asks both tools through the front door.
+  in front of every line it writes (`[pixelslash] ...`). It also holds the `slashslash` command, the
+  health check, which asks both tools through the front door, and `lib/slashslash/backup.sh`, the
+  one archive format that `slashslash backup` and `init-data`'s upgrade backup both write.
 - When a tool dies hard, its `finish` script kills what is left of that tool's process group, so a
   child it left behind (PixelSlash's workerd and diff worker hold their ports) cannot block the
   restart. The other tool is not touched.
@@ -133,7 +192,10 @@ nothing runs as root, that the token creates a project that survives a restart, 
 comes back from `kill -9` without the other noticing, that every log line is labelled and none
 holds the token, that nothing is written outside `/run`, `/tmp`, `/home/app` and `/data`, and that
 an unwritable `/data` stops the container with its one line, and that the image reports the
-version it was built with and holds every licence. CI runs it on every change here
+version it was built with and holds every licence. It also backs up, wipes and restores the
+volume, makes a start on an older recorded version write one upgrade backup and restores it, has a
+backup from a newer version refused with nothing touched, and checks that five manual backups are
+kept. CI runs it on every change here
 (`.github/workflows/self-host.yml`), and only the image that passed it is pushed to ghcr.
 
 ## Releasing

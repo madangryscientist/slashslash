@@ -1,6 +1,96 @@
 #!/bin/sh
 # The image's own command, run with `docker exec <container> slashslash <command>`.
 set -eu
+. /usr/local/lib/slashslash/backup.sh
+
+PRODUCTS="pixelslash toggleslash"
+
+# Stops both products, each given 60 s to finish; when one will not stop, both are started again.
+stop_products() {
+  for service in $PRODUCTS; do
+    if ! /command/s6-svc -wD -T 60000 -d "/run/service/$service"; then
+      echo "slashslash: $service did not stop within 60 s; nothing was changed" >&2
+      start_products
+      return 1
+    fi
+  done
+}
+
+start_products() {
+  for service in $PRODUCTS; do /command/s6-svc -u "/run/service/$service"; done
+}
+
+backup() {
+  version="$(cat /etc/slashslash/version)"
+  if [ -n "${1:-}" ]; then
+    out="$1"
+  else
+    mkdir -p /data/backups
+    out="/data/backups/manual-$(slashslash_stamp)-$version.tgz"
+    while [ -e "$out" ]; do sleep 1; out="/data/backups/manual-$(slashslash_stamp)-$version.tgz"; done
+  fi
+  stop_products
+  if slashslash_archive "$out" "$version"; then ok=1; else ok=0; fi
+  start_products
+  if [ "$ok" = 0 ]; then
+    echo "slashslash: writing $out failed; both products are started again" >&2
+    exit 1
+  fi
+  slashslash_prune /data/backups manual- 5
+  echo "$out"
+}
+
+restore() {
+  file="${1:-}"
+  if [ -z "$file" ] || [ ! -f "$file" ]; then
+    echo "slashslash: restore needs a backup file; '$file' is not one" >&2
+    exit 2
+  fi
+  # Every entry must be one this image writes, and each part must be there, before anything moves.
+  if ! entries="$(tar -tzf "$file" 2>/dev/null)"; then
+    echo "slashslash: $file is not a slashslash backup (not a gzip tar)" >&2
+    exit 1
+  fi
+  if printf '%s\n' "$entries" | grep -Evq '^(version|\.slashslash-version|(pixelslash|toggleslash|secrets|caddy)(/.*)?)$'; then
+    echo "slashslash: $file holds files a slashslash backup does not; nothing was changed" >&2
+    exit 1
+  fi
+  for part in version $SLASHSLASH_STATE; do
+    if ! printf '%s\n' "$entries" | grep -Eq "^$part/?\$"; then
+      echo "slashslash: $file has no $part, so it is not a whole backup; nothing was changed" >&2
+      exit 1
+    fi
+  done
+  archived="$(tar -xzOf "$file" version)"
+  running="$(cat /etc/slashslash/version)"
+  if ! slashslash_is_version "$archived"; then
+    echo "slashslash: $file names version '$archived', which is not X.Y.Z; nothing was changed" >&2
+    exit 1
+  fi
+  if [ "$(slashslash_version_cmp "$archived" "$running")" = 1 ]; then
+    echo "slashslash: $file is from slashslash $archived, newer than this image ($running); restore it with $archived or newer. Nothing was changed" >&2
+    exit 1
+  fi
+
+  # Unpacked next to the data first, so a broken archive fails while both products still run.
+  aside="/data/restore-$(slashslash_stamp)"
+  while [ -e "$aside" ]; do sleep 1; aside="/data/restore-$(slashslash_stamp)"; done
+  mkdir -p "$aside/incoming"
+  if ! tar -xzpf "$file" -C "$aside/incoming"; then
+    rm -rf "$aside"
+    echo "slashslash: unpacking $file failed; nothing was changed" >&2
+    exit 1
+  fi
+  stop_products || { rm -rf "$aside"; exit 1; }
+  for part in $SLASHSLASH_STATE .slashslash-version; do
+    if [ -e "/data/$part" ]; then mv "/data/$part" "$aside/$part"; fi
+    if [ -e "$aside/incoming/$part" ]; then mv "$aside/incoming/$part" "/data/$part"; fi
+  done
+  rm -rf "$aside/incoming"
+  start_products
+  slashslash_prune /data restore- 3
+  echo "restored $file (slashslash $archived); the data it replaced is in $aside"
+}
 
 usage() {
   cat <<'USAGE'
@@ -8,6 +98,11 @@ usage: slashslash <command>
 
   status          each service, and whether each product answers
   version         the version of this image
+  backup [<file>] stop both products, archive /data, start them again; the archive
+                  goes to /data/backups/manual-<UTC time>-<version>.tgz (the last 5
+                  are kept) unless <file> is given
+  restore <file>  put the volume back as it was in a backup; the data it replaces is
+                  kept in /data/restore-<UTC time>/ (the last 3 are kept)
   secret <name>   print one secret kept on the volume; today only toggleslash-admin-token
 USAGE
 }
@@ -36,6 +131,8 @@ case "${1:-}" in
     exec bun /usr/local/lib/slashslash/health.ts --print
     ;;
   version) cat /etc/slashslash/version ;;
+  backup) backup "${2:-}" ;;
+  restore) restore "${2:-}" ;;
   -h|--help|help) usage ;;
   *) usage >&2; exit 2 ;;
 esac

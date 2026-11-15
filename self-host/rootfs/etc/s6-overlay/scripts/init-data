@@ -16,3 +16,35 @@ if [ -z "${TOGGLESLASH_ADMIN_TOKEN:-}" ] && [ ! -s "$token" ]; then
   (umask 077 && od -An -tx1 -N32 /dev/urandom | tr -d ' \n' > "$token")
   echo "[init-data] generated the ToggleSlash admin token; read it with: slashslash secret toggleslash-admin-token"
 fi
+
+# Both products migrate their data at start with no way back, so when this image's version differs
+# from the one that last ran on the volume, the volume is archived first. Nothing is running yet:
+# init-data finishes before either product starts. A volume with no version recorded is a first
+# start, unless ToggleSlash's database is already there (a volume from before versions were
+# recorded, labelled 0.0.0). A failed backup stops the container before anything migrates.
+. /usr/local/lib/slashslash/backup.sh
+running="$(cat /etc/slashslash/version)"
+recorded=/data/.slashslash-version
+if [ -s "$recorded" ]; then
+  last="$(cat "$recorded")"
+  slashslash_is_version "$last" || last=0.0.0
+elif [ -e /data/toggleslash/toggleslash.db ]; then
+  last=0.0.0
+else
+  last="$running"
+fi
+if [ "$last" != "$running" ]; then
+  if [ "$(slashslash_version_cmp "$last" "$running")" = 1 ]; then
+    echo "[init-data] this volume was last run by $last, newer than this image ($running); to go back, restore the backup taken before that upgrade"
+  fi
+  mkdir -p /data/backups
+  file="/data/backups/upgrade-$(slashslash_stamp)-$last.tgz"
+  echo "[init-data] the volume was last run by $last and this image is $running: backing it up first"
+  if ! slashslash_archive "$file" "$last"; then
+    echo "[init-data] the upgrade backup to $file failed, so neither product starts; free space on /data and start again"
+    exit 1
+  fi
+  slashslash_prune /data/backups upgrade- 3
+  echo "[init-data] wrote $file"
+fi
+printf '%s\n' "$running" > "$recorded.new" && mv "$recorded.new" "$recorded"
