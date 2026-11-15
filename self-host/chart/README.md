@@ -130,9 +130,9 @@ Secret too.
   kubelet restarts the pod mid-backup, each attempt can leave an `upgrade-*.partial` file in
   `/data/backups` that fills the volume, and the pod stops for want of space.
 - A manual `slashslash backup` stops both tools until the archive is written, and the liveness
-  probe restarts the pod after 60 to 90 s of that, killing the backup, so allow about a minute in all. On a volume too large to
-  archive in that time, copy the claim with your storage's own snapshot instead. A killed backup
-  can leave a `*.partial` file in `/data/backups`; delete it.
+  probe restarts the pod after 60 to 90 s of that, killing the backup, so allow about a minute in
+  all. On a volume too large to archive in that time, copy the claim with your storage's own
+  snapshot instead. A killed backup can leave a `*.partial` file in `/data/backups`; delete it.
 - amd64 only, like the image.
 
 ## Checks
