@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 4332;
 
 // The page loop runs against the production build (`moon run site-next:e2e` builds first), served by
-// `astro preview`, on a Chromium desktop and a WebKit phone. astro.config.mjs sets vite's
+// `astro preview`, on a Chromium desktop and a Chromium phone. astro.config.mjs sets vite's
 // preview.strictPort, so a busy port fails the run; --ignore-lock keeps the server in the foreground.
 export default defineConfig({
   testDir: "./e2e",
@@ -13,7 +13,7 @@ export default defineConfig({
   use: { baseURL: `http://127.0.0.1:${PORT}` },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "phone", use: { ...devices["iPhone 13"] } },
+    { name: "phone", use: { ...devices["iPhone 13"], browserName: "chromium" } },
   ],
   webServer: {
     command: `bun run astro preview --host 127.0.0.1 --port ${PORT} --ignore-lock`,

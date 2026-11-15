@@ -36,7 +36,7 @@ for (const { path } of PAGES) {
       expect(violations).toEqual([]);
 
       // Down one viewport at a time, so every lazy loader fires, then wait for the images to settle.
-      // scrollBy, not mouse.wheel: mobile WebKit has no wheel.
+      // scrollBy, not mouse.wheel: it scrolls the same on a touch phone and a desktop.
       while (
         await page.evaluate(
           () => window.scrollY + window.innerHeight < document.documentElement.scrollHeight - 1,
