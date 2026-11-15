@@ -12,7 +12,11 @@
  * - the container writes nowhere outside /run, /tmp, /home/app and /data;
  * - a /data that UID 1654 cannot write stops the container with one line naming the path and UID;
  * - `slashslash version` and the version label are the version it was built with, and every
- *   licence the image owes is under /usr/share/licenses/slashslash.
+ *   licence the image owes is under /usr/share/licenses/slashslash;
+ * - `slashslash backup` and `restore` bring back a wiped volume (the ToggleSlash project and token,
+ *   PixelSlash and its generated secrets byte for byte), a changed version on the volume makes the
+ *   next start write exactly one upgrade backup that restores, a backup from a newer version is
+ *   refused with nothing touched, and only the last five manual backups are kept.
  *
  * The GitHub values are dummies, as PixelSlash's own e2e build uses: never a real secret. It also
  * prints the container's memory. Set SMOKE_IMAGE to test an image that is
@@ -102,6 +106,69 @@ async function killAndRecover(victim: { name: string; needle: string }, other: {
   check(!docker(["logs", NAME]).includes("ERR_ADDRESS_IN_USE"), `no ERR_ADDRESS_IN_USE in the logs`);
 }
 
+/** `docker exec` that keeps the exit code, for a command that is meant to fail. */
+function exec(command: string): { code: number; out: string } {
+  const result = Bun.spawnSync(["docker", "exec", NAME, "sh", "-c", command], { stdout: "pipe", stderr: "pipe" });
+  return { code: result.exitCode ?? 1, out: (result.stdout.toString() + result.stderr.toString()).trim() };
+}
+
+const sh = (command: string) => docker(["exec", NAME, "sh", "-c", command]);
+const secretHashes = () => sh("cd /data/pixelslash/secrets && sha256sum * | sort");
+const backups = (prefix: string) => sh(`ls /data/backups | grep '^${prefix}-' || true`).split("\n").filter(Boolean);
+
+async function projectAndTokenAreThere(token: string, what: string): Promise<void> {
+  await waitFor(`healthy after ${what}`, async () => health() === "healthy" && (await healthyOnFrontDoor()), 180);
+  const project = await fetch(`http://${hostPort(8080)}/api/v1/projects/smoke`, { headers: { authorization: `Bearer ${token}` } });
+  check(project.status === 200, `the ToggleSlash project is there after ${what} (${project.status})`);
+  check(docker(["exec", NAME, "slashslash", "secret", "toggleslash-admin-token"]) === token, `the token is the same after ${what}`);
+}
+
+async function backupAndRestore(token: string): Promise<void> {
+  // A manual backup, then the volume's state wiped with both products stopped, then a restore.
+  const hashes = secretHashes();
+  check(hashes.split("\n").length >= 2, "PixelSlash generated its secret files", hashes);
+  const file = docker(["exec", NAME, "slashslash", "backup"]).split("\n").at(-1)!;
+  check(/^\/data\/backups\/manual-\d{8}T\d{6}Z-.+\.tgz$/.test(file), `slashslash backup wrote ${file}`);
+  await projectAndTokenAreThere(token, "a backup");
+  sh("for s in pixelslash toggleslash; do /command/s6-svc -wD -T 60000 -d /run/service/$s; done; rm -rf /data/pixelslash /data/toggleslash /data/secrets");
+  console.log(`  | ${docker(["exec", NAME, "slashslash", "restore", file])}`);
+  await projectAndTokenAreThere(token, "wiping the volume and restoring");
+  check(secretHashes() === hashes, "PixelSlash's secret files hash the same as before the wipe");
+
+  // An older version on the volume: the next start writes one upgrade backup, which restores.
+  check(backups("upgrade").length === 0, "no upgrade backup before the version changes");
+  sh("echo 0.0.1 > /data/.slashslash-version");
+  docker(["restart", NAME]);
+  await projectAndTokenAreThere(token, "a restart on a volume last run by 0.0.1");
+  const upgrades = backups("upgrade");
+  check(upgrades.length === 1 && upgrades[0]!.endsWith("-0.0.1.tgz"), `the start wrote exactly one upgrade backup (${upgrades.join(" ")})`);
+  check(sh("cat /data/.slashslash-version") === VERSION, `the volume now records ${VERSION}`);
+  console.log(`  | ${docker(["exec", NAME, "slashslash", "restore", `/data/backups/${upgrades[0]}`])}`);
+  await projectAndTokenAreThere(token, "restoring the upgrade backup");
+  check(sh("cat /data/.slashslash-version") === VERSION, `a restore records the running version, ${VERSION}`);
+
+  // A backup from a newer version, made by repacking a real one: refused, and nothing stops.
+  const pids = [pidOf(PIXELSLASH.needle), pidOf(TOGGLESLASH.needle)];
+  const asideBefore = sh("ls -d /data/restore-* | wc -l");
+  sh(`rm -rf /tmp/newer && mkdir /tmp/newer && tar -xzf ${file} -C /tmp/newer && echo 9.9.9 > /tmp/newer/version \
+    && tar -czf /tmp/newer.tgz -C /tmp/newer version .slashslash-version pixelslash toggleslash secrets caddy && rm -rf /tmp/newer`);
+  const refused = exec("slashslash restore /tmp/newer.tgz");
+  console.log(`  | ${refused.out}`);
+  check(refused.code !== 0 && refused.out.includes("9.9.9") && refused.out.includes(VERSION),
+    `a backup from 9.9.9 is refused, naming 9.9.9 and ${VERSION}`);
+  sh("rm -f /tmp/newer.tgz");
+  check(pidOf(PIXELSLASH.needle) === pids[0] && pidOf(TOGGLESLASH.needle) === pids[1], "both products kept running through the refusal");
+  check(sh("ls -d /data/restore-* | wc -l") === asideBefore && secretHashes() === hashes, "the refusal moved nothing on the volume");
+  await projectAndTokenAreThere(token, "the refused restore");
+
+  // Six more manual backups: the last five are kept, and the upgrade backup is not pruned.
+  for (let i = 0; i < 6; i++) docker(["exec", NAME, "slashslash", "backup"]);
+  const manual = backups("manual");
+  check(manual.length === 5, `five manual backups are kept after six more (${manual.length})`);
+  check(backups("upgrade").length === 1, "the upgrade backup is still there");
+  await projectAndTokenAreThere(token, "six backups in a row");
+}
+
 const PIXELSLASH = { name: "pixelslash", needle: "deploy/docker/start.ts" };
 const TOGGLESLASH = { name: "toggleslash", needle: "ToggleSlash.Server.dll" };
 
@@ -185,6 +252,7 @@ async function main(): Promise<void> {
 
   await killAndRecover(PIXELSLASH, TOGGLESLASH);
   await killAndRecover(TOGGLESLASH, PIXELSLASH);
+  await backupAndRestore(token);
 
   const status = docker(["exec", NAME, "slashslash", "status"]);
   console.log(status.replace(/^/gm, "  | "));
