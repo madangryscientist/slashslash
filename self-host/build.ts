@@ -3,7 +3,11 @@
  * the commit in pins/<product>.sha (a BuildKit git context, so no checkout), then self-host/Dockerfile
  * with those images and repos handed in as named build contexts.
  *
- *   bun self-host/build.ts [--tag slashslash:dev]
+ *   bun self-host/build.ts [--tag slashslash:dev] [--version 0.1.0-dev]
+ *
+ * The version is what the image says it is (`slashslash version`, /etc/slashslash/version and the
+ * org.opencontainers.image.version label). It defaults to self-host/VERSION plus `-dev`; CI passes
+ * the release version on a release tag and `<VERSION>-edge.<sha7>` on main.
  *
  * A product image already built for its pin is reused, so only a moved pin rebuilds a product. The
  * products build one after the other, since each is a few minutes of CPU on its own.
@@ -24,6 +28,13 @@ function pin(product: string): string {
   return sha;
 }
 
+/** The release version in self-host/VERSION, as `0.1.0`. */
+export function readVersion(): string {
+  const version = readFileSync(join(ROOT, "self-host/VERSION"), "utf8").trim();
+  if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error(`self-host/VERSION is not X.Y.Z: '${version}'`);
+  return version;
+}
+
 const repo = (product: string) => `https://github.com/madangryscientist/${product}.git`;
 const productImage = (product: string) => `slashslash-product/${product}:${pin(product)}`;
 
@@ -37,9 +48,9 @@ function run(args: string[], quiet = false): number {
   return result.exitCode;
 }
 
-export function build(tag: string): void {
+export function build(tag: string, version = `${readVersion()}-dev`): void {
   const contexts: string[] = [];
-  const buildArgs: string[] = [];
+  const buildArgs = ["--build-arg", `SLASHSLASH_VERSION=${version}`];
   for (const { name, dockerfile } of PRODUCTS) {
     const sha = pin(name);
     const image = productImage(name);
@@ -58,6 +69,9 @@ export function build(tag: string): void {
 }
 
 if (import.meta.main) {
-  const at = process.argv.indexOf("--tag");
-  build(at > 0 ? process.argv[at + 1]! : "slashslash:dev");
+  const flag = (name: string) => {
+    const at = process.argv.indexOf(name);
+    return at > 0 ? process.argv[at + 1] : undefined;
+  };
+  build(flag("--tag") ?? "slashslash:dev", flag("--version"));
 }

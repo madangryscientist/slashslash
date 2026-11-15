@@ -7,6 +7,7 @@ usage() {
 usage: slashslash <command>
 
   status          each service, and whether each product answers
+  version         the version of this image
   secret <name>   print one secret kept on the volume; today only toggleslash-admin-token
 USAGE
 }
@@ -34,6 +35,7 @@ case "${1:-}" in
     done
     exec bun /usr/local/lib/slashslash/health.ts --print
     ;;
+  version) cat /etc/slashslash/version ;;
   -h|--help|help) usage ;;
   *) usage >&2; exit 2 ;;
 esac
