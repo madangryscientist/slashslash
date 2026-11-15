@@ -41,11 +41,13 @@ jobs:
       MOON_BASE: origin/main
       MOON_REMOTE_TOKEN: ${{ secrets.MOON_CACHE_READ_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
 
       - name: Check
         id: check
@@ -151,7 +153,17 @@ jobs:
         run: |
           set -euo pipefail
           # The push is done, so the gate runs with no write credential: drop the one checkout stored.
+          # checkout v6 and later keep it in a file under RUNNER_TEMP that the local config includes,
+          # so remove the includes and the file as well as any header set the old way.
           git config --local --unset-all "http.https://github.com/.extraheader" || true
+          { git config --local --name-only --get-regexp '^includeif\.' || true; } | while read -r key; do
+            git config --local --unset-all "$key"
+          done
+          rm -f "$RUNNER_TEMP"/git-credentials-*.config
+          if git config --get-regexp '\.extraheader$'; then
+            echo "a git credential is still configured" >&2
+            exit 1
+          fi
           bun install --frozen-lockfile
           bunx moon run --concurrency 3 :lint :typecheck :build :test 2>&1 | tee "$RUNNER_TEMP/gate.log"
 
