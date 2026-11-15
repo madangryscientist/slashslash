@@ -49,7 +49,7 @@ is Ready. The first start can take two minutes.
 ## Upgrade and remove
 
 - Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash
-  --reuse-values --version <new>` (or apply the newer rendered file). The old pod stops first, and the
+  --reset-then-reuse-values --version <new>` (or apply the newer rendered file). The old pod stops first, and the
   new version writes its upgrade backup before the tools start.
 - Remove: `helm uninstall slashslash -n slashslash` (or `kubectl delete -f` the rendered file) keeps
   the claim; deleting `data-slashslash-0` deletes the data (depending on the class's reclaim

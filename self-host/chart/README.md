@@ -102,7 +102,7 @@ Secret too.
 ## Upgrade, backup and remove
 
 - Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash
-  --reuse-values --version <new>`. The new version backs the volume up before either tool migrates
+  --reset-then-reuse-values --version <new>`. The new version backs the volume up before either tool migrates
   (see "Backup, restore and rollback" in `self-host/README.md`).
 - Backup: `kubectl exec -n slashslash slashslash-0 -- slashslash backup`, then copy it out with
   `kubectl cp slashslash/slashslash-0:/data/backups/<file> ./<file>`.
