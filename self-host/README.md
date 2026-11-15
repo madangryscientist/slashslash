@@ -46,8 +46,8 @@ Without a terminal it reads everything from the environment instead:
 | `BRIDGE` | `vmbr0` | The network bridge |
 | `STORAGE` | `local-lvm` | Storage for the root disk (Docker's own files live there) |
 | `DATA_STORAGE`, `DATA_GB` | `STORAGE`, `8` | A new data volume, on that storage at that size |
-| `DATA_PATH` | unset | A host folder for the data instead, such as a ZFS dataset's mountpoint. It is given to UID 101654, the image's user as the host sees it |
-| `DATA_VOLUME` | unset | An existing volume for the data instead, such as one `--uninstall` kept |
+| `DATA_PATH` | unset | A host folder for the data instead, such as a ZFS dataset's mountpoint. It must be empty or already slashslash's, and no other container may mount it. It is given to UID 101654, the image's user as the host sees it |
+| `DATA_VOLUME` | unset | A volume `--uninstall` kept, used again under the same `CTID` |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | none, required | PixelSlash's GitHub sign-in. The callback is `http://<address>:3000/auth/github/callback` |
 | `VERSION` | `latest` | The image tag to run |
 | `CT_HOSTNAME` | `slashslash` | The container's host name |
@@ -66,7 +66,8 @@ bash -c "$(curl -fsSL $url)" _ --uninstall <CTID> --purge  # remove the containe
 
 An upgrade prints the old and new version and the upgrade backup the new version wrote (see
 "Backup, restore and rollback"). Uninstall keeps a data volume by taking it out of the container's
-config first and tells you how to use it again; `--purge` deletes it. A host folder (`DATA_PATH`)
+config first and tells you how to use it again. The volume stays filed under that id, so give the
+id to no other guest until then. `--purge` deletes it. A host folder (`DATA_PATH`)
 is never deleted, even with `--purge`. Upgrade and uninstall act only on a container tagged
 `slashslash`.
 

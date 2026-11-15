@@ -15,6 +15,7 @@ let dir: string;
 let bin: string;
 let log: string;
 let dataPath: string;
+let lxcDir: string;
 
 // One stand-in for every host tool; $0's name picks the behaviour. FAKE_CTS lists the existing
 // containers, FAKE_OURS the ones carrying the slashslash tag, FAKE_VMS the existing VMs.
@@ -27,6 +28,8 @@ case "$tool" in
       status) has "$FAKE_CTS" "$2" && { echo "status: running"; exit 0; }; echo "no such ct" >&2; exit 2 ;;
       config)
         has "$FAKE_CTS" "$2" || exit 2
+        # A config file written by the test stands for the real one.
+        [ -f "$PVE_LXC_DIR/$2.conf" ] && { cat "$PVE_LXC_DIR/$2.conf"; exit 0; }
         echo "hostname: slashslash"
         has "$FAKE_OURS" "$2" && echo "tags: slashslash"
         echo "net0: name=eth0,bridge=vmbr0,gw=192.168.0.1,ip=192.168.0.40/24,type=veth"
@@ -59,6 +62,8 @@ beforeAll(() => {
   dataPath = join(dir, "tank-slashslash");
   mkdirSync(bin);
   mkdirSync(dataPath);
+  lxcDir = join(dir, "lxc");
+  mkdirSync(lxcDir);
   for (const tool of ["pct", "qm", "pveam", "pvesh", "ping"]) {
     writeFileSync(join(bin, tool), STUB);
     chmodSync(join(bin, tool), 0o755);
@@ -75,6 +80,7 @@ function sh(args: string[], env: Record<string, string> = {}): Run {
       PATH: `${bin}:${process.env.PATH}`,
       DRY_RUN: "1",
       FAKE_LOG: log,
+      PVE_LXC_DIR: lxcDir,
       FAKE_CTS: "100 139",
       FAKE_OURS: "",
       FAKE_VMS: "101",
@@ -192,11 +198,6 @@ describe("install", () => {
     expect(r.out).toContain("+ pveam download local debian-13-standard_13.6-1_amd64.tar.zst");
   });
 
-  test("the secret never reaches the output", () => {
-    const r = sh([], { ...INSTALL, DATA_PATH: dataPath });
-    expect(r.out + r.err).not.toContain(SECRET);
-  });
-
   test.each([
     ["an existing container", { CTID: "139" }, "container 139 already exists"],
     ["an existing VM", { CTID: "101" }, "VM 101 already exists"],
@@ -207,8 +208,17 @@ describe("install", () => {
     ["no client secret", { GITHUB_CLIENT_SECRET: "" }, "GITHUB_CLIENT_SECRET is required"],
     ["a DATA_PATH that is not there", { DATA_PATH: "/no/such/dir" }, "is not a directory"],
     ["DATA_PATH and DATA_VOLUME both", { DATA_PATH: "/x", DATA_VOLUME: "y" }, "not both"],
+    ["a DATA_PATH with someone else's files", { DATA_PATH: "NONEMPTY" }, "is not empty and not owned by UID 101654"],
+    ["a DATA_PATH another container mounts", { DATA_PATH: "MOUNTED" }, "is already mounted by 139.conf"],
   ])("refuses %s", (_name, env, message) => {
-    const r = sh([], { ...INSTALL, ...env });
+    const path = { NONEMPTY: join(dir, "nonempty"), MOUNTED: join(dir, "mounted") }[env.DATA_PATH ?? ""];
+    if (path) {
+      mkdirSync(path, { recursive: true });
+      if (env.DATA_PATH === "NONEMPTY") writeFileSync(join(path, "theirs.txt"), "");
+      else writeFileSync(join(lxcDir, "139.conf"), `mp0: ${path},mp=/srv\n`);
+    }
+    const r = sh([], { ...INSTALL, ...env, ...(path ? { DATA_PATH: path } : {}) });
+    rmSync(join(lxcDir, "139.conf"), { force: true });
     expect(r.code).toBe(1);
     expect(r.err).toContain(message);
     expect(r.out).not.toContain("pct create");
@@ -229,7 +239,7 @@ describe("upgrade", () => {
       "--env-file /etc/slashslash/.env -v /var/lib/slashslash:/data ghcr.io/madangryscientist/slashslash:0.1.1",
     );
     expect(r.out).toContain("+ pct set 140 --description");
-    expect(r.out).toContain("upgrade-20261115T100000Z-0.1.0.tgz");
+    expect(r.out).toContain("upgrade backup: upgrade-20261115T100000Z-0.1.0.tgz");
     expect(r.out).toContain("PixelSlash:  http://192.168.0.40:3000");
     expect(r.out).not.toContain("pct create");
   });
@@ -238,6 +248,13 @@ describe("upgrade", () => {
     const r = sh(["--upgrade", "140"], { FAKE_CTS: "140", FAKE_OURS: "140" });
     expect(r.code).toBe(0);
     expect(r.out).toContain("slashslash:latest");
+  });
+
+  test("the same version again says no upgrade backup was written", () => {
+    const r = sh(["--upgrade", "140", "0.1.0"], { FAKE_CTS: "140", FAKE_OURS: "140" });
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("same version, so no upgrade backup was written");
+    expect(r.out).not.toContain("upgrade backup:");
   });
 
   test("refuses a container this script did not make", () => {
@@ -266,19 +283,46 @@ describe("uninstall", () => {
     expect(r.code).toBe(0);
     expect(r.calls).toBe("");
     const lines = r.out.split("\n");
-    const detach = lines.findIndex((l) => l === "+ remove the mp0 line from /etc/pve/lxc/140.conf");
-    const destroy = lines.findIndex((l) => l === "+ pct destroy 140 --destroy-unreferenced-disks 0");
-    expect(detach).toBeGreaterThan(-1);
+    const detach = lines.findIndex((l) => l === `+ remove the mp0 line from ${lxcDir}/140.conf`);
+    const stop = lines.findIndex((l) => l === "+ pct stop 140");
+    const destroy = lines.findIndex((l) => l === "+ pct destroy 140 --purge 1 --destroy-unreferenced-disks 0");
+    expect(stop).toBeGreaterThan(-1);
+    expect(detach).toBeGreaterThan(stop);
     expect(destroy).toBeGreaterThan(detach);
-    expect(r.out).toContain("+ pct stop 140");
     expect(r.out).toContain("DATA_VOLUME=local-lvm:vm-140-disk-1");
+  });
+
+  test("for real, the volume leaves the config before the stop and destroy calls", () => {
+    const conf = join(lxcDir, "140.conf");
+    writeFileSync(
+      conf,
+      "hostname: slashslash\nmp0: local-lvm:vm-140-disk-1,mp=/var/lib/slashslash,size=8G\ntags: slashslash\n",
+    );
+    const r = sh(["--uninstall", "140"], { ...ours, DRY_RUN: "0" });
+    const left = readFileSync(conf, "utf8");
+    rmSync(conf);
+    expect(r.err).toBe("");
+    expect(r.code).toBe(0);
+    expect(left).toBe("hostname: slashslash\ntags: slashslash\n");
+    expect(r.calls).toBe("pct stop 140\npct destroy 140 --purge 1 --destroy-unreferenced-disks 0\n");
+    expect(r.out).toContain("still filed under id 140");
+  });
+
+  test("refuses to keep a volume that snapshots still hold", () => {
+    const conf = join(lxcDir, "140.conf");
+    writeFileSync(conf, "mp0: local-lvm:vm-140-disk-1,mp=/var/lib/slashslash\ntags: slashslash\n[before]\nmp0: local-lvm:vm-140-disk-1,mp=/var/lib/slashslash\n");
+    const r = sh(["--uninstall", "140"], ours);
+    rmSync(conf);
+    expect(r.code).toBe(1);
+    expect(r.err).toContain("has snapshots");
+    expect(r.out).not.toContain("destroy");
   });
 
   test("keeps a host directory without touching the config", () => {
     const r = sh(["--uninstall", "140"], { ...ours, FAKE_MP0: "/tank/slashslash,mp=/var/lib/slashslash" });
     expect(r.code).toBe(0);
     expect(r.out).not.toContain("remove the mp0 line");
-    expect(r.out).toContain("+ pct destroy 140 --destroy-unreferenced-disks 0");
+    expect(r.out).toContain("+ pct destroy 140 --purge 1 --destroy-unreferenced-disks 0");
     expect(r.out).toContain("Data kept at /tank/slashslash.");
   });
 

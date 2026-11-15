@@ -23,6 +23,8 @@ MOUNT="/var/lib/slashslash"
 APP_UID=1654
 HOST_APP_UID=$((100000 + APP_UID))
 HEALTH_TIMEOUT="${HEALTH_TIMEOUT:-300}"
+# Where Proxmox keeps container configs; the test points it at a folder of its own.
+LXC_DIR="${PVE_LXC_DIR:-/etc/pve/lxc}"
 DRY_RUN="${DRY_RUN:-0}"
 
 usage() {
@@ -41,7 +43,7 @@ Install settings (environment; asked for in a terminal when missing):
   STORAGE               storage for the container's root disk (default local-lvm)
   DATA_STORAGE, DATA_GB storage and size in GB of the data volume (default STORAGE, 8)
   DATA_PATH             a host directory (a ZFS dataset's mountpoint) to use for data instead
-  DATA_VOLUME           an existing volume id to use for data instead (one kept by --uninstall)
+  DATA_VOLUME           a volume kept by --uninstall, to use again under the same CTID
   GITHUB_CLIENT_ID      the GitHub OAuth app for PixelSlash's sign-in
   GITHUB_CLIENT_SECRET
   VERSION               image version (default latest)
@@ -71,7 +73,10 @@ vm_exists() { qm status "$1" >/dev/null 2>&1; }
 # Only a container this script made carries the tag, so --upgrade and --uninstall act on no other.
 require_ours() {
   ct_exists "$1" || die "no container $1"
-  pct config "$1" | grep -Eq "^tags:.*(^|[ ;,])$TAG([ ;,]|$)" ||
+  # Read whole before matching: with pipefail, grep -q quitting early can fail the pipe on SIGPIPE.
+  local conf
+  conf="$(pct config "$1")"
+  grep -Eq "^tags:.*(^|[ ;,])$TAG([ ;,]|$)" <<<"$conf" ||
     die "REFUSING: container $1 was not made by this script (no '$TAG' tag)"
 }
 
@@ -172,7 +177,15 @@ do_install() {
   fi
   local mp0 own_inside=1
   if [ -n "${DATA_PATH:-}" ]; then
+    DATA_PATH="${DATA_PATH%/}"
     [ -d "$DATA_PATH" ] || die "DATA_PATH $DATA_PATH is not a directory on this host"
+    # It is chowned to the image's user, so it must be ours: empty, or slashslash data already.
+    if [ -n "$(ls -A "$DATA_PATH")" ] && [ "$(stat -c %u "$DATA_PATH")" != "$HOST_APP_UID" ]; then
+      die "REFUSING: DATA_PATH $DATA_PATH is not empty and not owned by UID $HOST_APP_UID; give it a folder of its own"
+    fi
+    local other
+    other="$(grep -lsF -- " $DATA_PATH," "$LXC_DIR"/*.conf | head -n1 || true)"
+    [ -z "$other" ] || die "REFUSING: DATA_PATH $DATA_PATH is already mounted by ${other##*/}"
     mp0="$DATA_PATH,mp=$MOUNT"
     own_inside=0
   elif [ -n "${DATA_VOLUME:-}" ]; then
@@ -250,7 +263,7 @@ do_upgrade() { # ctid version
   CTID="$1"; VERSION="${2:-latest}"
   valid_ctid "$CTID"; valid_version "$VERSION"
   require_ours "$CTID"
-  if ! pct status "$CTID" | grep -q running; then
+  if [[ "$(pct status "$CTID")" != *running* ]]; then
     run pct start "$CTID"
     wait_healthy
   fi
@@ -266,8 +279,11 @@ do_upgrade() { # ctid version
   new="$(image_version new)"
   run pct set "$CTID" --description "$(description "$new")"
   echo "slashslash version: $old -> $new"
-  echo "upgrade backups (the new version writes one when the version changes):"
-  ask_ct "ls -1 $MOUNT/backups/ 2>/dev/null | grep '^upgrade-' || echo '  (none)'"
+  if [ "$old" = "$new" ]; then
+    echo "same version, so no upgrade backup was written"
+  else
+    echo "upgrade backup: $(ask_ct "ls -1t $MOUNT/backups/upgrade-*.tgz 2>/dev/null | head -n1" || true)"
+  fi
   print_urls
 }
 
@@ -275,12 +291,13 @@ do_uninstall() { # ctid purge
   CTID="$1"
   valid_ctid "$CTID"
   require_ours "$CTID"
-  local conf mp0 vol
-  conf="$(pct config "$CTID")"
-  mp0="$(sed -n 's/^mp0: //p' <<<"$conf")"
+  local conf="$LXC_DIR/$CTID.conf" mp0 vol
+  mp0="$(pct config "$CTID" | sed -n 's/^mp0: //p')"
   vol="${mp0%%,*}"
+  # --purge 1 on pct destroy drops the container from backup, replication and HA jobs, so the next
+  # guest given this id inherits none. Volumes go because the config names them, not because of it.
   if [ "$2" = 1 ]; then
-    step "remove container $CTID and its volumes"
+    step "remove container $CTID and its data volume"
     run pct stop "$CTID" || true
     run pct destroy "$CTID" --purge 1
     case "$vol" in /*) echo "The data at $vol is a host directory and was not deleted. Remove it yourself if you mean to." ;; esac
@@ -288,31 +305,35 @@ do_uninstall() { # ctid purge
   fi
 
   step "remove container $CTID, keep its data"
+  run pct stop "$CTID" || true
   case "$vol" in
-    "") ;;
-    /*) ;; # A host directory: destroying the container never touches it.
+    "" | /*) ;; # No data mount, or a host directory, which destroying the container never touches.
     *)
-      # A volume of the container's own: pct destroy deletes every volume its config names, so the
-      # volume leaves the config first. Snapshots would still name it.
-      grep -q '^\[' "/etc/pve/lxc/$CTID.conf" 2>/dev/null &&
+      # A volume: pct destroy deletes every volume the config names, so it leaves the config first.
+      # A snapshot section would still name it.
+      if grep '^\[' "$conf" 2>/dev/null | grep -vx '\[pve:pending\]' >/dev/null; then
         die "REFUSING: container $CTID has snapshots, which still hold $vol; delete them first or use --purge"
+      fi
       if [ "$DRY_RUN" = 1 ]; then
-        echo "+ remove the mp0 line from /etc/pve/lxc/$CTID.conf"
+        echo "+ remove the mp0 line from $conf"
       else
         local rest
-        rest="$(grep -v '^mp0: ' "/etc/pve/lxc/$CTID.conf")"
-        printf '%s\n' "$rest" >"/etc/pve/lxc/$CTID.conf"
+        rest="$(grep -v '^mp0: ' "$conf")"
+        printf '%s\n' "$rest" >"$conf"
+        [[ "$(pct config "$CTID")" != *"$vol"* ]] ||
+          die "REFUSING: $vol is still in container $CTID's config; nothing was destroyed"
       fi
       ;;
   esac
-  run pct stop "$CTID" || true
-  run pct destroy "$CTID" --destroy-unreferenced-disks 0
-  if [ -n "$vol" ]; then
-    case "$vol" in
-      /*) echo "Data kept at $vol." ;;
-      *) echo "Data kept on volume $vol. To use it again: DATA_VOLUME=$vol with a new install." ;;
-    esac
-  fi
+  run pct destroy "$CTID" --purge 1 --destroy-unreferenced-disks 0
+  case "$vol" in
+    "") ;;
+    /*) echo "Data kept at $vol." ;;
+    *)
+      echo "Data kept on volume $vol, still filed under id $CTID. To use it again: CTID=$CTID DATA_VOLUME=$vol with a new install."
+      echo "Until then, a guest given id $CTID and destroyed with 'destroy unreferenced disks' would delete it."
+      ;;
+  esac
 }
 
 main() {
