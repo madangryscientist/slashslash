@@ -46,12 +46,15 @@ jobs:
         with:
           path: ${{ runner.temp }}/product-images/toggleslash.tar.gz
           key: self-host-toggleslash-${{ hashFiles('self-host/pins/toggleslash.sha') }}
+      # bash, so GitHub adds pipefail: a failed load or save turns the run red instead of caching junk.
       - name: Load the cached product images
-        run: for f in "$RUNNER_TEMP/product-images"/*.tar.gz; do [ -e "$f" ] && docker load -i "$f"; done; true
+        shell: bash
+        run: for f in "$RUNNER_TEMP/product-images"/*.tar.gz; do if [ -e "$f" ]; then docker load -i "$f"; fi; done
       - name: Build the image (and any product whose pin has no cached image)
         run: bun self-host/build.ts --tag slashslash:smoke
       - name: Export the product images that were built
         if: steps.pixelslash.outputs.cache-hit != 'true' || steps.toggleslash.outputs.cache-hit != 'true'
+        shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/product-images"
           for p in pixelslash toggleslash; do

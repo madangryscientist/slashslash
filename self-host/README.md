@@ -33,6 +33,8 @@ Everything is the container's environment.
 | `SLASHSLASH_PORT` | `8000` | That one port, used only with `SLASHSLASH_DOMAIN` |
 
 Any other setting either product reads (see each product's own docs) passes straight through.
+Ports 3100 and 8180 are taken inside the container (the tools listen there, behind Caddy), so none
+of the three port settings may use them.
 
 Each tool has its own port, or its own host name with a domain, never a path. The host names are
 plain HTTP on `SLASHSLASH_PORT`; map it to the host's port 80 (`-p 80:8000`) or put your own proxy
