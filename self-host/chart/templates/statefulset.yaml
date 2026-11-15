@@ -54,13 +54,14 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]
-          # The first start migrates PixelSlash's database before it listens.
+          # The first start migrates PixelSlash's database, and an upgrade backs up the volume, before
+          # PixelSlash listens.
           startupProbe:
             httpGet:
               path: /
               port: pixelslash
             periodSeconds: 5
-            failureThreshold: 36
+            failureThreshold: {{ div .Values.startupSeconds 5 | max 1 }}
           # The image's own check asks both tools through its front door.
           readinessProbe:
             exec:

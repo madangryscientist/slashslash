@@ -40,3 +40,6 @@ ingress:
     secretName: ""
 
 resources: {}
+
+# Seconds the first start (PixelSlash's migration) or an upgrade's volume backup may take.
+startupSeconds: 180

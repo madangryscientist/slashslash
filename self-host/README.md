@@ -266,5 +266,6 @@ kept. CI runs it on every change here
    runs the smoke, pushes `:X.Y.Z` and `:latest`, then pushes the chart to
    `oci://ghcr.io/madangryscientist/charts`.
 
-The first push from CI creates each package (the image, the chart) private. Its owner makes it public once, under
-the package's settings on github.com (Change visibility); GitHub's API cannot change it.
+The first push from CI creates each package (the image, the chart) private. Its owner makes it
+public once, under the package's settings on github.com (Change visibility); GitHub's API cannot
+change it.

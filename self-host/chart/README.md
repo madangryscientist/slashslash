@@ -81,6 +81,7 @@ kubectl exec -n slashslash slashslash-0 -- slashslash secret toggleslash-admin-t
 | `ingress.tls.enabled` | `false` | TLS for both host names (see the HTTPS note above) |
 | `ingress.tls.secretName` | `<release>-tls` | The certificate's Secret |
 | `resources` | `{}` | The container's requests and limits |
+| `startupSeconds` | `180` | How long the first start, or an upgrade's backup, may take before the pod is restarted |
 
 Any other setting the image reads (see the Settings table in `self-host/README.md`) can go in the
 Secret too.
@@ -101,9 +102,13 @@ Secret too.
 
 ## Upgrade, backup and remove
 
-- Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash
-  --reset-then-reuse-values --version <new>`. The new version backs the volume up before either tool migrates
-  (see "Backup, restore and rollback" in `self-host/README.md`).
+- Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash
+  -n slashslash --reset-then-reuse-values --version <new>`. The new version backs the volume up
+  before either tool migrates (see "Backup, restore and rollback" in `self-host/README.md`).
+- Rollback (untested): `helm rollback slashslash -n slashslash`; if `slashslash-0` stays on the new
+  version, `kubectl delete pod slashslash-0 -n slashslash`. Then restore the upgrade backup taken
+  before the upgrade: `kubectl exec -n slashslash slashslash-0 -- slashslash restore
+  /data/backups/upgrade-<UTC time>-<previous version>.tgz`.
 - Backup: `kubectl exec -n slashslash slashslash-0 -- slashslash backup`, then copy it out with
   `kubectl cp slashslash/slashslash-0:/data/backups/<file> ./<file>`.
 - Remove: `helm uninstall slashslash -n slashslash` keeps the volume claim. Deleting it
@@ -117,6 +122,9 @@ Secret too.
   allows it.
 - The hand-written manifest the self-host guide used to carry was never applied anywhere, so there
   is no migration from its `slashslash-data` claim.
+- The startup probe allows `startupSeconds` (180 by default). An upgrade backs up the whole
+  volume inside that time, before the tools listen; on a large volume, raise it, or the kubelet
+  restarts the pod mid-backup and the backup starts again.
 - amd64 only, like the image.
 
 ## Checks

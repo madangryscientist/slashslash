@@ -48,9 +48,10 @@ is Ready. The first start can take two minutes.
 
 ## Upgrade and remove
 
-- Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash
-  --reset-then-reuse-values --version <new>` (or apply the newer rendered file). The old pod stops first, and the
-  new version writes its upgrade backup before the tools start.
+- Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash
+  -n slashslash --reset-then-reuse-values --version <new>` (or apply the newer rendered file). The
+  old pod stops first, and the new version writes its upgrade backup before the tools start. On a
+  large volume, raise `startupSeconds` first. Rollback is in the chart README, and untested.
 - Remove: `helm uninstall slashslash -n slashslash` (or `kubectl delete -f` the rendered file) keeps
   the claim; deleting `data-slashslash-0` deletes the data (depending on the class's reclaim
   policy). Take a `slashslash backup` and `kubectl cp` it out first.
