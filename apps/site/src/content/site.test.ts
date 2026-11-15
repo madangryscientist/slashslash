@@ -1,6 +1,7 @@
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
+import { PAGES } from "#/content/pages";
 import { PRODUCTS } from "#/content/products";
 import { STAGES } from "#/content/stages";
 import { SITE_URL } from "#/content/site";
@@ -8,6 +9,10 @@ import { STAGE, STAGE_LINE } from "#/pixelslash/content/stage";
 
 const CLIENT = resolve(import.meta.dirname, "../../dist");
 const BUILT = resolve(CLIENT, "index.html");
+const SRC_PAGES = resolve(import.meta.dirname, "../pages");
+
+/** The built file of a page address: `index.html` for `/`, `<path>.html` otherwise. */
+const builtFile = (path: string): string => (path === "/" ? "index.html" : `${path.slice(1)}.html`);
 
 function builtHtml(): string {
   if (!existsSync(BUILT))
@@ -100,6 +105,30 @@ describe("built page", () => {
     expect(SITE_URL).toMatch(/^https:\/\/[^/]+$/);
   });
 
+  test("every suite page's share image is in the build at 1200x630", () => {
+    builtHtml();
+    for (const { path } of PAGES.filter((page) => !page.path.startsWith("/pixelslash"))) {
+      const html = readFileSync(resolve(CLIENT, builtFile(path)), "utf8");
+      const image = html.match(/property="og:image" content="([^"]+)"/)?.[1];
+      expect(image?.startsWith(`${SITE_URL}/`), `${path} should name a share image on ${SITE_URL}`).toBe(true);
+      const file = resolve(CLIENT, (image ?? "").slice(SITE_URL.length + 1));
+      expect(existsSync(file), `${path}'s share image ${image} should be in dist/`).toBe(true);
+      // A PNG's IHDR chunk holds its width and height as big-endian 32-bit numbers at bytes 16 and 20.
+      const png = readFileSync(file);
+      expect(png.subarray(1, 4).toString("latin1")).toBe("PNG");
+      expect([png.readUInt32BE(16), png.readUInt32BE(20)], `${image} size`).toEqual([1200, 630]);
+    }
+  });
+
+  test("every PixelSlash page names its share image at 1200x630", () => {
+    for (const { path } of PAGES.filter((page) => page.path.startsWith("/pixelslash"))) {
+      const html = readFileSync(resolve(CLIENT, builtFile(path)), "utf8");
+      expect(html, path).toMatch(/property="og:image" content="https:\/\/[^"]+\.png"/);
+      expect(html, path).toContain('property="og:image:width" content="1200"');
+      expect(html, path).toContain('property="og:image:height" content="630"');
+    }
+  });
+
   test("each page has its own description", () => {
     builtPages();
     const developers = readFileSync(resolve(CLIENT, "developers.html"), "utf8");
@@ -117,18 +146,16 @@ describe("is open to search engines", () => {
     );
   });
 
-  test("the sitemap lists the pages, the PixelSlash ones included, and not the 404 page", () => {
+  test("the page list names every .astro page under src/pages but the 404 page", () => {
+    const files = globSync("**/*.astro", { cwd: SRC_PAGES }).filter((file) => file !== "404.astro");
+    expect(new Set(files)).toEqual(new Set(PAGES.map((page) => page.file)));
+  });
+
+  test("the sitemap lists exactly the page list on the live site", () => {
     const sitemap = readFileSync(resolve(CLIENT, "sitemap.xml"), "utf8");
-    expect([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])).toEqual([
-      `${SITE_URL}/`,
-      `${SITE_URL}/developers`,
-      `${SITE_URL}/flakeslash`,
-      `${SITE_URL}/pixelslash`,
-      `${SITE_URL}/pixelslash/compare`,
-      `${SITE_URL}/pixelslash/how-it-works`,
-      `${SITE_URL}/pixelslash/pricing`,
-      `${SITE_URL}/toggleslash`,
-    ]);
+    expect([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])).toEqual(
+      PAGES.map((page) => `${SITE_URL}${page.path}`),
+    );
   });
 
   test("no page asks crawlers to stay out", () => {
