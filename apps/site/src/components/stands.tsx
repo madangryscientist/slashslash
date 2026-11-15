@@ -3,7 +3,8 @@ import { useRef } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { Section } from "#/components/section";
 import { STANDS } from "#/content/landing";
-import { PRODUCTS, STATUS_TONE } from "#/content/products";
+import { PRODUCTS } from "#/content/products";
+import { STAGES, STAGE_TONE } from "#/content/stages";
 
 /**
  * The real PixelSlash report. A tap opens it full screen in a modal dialog, which Esc closes. With no
@@ -33,11 +34,11 @@ function Report(): ReactNode {
   );
 }
 
-/** The chip's colour comes from the product's status. Its words are the visuals brief's, kept short. */
-function toneOf(tool: string): (typeof STATUS_TONE)[keyof typeof STATUS_TONE] {
+/** The product a chip is for. The chip's stage comes from that product, so it can never disagree with /developers. */
+function productOf(tool: string): (typeof PRODUCTS)[number] {
   const product = PRODUCTS.find((p) => p.name === tool);
   if (!product) throw new Error(`No product named ${tool}`);
-  return STATUS_TONE[product.status];
+  return product;
 }
 
 /** Where it stands: a status chip per tool, and the real report. */
@@ -45,14 +46,18 @@ export function Stands(): ReactNode {
   return (
     <Section id="stands" title={STANDS.title}>
       <ul className="chips" data-play="">
-        {STANDS.chips.map((chip, i) => (
-          <li key={chip.tool} style={{ "--i": i }}>
-            <span className="chip-tool">{chip.tool}</span>
-            <Pill tone={toneOf(chip.tool)} data-chip-for={chip.tool}>
-              {chip.status}
-            </Pill>
-          </li>
-        ))}
+        {STANDS.chips.map((chip, i) => {
+          const { stage } = productOf(chip.tool);
+          return (
+            <li key={chip.tool} style={{ "--i": i }}>
+              <span className="chip-tool">{chip.tool}</span>
+              <Pill tone={STAGE_TONE[stage]} data-chip-for={chip.tool}>
+                {STAGES[stage].label}
+              </Pill>
+              <span className="chip-stage">{STAGES[stage].sentence}</span>
+            </li>
+          );
+        })}
       </ul>
       <div className="stands">
         <div className="stands-text">

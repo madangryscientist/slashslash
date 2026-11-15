@@ -4,7 +4,7 @@ import { Frame } from "#/components/evidence";
 import { Section } from "#/components/section";
 import { FLOW } from "#/content/flow";
 import type { Output } from "#/content/flow";
-import { STATUS_TONE } from "#/content/products";
+import { STAGES, STAGE_TONE } from "#/content/stages";
 
 function lineClass(line: string): string {
   if (line.startsWith("$ ")) return "term-cmd";
@@ -66,7 +66,7 @@ export function Walkthrough(): ReactNode {
                 <div className="fit" key={fit.tool}>
                   <div className="fit-text">
                     <h4 className="fit-tool">
-                      {fit.tool} <Pill tone={STATUS_TONE[fit.status]}>{fit.status}</Pill>
+                      {fit.tool} <Pill tone={STAGE_TONE[fit.stage]}>{STAGES[fit.stage].label}</Pill>
                     </h4>
                     <p>{fit.text}</p>
                   </div>

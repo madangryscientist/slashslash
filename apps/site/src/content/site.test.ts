@@ -2,7 +2,9 @@ import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { PRODUCTS } from "#/content/products";
+import { STAGES } from "#/content/stages";
 import { SITE_URL } from "#/content/site";
+import { STAGE, STAGE_LINE } from "#/pixelslash/content/stage";
 
 const CLIENT = resolve(import.meta.dirname, "../../dist");
 const BUILT = resolve(CLIENT, "index.html");
@@ -35,12 +37,41 @@ function visibleText(html: string): string {
 }
 
 describe("built page", () => {
-  test("every product has its status label next to its name on /developers", () => {
+  test("every product has its stage label next to its name, and the stage's sentence, on /developers", () => {
     builtHtml();
     const html = readFileSync(resolve(CLIENT, "developers.html"), "utf8");
     for (const product of PRODUCTS) {
-      const label = new RegExp(`data-status-for="${product.name}"[^>]*>${product.status}<`);
-      expect(html, `${product.name} should carry "${product.status}"`).toMatch(label);
+      const { label, sentence } = STAGES[product.stage];
+      expect(html, `${product.name} should carry "${label}"`).toMatch(
+        new RegExp(`data-status-for="${product.name}"[^>]*>${label}<`),
+      );
+      // The name, the label and the sentence must sit in this product's own header, so that header is cut out first.
+      const pill = html.indexOf(`data-status-for="${product.name}"`);
+      const header = html.slice(html.lastIndexOf('<header class="tool-head">', pill), html.indexOf("</header>", pill));
+      expect(header, `${product.name} should say "${sentence}" in its own header`).toContain(
+        `<p class="tool-stage">${sentence}</p>`,
+      );
+      expect(header, `${product.name}'s label should sit beside its name`).toContain(
+        `<h3 class="tool-name">${product.name}</h3>`,
+      );
+    }
+  });
+
+  test("PixelSlash's built page prints its stage line, and that stage is the product's stage on /developers", () => {
+    expect(STAGE).toBe(PRODUCTS.find((product) => product.name === "PixelSlash")?.stage);
+    const html = readFileSync(resolve(CLIENT, "pixelslash.html"), "utf8");
+    expect(html).toContain(STAGE_LINE);
+  });
+
+  test("no built page keeps the retired status words", () => {
+    builtHtml();
+    const pages = globSync("**/*.html", { cwd: CLIENT });
+    expect(pages.length).toBeGreaterThan(0);
+    for (const page of pages) {
+      const html = readFileSync(resolve(CLIENT, page), "utf8");
+      expect(html, `${page} should not say "Available now"`).not.toContain("Available now");
+      expect(html, `${page} should not say "Works today"`).not.toContain("Works today");
+      expect(html, `${page} should not say "early development"`).not.toMatch(/early development/i);
     }
   });
 

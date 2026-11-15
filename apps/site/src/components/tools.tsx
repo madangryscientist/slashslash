@@ -1,8 +1,9 @@
 import { Pill, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { Section } from "#/components/section";
-import { PRODUCTS, STATUS_TONE } from "#/content/products";
+import { PRODUCTS } from "#/content/products";
 import type { Product } from "#/content/products";
+import { STAGES, STAGE_TONE } from "#/content/stages";
 import { TOGGLESLASH_REPO_URL } from "#/content/site";
 
 /** "Not public yet" until the constant holds a URL, then the link in its place. */
@@ -63,9 +64,10 @@ function ToolHead({ product }: { product: Product }): ReactNode {
   return (
     <header className="tool-head">
       <h3 className="tool-name">{product.name}</h3>
-      <Pill tone={STATUS_TONE[product.status]} data-status-for={product.name}>
-        {product.status}
+      <Pill tone={STAGE_TONE[product.stage]} data-status-for={product.name}>
+        {STAGES[product.stage].label}
       </Pill>
+      <p className="tool-stage">{STAGES[product.stage].sentence}</p>
       <p className="tool-q">{product.question}</p>
     </header>
   );
@@ -77,7 +79,7 @@ export function ToolsInDetail(): ReactNode {
     <Section id="tools-detail" hunk="the tools in detail" title="The tools in detail">
       <div className="ledger">
         {PRODUCTS.map((product) => (
-          <article className="tool" key={product.name} data-status={product.status}>
+          <article className="tool" key={product.name} data-status={product.stage}>
             <ToolHead product={product} />
             <div className="tool-body">
               {product.summary.map((paragraph) => (
