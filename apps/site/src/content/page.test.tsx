@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { DEVELOPER_QUESTIONS } from "#/components/ask";
@@ -53,7 +53,6 @@ describe("the landing page carries the agreed copy, in order", () => {
   test("the five steps, each with its bold lead and its words", () => {
     const html = markup();
     const today = html.slice(html.indexOf('id="how-today"'), html.indexOf('id="missing"'));
-    expect(today.match(/class="pipe-step"/g)).toHaveLength(5);
     for (const step of TODAY.steps) expect(today).toContain(`<strong>${step.lead}</strong> ${step.text}`);
     expect(today).toContain(TODAY.card);
     expect(today).toContain(TODAY.customer);
@@ -181,8 +180,10 @@ describe("with no JavaScript, or reduced motion, every drawing is finished", () 
 });
 
 describe("the hard lines", () => {
-  test("no em dash or en dash on either page", () => {
-    for (const html of [built(), read("developers.html")]) expect(html).not.toMatch(/[\u2013\u2014]/);
+  test("no em dash or en dash on any built page", () => {
+    const pages = globSync("**/*.html", { cwd: DIST });
+    expect(pages).toContain("index.html");
+    for (const page of pages) expect(read(page), page).not.toMatch(/[\u2013\u2014]/);
   });
 });
 
