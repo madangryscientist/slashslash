@@ -95,8 +95,9 @@ Secret too.
   runtime's default seccomp profile, no privilege escalation, every capability dropped and a
   read-only root filesystem, with empty folders at `/run`, `/tmp` and `/home/app`, the only places
   besides `/data` the image writes. It passes the `restricted` Pod Security admission level.
-- **Health.** A startup probe waits up to 180 s for PixelSlash; then readiness and liveness run the
-  image's own `healthcheck`, which asks both tools through its front door.
+- **Health.** A startup probe waits up to `startupSeconds` (180 by default) for PixelSlash; then
+  readiness and liveness run the image's own `healthcheck`, which asks both tools through its front
+  door.
 - **No Service variables.** `enableServiceLinks` is off: the image reads `SLASHSLASH_PORT`, which
   Kubernetes would otherwise set to the Service's address.
 
@@ -105,10 +106,11 @@ Secret too.
 - Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash
   -n slashslash --reset-then-reuse-values --version <new>`. The new version backs the volume up
   before either tool migrates (see "Backup, restore and rollback" in `self-host/README.md`).
-- Rollback (untested): `helm rollback slashslash -n slashslash`; if `slashslash-0` stays on the new
-  version, `kubectl delete pod slashslash-0 -n slashslash`. Then restore the upgrade backup taken
-  before the upgrade: `kubectl exec -n slashslash slashslash-0 -- slashslash restore
-  /data/backups/upgrade-<UTC time>-<previous version>.tgz`.
+- Rollback (untested): the same `helm upgrade` with `--version <previous>` (not `helm rollback`,
+  which would also put back the old `startupSeconds`, while the older image backs the volume up
+  again). If `slashslash-0` stays on the new version, `kubectl delete pod slashslash-0 -n
+  slashslash`. Then find the backup taken before the upgrade with `kubectl exec -n slashslash
+  slashslash-0 -- ls /data/backups` and `slashslash restore /data/backups/<that file>`.
 - Backup: `kubectl exec -n slashslash slashslash-0 -- slashslash backup`, then copy it out with
   `kubectl cp slashslash/slashslash-0:/data/backups/<file> ./<file>`.
 - Remove: `helm uninstall slashslash -n slashslash` keeps the volume claim. Deleting it
@@ -123,8 +125,9 @@ Secret too.
 - The hand-written manifest the self-host guide used to carry was never applied anywhere, so there
   is no migration from its `slashslash-data` claim.
 - The startup probe allows `startupSeconds` (180 by default). An upgrade backs up the whole
-  volume inside that time, before the tools listen; on a large volume, raise it, or the kubelet
-  restarts the pod mid-backup and the backup starts again.
+  volume inside that time, before the tools listen; on a large volume, raise it. Otherwise the
+  kubelet restarts the pod mid-backup, each attempt can leave an `upgrade-*.partial` file in
+  `/data/backups` that fills the volume, and the pod stops for want of space.
 - amd64 only, like the image.
 
 ## Checks
