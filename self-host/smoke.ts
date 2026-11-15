@@ -209,12 +209,17 @@ async function readOnlyDataStops(): Promise<void> {
   }
 }
 
-/** The way the Helm chart runs it: read-only root, and an empty folder at each other writable path. */
+/**
+ * The way the Helm chart runs it: read-only root, and at each other writable path an empty folder
+ * as a kubelet makes an emptyDir under fsGroup 1654 (owner root, group 1654, mode 2777), with the
+ * chart's S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES.
+ */
 async function readOnlyRootRuns(): Promise<void> {
   const name = `${NAME}-rootro`;
-  const empty = ["/run", "/tmp", "/home/app"].flatMap((path) => ["--tmpfs", `${path}:exec`]);
+  const empty = ["/run", "/tmp", "/home/app"].flatMap((path) => ["--tmpfs", `${path}:exec,mode=2777,uid=0,gid=1654`]);
+  const kubernetes = ["-e", "S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES=1"];
   try {
-    docker(["run", "-d", "--name", name, ...LIMITS, "--read-only", ...empty, ...DUMMY_GITHUB, "-v", `${name}:/data`, IMAGE]);
+    docker(["run", "-d", "--name", name, ...LIMITS, "--read-only", ...empty, ...kubernetes, ...DUMMY_GITHUB, "-v", `${name}:/data`, IMAGE]);
     const status = () => docker(["inspect", "-f", "{{.State.Health.Status}}", name], true);
     const until = Date.now() + 180_000;
     while (status() !== "healthy" && docker(["inspect", "-f", "{{.State.Running}}", name]) === "true" && Date.now() < until)

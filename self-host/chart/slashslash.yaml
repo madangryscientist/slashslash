@@ -77,6 +77,12 @@ spec:
           envFrom:
             - secretRef:
                 name: slashslash-github
+          env:
+            # The /run emptyDir belongs to root with mode 2777 (group 1654 from fsGroup), which the
+            # supervisor refuses as a non-root user unless told this is Kubernetes. Nothing but the
+            # container's one user can reach it.
+            - name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
+              value: "1"
           ports:
             - name: pixelslash
               containerPort: 3000
