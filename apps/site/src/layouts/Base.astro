@@ -15,9 +15,15 @@ interface Props {
   title?: string;
   /** The description in search results and link previews. The landing page uses the hero lead. */
   description?: string;
+  /** The tab icon: the page's own tool mark, or the suite's. */
+  icon?: string;
 }
 
-const { title = `${SITE_NAME}: ${LANDING_HEADLINE}`, description = SITE_DESCRIPTION } = Astro.props;
+const {
+  title = `${SITE_NAME}: ${LANDING_HEADLINE}`,
+  description = SITE_DESCRIPTION,
+  icon = "/brand/slash-mark.svg",
+} = Astro.props;
 const onDevelopers = Astro.url.pathname.startsWith("/developers");
 // The page's own address on the live site, with no trailing slash (Cloudflare Pages serves `/developers`).
 const path =
@@ -60,7 +66,7 @@ const scopeScript = `${colourSchemeScript};(function(){var r=document.documentEl
     <meta name="twitter:image" content={shareImage} />
     <link rel="preload" href="/fonts/bricolage-grotesque-latin-opsz-wght-subset.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="preload" href="/fonts/jetbrains-mono-latin-wght-subset.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={icon} type="image/svg+xml" />
     <!-- Before first paint: the visitor's stored choice, else the system's light or dark. No cookie. -->
     <script is:inline set:html={scopeScript} />
   </head>
