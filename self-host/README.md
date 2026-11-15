@@ -26,6 +26,8 @@ For a guided setup on Proxmox, Docker, Compose, Kubernetes or another platform, 
 [`skills/self-host`](../skills/self-host/SKILL.md): a step-by-step guide any coding agent (or person)
 can work through, with the checks that prove each step.
 
+On Kubernetes it is one `helm install` (or one `kubectl apply`): see [`chart/`](chart/README.md).
+
 ## On Proxmox, in one line
 
 Run this in the Proxmox host's shell, as root:
@@ -150,7 +152,8 @@ Everything lives on the one volume at `/data`:
 
 Both tools change their data when a new version starts (database migrations), and neither can
 change it back. A copy of the volume taken while either one is writing can miss data. So use the
-image's own commands, which stop both tools for the few seconds it takes:
+image's own commands, which stop both tools while they run (seconds on a small volume, longer on
+a large one):
 
 ```sh
 docker exec slashslash slashslash backup
@@ -216,7 +219,7 @@ sudo chown -R 1654:1654 /srv/slashslash
 ```
 
 If it is not, the container stops at once with one line naming the path and the UID. On Kubernetes,
-set `fsGroup: 1654`, and mount an `emptyDir` at `/run` if the root filesystem is read-only.
+use the Helm chart in [`chart/`](chart/README.md), which sets all of this.
 
 ## How it is built
 
@@ -247,7 +250,8 @@ The smoke test runs the image under the restricted limits and checks that both t
 nothing runs as root, that the token creates a project that survives a restart, that each tool
 comes back from `kill -9` without the other noticing, that every log line is labelled and none
 holds the token, that nothing is written outside `/run`, `/tmp`, `/home/app` and `/data`, and that
-an unwritable `/data` stops the container with its one line, and that the image reports the
+an unwritable `/data` stops the container with its one line, that it turns healthy with a
+read-only root filesystem (as the Helm chart runs it), and that the image reports the
 version it was built with and holds every licence. It also backs up, wipes and restores the
 volume, makes a start on an older recorded version write one upgrade backup and restores it, has a
 backup from a newer version refused with nothing touched, and checks that five manual backups are
@@ -256,9 +260,13 @@ kept. CI runs it on every change here
 
 ## Releasing
 
-1. Set `VERSION` to the new `X.Y.Z` and land that on main.
+1. Set `VERSION` to the new `X.Y.Z`, set `version` and `appVersion` in `chart/Chart.yaml` to the
+   same, run `bun self-host/chart.ts --write` (the rendered manifest names the version), and land
+   that on main.
 2. Tag that commit `self-host-vX.Y.Z` and push the tag. CI checks the tag matches `VERSION`, builds,
-   runs the smoke and pushes `:X.Y.Z` and `:latest`.
+   runs the smoke, pushes `:X.Y.Z` and `:latest`, then pushes the chart to
+   `oci://ghcr.io/madangryscientist/charts`.
 
-The first push from CI creates the package private. Its owner makes it public once, under
-the package's settings on github.com (Change visibility); GitHub's API cannot change it.
+The first push from CI creates each package (the image, the chart) private. Its owner makes it
+public once, under the package's settings on github.com (Change visibility); GitHub's API cannot
+change it.

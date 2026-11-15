@@ -1,0 +1,39 @@
+{{- if .Values.ingress.enabled }}
+{{- $host := required "set ingress.host with ingress.enabled" .Values.ingress.host }}
+{{- $fullname := include "slashslash.fullname" . }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "slashslash.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - secretName: {{ .Values.ingress.tls.secretName | default (printf "%s-tls" $fullname) }}
+      hosts:
+        - pixelslash.{{ $host }}
+        - toggleslash.{{ $host }}
+  {{- end }}
+  rules:
+    {{- range $tool := list "pixelslash" "toggleslash" }}
+    - host: {{ $tool }}.{{ $host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullname }}
+                port:
+                  name: {{ $tool }}
+    {{- end }}
+{{- end }}

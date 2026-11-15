@@ -1,0 +1,45 @@
+# Every value is described in README.md.
+
+image:
+  repository: ghcr.io/madangryscientist/slashslash
+  # Empty means the chart's appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# PixelSlash's GitHub sign-in. Set both, or set existingSecret instead.
+github:
+  clientId: ""
+  clientSecret: ""
+
+toggleslash:
+  # Empty leaves the key out of the Secret, so the image makes its own token on /data.
+  adminToken: ""
+
+# The name of a Secret you made, holding GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET (and
+# TOGGLESLASH_ADMIN_TOKEN if you want your own). When set, the chart makes no Secret.
+existingSecret: ""
+
+persistence:
+  # Fixed at install: a StatefulSet's claim template cannot change afterwards.
+  size: 8Gi
+  # Empty uses the cluster's default storage class.
+  storageClassName: ""
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  # pixelslash.<host> and toggleslash.<host>.
+  host: ""
+  className: ""
+  annotations: {}
+  tls:
+    enabled: false
+    # Empty means <release>-tls. It must hold a certificate for both host names.
+    secretName: ""
+
+resources: {}
+
+# Seconds the first start (PixelSlash's migration) or an upgrade's volume backup may take.
+startupSeconds: 180

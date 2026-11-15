@@ -11,6 +11,8 @@
  * - every log line carries its service's name and none carries the token;
  * - the container writes nowhere outside /run, /tmp, /home/app and /data;
  * - a /data that UID 1654 cannot write stops the container with one line naming the path and UID;
+ * - it starts and turns healthy on a fresh volume with a read-only root filesystem and empty
+ *   writable folders at /run, /tmp and /home/app, as the Helm chart (chart/) runs it;
  * - `slashslash version` and the version label are the version it was built with, and every
  *   licence the image owes is under /usr/share/licenses/slashslash;
  * - `slashslash backup` and `restore` bring back a wiped volume (the ToggleSlash project and token,
@@ -207,6 +209,28 @@ async function readOnlyDataStops(): Promise<void> {
   }
 }
 
+/**
+ * The way the Helm chart runs it: read-only root, and at each other writable path an empty folder
+ * as a kubelet makes an emptyDir under fsGroup 1654 (owner root, group 1654, mode 2777), with the
+ * chart's S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES.
+ */
+async function readOnlyRootRuns(): Promise<void> {
+  const name = `${NAME}-rootro`;
+  const empty = ["/run", "/tmp", "/home/app"].flatMap((path) => ["--tmpfs", `${path}:exec,mode=2777,uid=0,gid=1654`]);
+  const kubernetes = ["-e", "S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES=1"];
+  try {
+    docker(["run", "-d", "--name", name, ...LIMITS, "--read-only", ...empty, ...kubernetes, ...DUMMY_GITHUB, "-v", `${name}:/data`, IMAGE]);
+    const status = () => docker(["inspect", "-f", "{{.State.Health.Status}}", name], true);
+    const until = Date.now() + 180_000;
+    while (status() !== "healthy" && docker(["inspect", "-f", "{{.State.Running}}", name]) === "true" && Date.now() < until)
+      await Bun.sleep(1000);
+    check(status() === "healthy", "healthy on a fresh volume with a read-only root filesystem", docker(["logs", "--tail", "40", name], true));
+  } finally {
+    docker(["rm", "-f", name], true);
+    docker(["volume", "rm", name], true);
+  }
+}
+
 async function main(): Promise<void> {
   if (!process.env["SMOKE_IMAGE"]) build(IMAGE, VERSION);
 
@@ -214,6 +238,9 @@ async function main(): Promise<void> {
     "-v", `${VOLUME}:/data`, IMAGE]);
   await waitFor("the container reports healthy", () => health() === "healthy", 180);
   check(await healthyOnFrontDoor(), "PixelSlash / and ToggleSlash /health answer through Caddy");
+  // The Helm chart's startup probe is an HTTP GET of PixelSlash's /, which passes only on 200 to 399.
+  const front = await fetch(`http://${hostPort(3000)}/`, { redirect: "manual", signal: AbortSignal.timeout(3000) });
+  check(front.status >= 200 && front.status < 400, `PixelSlash / answers ${front.status}, which the chart's startup probe accepts`);
 
   check(docker(["inspect", "-f", "{{.Config.User}}", IMAGE]) === "app", "the image's user is app");
   const users = docker(["exec", NAME, "ps", "-eo", "user="]).split("\n").map((u) => u.trim());
@@ -272,6 +299,7 @@ async function main(): Promise<void> {
   console.log(`measured: memory after the run ${docker(["stats", "--no-stream", "--format", "{{.MemUsage}}", NAME])}`);
 
   await readOnlyDataStops();
+  await readOnlyRootRuns();
   console.log("smoke: all checks passed");
 }
 
