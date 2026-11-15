@@ -27,7 +27,7 @@ The image is published at `ghcr.io/madangryscientist/slashslash`:
 | Tag | What it is |
 | --- | --- |
 | `latest` | The newest release |
-| `0.1.0` (any `X.Y.Z`) | That release, never moved. Pin this to choose when you upgrade |
+| `0.1.0` (any `X.Y.Z`) | That release. Pin this to choose when you upgrade |
 | `edge` | The newest build of main, tested but not released |
 | `0.1.0-edge.<sha7>` | One build of main |
 
@@ -125,7 +125,6 @@ set `fsGroup: 1654`, and mount an `emptyDir` at `/run` if the root filesystem is
 
 ```sh
 bun self-host/build.ts            # builds slashslash:dev, and any product image a pin needs
-bun self-host/build.ts --version 0.1.0-dev --tag slashslash:dev   # the same, with the version given
 bunx moon run self-host:smoke     # builds and checks it end to end
 ```
 
@@ -143,5 +142,5 @@ version it was built with and holds every licence. CI runs it on every change he
 2. Tag that commit `self-host-vX.Y.Z` and push the tag. CI checks the tag matches `VERSION`, builds,
    runs the smoke and pushes `:X.Y.Z` and `:latest`.
 
-The package was created private by the first push from CI. Its owner makes it public once, under
+The first push from CI creates the package private. Its owner makes it public once, under
 the package's settings on github.com (Change visibility); GitHub's API cannot change it.

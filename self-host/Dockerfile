@@ -16,6 +16,7 @@
 
 ARG PIXELSLASH_REVISION
 ARG TOGGLESLASH_REVISION
+ARG BUN=1.4.2
 
 # Caddy's binary without its file capability (cap_net_bind_service): it binds no low port here, and
 # nothing in the image may gain privilege. s6-overlay unpacked from its release tarballs, checked,
@@ -23,7 +24,7 @@ ARG TOGGLESLASH_REVISION
 # image; the final stage checks it, so a pin that moves Bun fails here until BUN and its checksum move).
 FROM caddy:2.11.9@sha256:4e2425f6009577e7c651010f16679c28f7d12df3e7b1914f941a7a3370746b3c AS tools
 ARG S6=3.2.1.0
-ARG BUN=1.4.2
+ARG BUN
 ADD --checksum=sha256:42e038a9a00fc0fef70bf0bc42f625a9c14f8ecdfe77d4ad93281edf717e10c5 \
     https://github.com/just-containers/s6-overlay/releases/download/v${S6}/s6-overlay-noarch.tar.xz /tmp/
 ADD --checksum=sha256:8bcbc2cada58426f976b159dcc4e06cbb1454d5f39252b3bb0c778ccf71c9435 \
@@ -47,7 +48,7 @@ FROM toggleslash
 ARG PIXELSLASH_REVISION
 ARG TOGGLESLASH_REVISION
 ARG SLASHSLASH_VERSION
-ARG BUN=1.4.2
+ARG BUN
 USER root
 COPY --from=tools /s6/ /
 COPY --from=tools /usr/bin/caddy /usr/local/bin/caddy
@@ -61,7 +62,7 @@ COPY --from=toggleslash-src LICENSE NOTICE /usr/share/licenses/slashslash/toggle
 COPY --from=tools /licenses/ /usr/share/licenses/slashslash/
 
 # The .NET runtime's licence is copied next to the others, not only left in /usr/share/dotnet, and
-# the version this image reports is written once, for `slashslash version` and the upgrade backup.
+# the version this image reports is written once, for `slashslash version`.
 RUN test -n "${SLASHSLASH_VERSION}" \
  && test "$(bun --version)" = "${BUN}" \
  && mkdir -p /usr/share/licenses/slashslash/dotnet /etc/slashslash \
