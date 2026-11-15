@@ -43,7 +43,28 @@ for (const { path, status } of ROUTES) {
         v.nodes.map((n) => `${v.id}: ${n.target.join(" ")} (${n.any.map((c) => c.message).join("; ")})`),
       );
       expect(violations).toEqual([]);
+
+      // Down one viewport at a time, so every lazy loader fires, then wait for the images to settle.
+      // scrollBy, not mouse.wheel: mobile WebKit has no wheel.
+      while (
+        await page.evaluate(
+          () => window.scrollY + window.innerHeight < document.documentElement.scrollHeight - 1,
+        )
+      ) {
+        const before = await page.evaluate(() => window.scrollY);
+        await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+        await expect.poll(() => page.evaluate(() => window.scrollY)).not.toBe(before);
+      }
+      await expect
+        .poll(() =>
+          page.evaluate(() =>
+            [...document.images].filter((i) => i.getClientRects().length > 0).every((i) => i.complete),
+          ),
+        )
+        .toBe(true);
       expect(leaked).toEqual([]);
+
+      // After the scroll, so lazy content that loaded on the way down counts too.
 
       if (info.project.name === "phone") {
         const overflow = await page.evaluate(
