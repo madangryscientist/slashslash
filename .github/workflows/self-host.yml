@@ -108,6 +108,9 @@ jobs:
         env:
           SMOKE_IMAGE: slashslash:smoke
           SMOKE_VERSION: ${{ steps.version.outputs.version }}
+          # Every run, so every pin bump and every release is checked against an install the
+          # released image made (smoke.ts, upgradeFrom).
+          SMOKE_UPGRADE_FROM: ghcr.io/madangryscientist/slashslash:latest
       # Only after the smoke passed (a failed step skips these), and never on a pull request.
       - name: Log in to ghcr
         if: github.event_name == 'push'
