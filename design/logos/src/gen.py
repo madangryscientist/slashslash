@@ -492,7 +492,8 @@ if __name__ == "__main__":
         # A page that left the list takes its card with it (the SVG and the PNG made from it).
         slugs = {entry["slug"] for entry in pages}
         for name in os.listdir(OG_OUT) if os.path.isdir(OG_OUT) else []:
-            if os.path.splitext(name)[0] not in slugs:
+            stem, ext = os.path.splitext(name)
+            if ext in (".svg", ".png") and stem not in slugs:
                 os.remove(os.path.join(OG_OUT, name))
         for entry in pages:
             og(entry)
