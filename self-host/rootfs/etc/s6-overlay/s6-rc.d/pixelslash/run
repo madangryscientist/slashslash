@@ -1,0 +1,6 @@
+#!/command/with-contenv sh
+# PixelSlash on loopback behind Caddy, its state on /data/pixelslash.
+exec 2>&1
+cd /opt/pixelslash/apps/web
+export PIXELSLASH_DATA_DIR=/data/pixelslash HOST=127.0.0.1 PORT=3100 NODE_ENV=production
+exec bun deploy/docker/start.ts

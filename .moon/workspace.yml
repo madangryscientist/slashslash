@@ -10,6 +10,7 @@ projects:
   site: "apps/site"
   site-next: "apps/site-next"
   scripts: "scripts"
+  self-host: "self-host"
 
 vcs:
   client: "git"

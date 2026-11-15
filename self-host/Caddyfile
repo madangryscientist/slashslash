@@ -1,0 +1,17 @@
+# The front door: a port per tool, never a path (PixelSlash cannot live under a path prefix). The
+# products listen on loopback only, so every request comes through here.
+{
+	admin off
+	auto_https off
+}
+
+:{$PIXELSLASH_PORT:3000} {
+	reverse_proxy 127.0.0.1:3100
+}
+
+:{$TOGGLESLASH_PORT:8080} {
+	reverse_proxy 127.0.0.1:8180
+}
+
+# Empty unless SLASHSLASH_DOMAIN is set (the caddy service's run script decides).
+import /run/caddy/domain.caddy

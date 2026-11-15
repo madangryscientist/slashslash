@@ -1,0 +1,9 @@
+#!/bin/sh
+# s6-supervise starts each run as its own process group and hands that group to finish as $4.
+# A child left behind by a hard kill (PixelSlash's workerd and diff sidecar keep their ports) is
+# still in it, so killing the group clears exactly what this service started and nothing else.
+# procps' kill, since dash's builtin cannot signal a group.
+if [ -n "${4:-}" ] && [ "$4" != 0 ] && /usr/bin/kill -s KILL -- "-$4" 2>/dev/null; then
+  echo "stopped what was left of process group $4"
+fi
+exit 0

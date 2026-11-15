@@ -1,0 +1,39 @@
+#!/bin/sh
+# The image's own command, run with `docker exec <container> slashslash <command>`.
+set -eu
+
+usage() {
+  cat <<'USAGE'
+usage: slashslash <command>
+
+  status          each service, and whether each product answers
+  secret <name>   print one secret kept on the volume; today only toggleslash-admin-token
+USAGE
+}
+
+case "${1:-}" in
+  secret)
+    name="${2:-}"
+    case "$name" in
+      toggleslash-admin-token) ;;
+      *) echo "slashslash: no secret named '$name'; known: toggleslash-admin-token" >&2; exit 2 ;;
+    esac
+    if [ -n "${TOGGLESLASH_ADMIN_TOKEN:-}" ]; then
+      printf '%s\n' "$TOGGLESLASH_ADMIN_TOKEN"
+    elif [ -s "/data/secrets/$name" ]; then
+      cat "/data/secrets/$name"
+      echo
+    else
+      echo "slashslash: /data/secrets/$name is not there yet; it is made on the first start" >&2
+      exit 1
+    fi
+    ;;
+  status)
+    for service in pixelslash toggleslash caddy; do
+      printf '%-12s %s\n' "$service" "$(/command/s6-svstat "/run/service/$service" 2>&1 || true)"
+    done
+    exec bun /usr/local/lib/slashslash/health.ts --print
+    ;;
+  -h|--help|help) usage ;;
+  *) usage >&2; exit 2 ;;
+esac

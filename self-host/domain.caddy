@@ -1,0 +1,8 @@
+# With SLASHSLASH_DOMAIN set: a host name per tool on one port, as well as the port per tool.
+http://pixelslash.{$SLASHSLASH_DOMAIN}:{$SLASHSLASH_PORT:8000} {
+	reverse_proxy 127.0.0.1:3100
+}
+
+http://toggleslash.{$SLASHSLASH_DOMAIN}:{$SLASHSLASH_PORT:8000} {
+	reverse_proxy 127.0.0.1:8180
+}

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Every line caddy writes, on the container's stdout with its name in front.
+exec sed -u 's/^/[caddy] /'

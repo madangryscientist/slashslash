@@ -1,0 +1,10 @@
+$schema: "../.moon/cache/schemas/project.json"
+
+# The one self-host image. Its only task is the smoke test, which builds the image and runs it under
+# Docker: minutes of work, so it is never cached, and there is deliberately no build, test, lint or
+# typecheck task here, because the gate and deploy.yml run those across every project.
+tasks:
+  smoke:
+    command: "bun smoke.ts"
+    options:
+      cache: false
