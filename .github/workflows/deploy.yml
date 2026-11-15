@@ -61,3 +61,22 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: bunx wrangler pages deploy dist --project-name slashslash --branch main --commit-dirty=true
+
+  # After the deploy, what only the live host can show: an unknown path answers a real 404 with the
+  # site's 404 page. It only reads the live site.
+  smoke:
+    if: github.ref == 'refs/heads/main'
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+        working-directory: apps/site
+      - run: bun run playwright test --project smoke
+        working-directory: apps/site
+        env:
+          SMOKE_BASE_URL: https://slashslash.build

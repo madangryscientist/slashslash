@@ -21,6 +21,9 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    // `astro preview` has no --strictPort flag. The browser tests serve the build on a fixed port and
+    // look only there, so a busy port fails the run instead of moving the server.
+    preview: { strictPort: true },
     resolve: {
       alias: {
         // The ported PixelSlash code (src/pixelslash) imports its own files as `#ps/...`, its repo's
