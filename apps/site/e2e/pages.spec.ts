@@ -28,13 +28,6 @@ for (const { path } of PAGES) {
       const response = await page.goto(path, { waitUntil: "load" });
       expect(response?.status()).toBe(200);
 
-      if (info.project.name === "phone") {
-        const overflow = await page.evaluate(
-          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        );
-        expect(overflow, "the page scrolls sideways").toBe(0);
-      }
-
       const axe = await new AxeBuilder({ page }).analyze();
       // One line per failing element, so the report says what failed and where.
       const violations = axe.violations.flatMap((v) =>
@@ -61,6 +54,14 @@ for (const { path } of PAGES) {
         )
         .toBe(true);
       expect(leaked).toEqual([]);
+
+      // After the scroll, so lazy content that loaded on the way down counts too.
+      if (info.project.name === "phone") {
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow, "the page scrolls sideways").toBe(0);
+      }
     });
   }
 }
