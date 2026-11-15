@@ -141,9 +141,9 @@ docker exec slashslash ls /data/backups
 docker exec slashslash slashslash restore /data/backups/upgrade-<UTC time>-<previous version>.tgz
 ```
 
-Anything written since the upgrade is lost, so take a manual backup first if you may want it. After
-a restore the volume records the backup's version, so the next start of a newer image takes a fresh
-upgrade backup. That is intended.
+Anything written since the upgrade is lost, so take a manual backup first if you may want it. A
+restore records the running image's version on the volume, since both tools bring the restored data
+up to that version as soon as they start.
 
 ## It runs as one user, never root
 

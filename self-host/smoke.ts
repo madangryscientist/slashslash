@@ -145,6 +145,7 @@ async function backupAndRestore(token: string): Promise<void> {
   check(sh("cat /data/.slashslash-version") === VERSION, `the volume now records ${VERSION}`);
   console.log(`  | ${docker(["exec", NAME, "slashslash", "restore", `/data/backups/${upgrades[0]}`])}`);
   await projectAndTokenAreThere(token, "restoring the upgrade backup");
+  check(sh("cat /data/.slashslash-version") === VERSION, `a restore records the running version, ${VERSION}`);
 
   // A backup from a newer version, made by repacking a real one: refused, and nothing stops.
   const pids = [pidOf(PIXELSLASH.needle), pidOf(TOGGLESLASH.needle)];

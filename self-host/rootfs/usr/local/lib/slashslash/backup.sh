@@ -56,6 +56,7 @@ slashslash_archive() {
 # slashslash_prune <dir> <prefix> <keep>: removes all but the newest <keep> entries named
 # <prefix>* in <dir>. Names carry a stamp right after the prefix, so newest is last by name.
 slashslash_prune() {
+  [ -d "$1" ] || return 0
   find "$1" -mindepth 1 -maxdepth 1 -name "$2*" ! -name '*.partial' | sort | head -n "-$3" | while read -r old; do
     rm -rf "$old"
   done

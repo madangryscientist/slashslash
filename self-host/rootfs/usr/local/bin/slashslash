@@ -82,12 +82,22 @@ restore() {
     exit 1
   fi
   stop_products || { rm -rf "$aside"; exit 1; }
+  # Renames inside /data; if one fails anyway, both products still start and the command says so.
+  moved=1
   for part in $SLASHSLASH_STATE .slashslash-version; do
-    if [ -e "/data/$part" ]; then mv "/data/$part" "$aside/$part"; fi
-    if [ -e "$aside/incoming/$part" ]; then mv "$aside/incoming/$part" "/data/$part"; fi
+    if [ -e "/data/$part" ]; then mv "/data/$part" "$aside/$part" || moved=0; fi
+    if [ -e "$aside/incoming/$part" ]; then mv "$aside/incoming/$part" "/data/$part" || moved=0; fi
   done
-  rm -rf "$aside/incoming"
+  # Both products migrate the restored data as soon as they start, so from now on it is this
+  # image's data: the volume records the running version, never the backup's. A later start on
+  # another version then labels its upgrade backup with what the data really is.
+  printf '%s\n' "$running" > /data/.slashslash-version.new && mv /data/.slashslash-version.new /data/.slashslash-version || moved=0
   start_products
+  if [ "$moved" = 0 ]; then
+    echo "slashslash: restoring $file did not finish moving the data; what was there before is in $aside" >&2
+    exit 1
+  fi
+  rm -rf "$aside/incoming"
   slashslash_prune /data restore- 3
   echo "restored $file (slashslash $archived); the data it replaced is in $aside"
 }
