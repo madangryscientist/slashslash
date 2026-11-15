@@ -10,18 +10,23 @@
  *   its pid;
  * - every log line carries its service's name and none carries the token;
  * - the container writes nowhere outside /run, /tmp, /home/app and /data;
- * - a /data that UID 1654 cannot write stops the container with one line naming the path and UID.
+ * - a /data that UID 1654 cannot write stops the container with one line naming the path and UID;
+ * - `slashslash version` and the version label are the version it was built with, and every
+ *   licence the image owes is under /usr/share/licenses/slashslash.
  *
  * The GitHub values are dummies, as PixelSlash's own e2e build uses: never a real secret. It also
  * prints the container's memory. Set SMOKE_IMAGE to test an image that is
- * already built instead of building one.
+ * already built instead of building one, and SMOKE_VERSION to the version it was built with (default
+ * self-host/VERSION plus `-dev`, which is also what it builds).
  */
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { build } from "./build.ts";
+import { build, readVersion } from "./build.ts";
 
 const IMAGE = process.env["SMOKE_IMAGE"] || "slashslash:smoke";
+const VERSION = process.env["SMOKE_VERSION"] || `${readVersion()}-dev`;
+const LICENCES = ["pixelslash", "toggleslash", "caddy", "s6-overlay", "dotnet", "bun"];
 const NAME = `slashslash-smoke-${process.pid}`;
 const VOLUME = `${NAME}-data`;
 const DUMMY_GITHUB = ["-e", "GITHUB_CLIENT_ID=smoke-not-real", "-e", "GITHUB_CLIENT_SECRET=smoke-not-real"];
@@ -136,7 +141,7 @@ async function readOnlyDataStops(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  if (!process.env["SMOKE_IMAGE"]) build(IMAGE);
+  if (!process.env["SMOKE_IMAGE"]) build(IMAGE, VERSION);
 
   docker(["run", "-d", "--name", NAME, ...LIMITS, ...DUMMY_GITHUB, "-p", "127.0.0.1::3000", "-p", "127.0.0.1::8080",
     "-v", `${VOLUME}:/data`, IMAGE]);
@@ -147,6 +152,19 @@ async function main(): Promise<void> {
   const users = docker(["exec", NAME, "ps", "-eo", "user="]).split("\n").map((u) => u.trim());
   check(users.length > 0 && users.every((u) => u === "app"), "no process runs as root", users.join(" "));
   check(docker(["exec", NAME, "sh", "-c", "find / -xdev -type f -perm /6000 2>/dev/null; true"]) === "", "no setuid or setgid file in the image");
+
+  const reported = docker(["exec", NAME, "slashslash", "version"]);
+  check(reported === VERSION, `slashslash version is ${VERSION} (${reported})`);
+  const label = docker(["inspect", "-f", '{{index .Config.Labels "org.opencontainers.image.version"}}', IMAGE]);
+  check(label === VERSION, `the version label is ${VERSION} (${label})`);
+  // Every non-empty file under the folder, as `bun/LICENSE.md`; each product needs at least one.
+  const licences = docker(["exec", NAME, "find", "/usr/share/licenses/slashslash", "-type", "f", "-size", "+0c"])
+    .split("\n")
+    .map((f) => f.replace("/usr/share/licenses/slashslash/", ""));
+  const missing = ["LICENSE", "NOTICE", ...LICENCES.map((d) => `${d}/`)].filter(
+    (want) => !licences.some((f) => (want.endsWith("/") ? f.startsWith(want) : f === want)),
+  );
+  check(missing.length === 0, `the licences are there: slashslash, ${LICENCES.join(", ")}`, `missing: ${missing.join(" ")}`);
 
   const token = docker(["exec", NAME, "slashslash", "secret", "toggleslash-admin-token"]);
   check(/^[0-9a-f]{64}$/.test(token), "the generated admin token is 32 random bytes in hex");

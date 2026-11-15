@@ -1,8 +1,13 @@
 name: Self-host image
 
 # Builds the one self-host image and runs its smoke test, on any change to self-host/ or to this
-# file. Nothing is pushed to a registry. Each product image takes minutes to build, so it is kept in
-# the Actions cache under its pin and rebuilt only when that pin moves.
+# file. Each product image takes minutes to build, so it is kept in the Actions cache under its pin
+# and rebuilt only when that pin moves.
+#
+# The image the smoke passed is then pushed to ghcr.io/madangryscientist/slashslash, from the same
+# job, so what is published is exactly what was tested. A pull request pushes nothing. A push to
+# main pushes `:edge` and `:<VERSION>-edge.<sha7>`. A tag `self-host-vX.Y.Z` (X.Y.Z must be
+# self-host/VERSION, checked before anything is built) pushes `:X.Y.Z` and `:latest`.
 on:
   pull_request:
     paths:
@@ -10,6 +15,8 @@ on:
       - ".github/workflows/self-host.yml"
   push:
     branches: [main]
+    # Path filters are not applied to tag pushes, so every release tag runs.
+    tags: ["self-host-v*"]
     paths:
       - "self-host/**"
       - ".github/workflows/self-host.yml"
@@ -17,13 +24,18 @@ on:
 permissions:
   contents: read
 
+# Only a pull request's run is cut off by a newer one; a main or tag run is never stopped between
+# two pushes.
 concurrency:
   group: self-host-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     env:
       # See ci.yml: moon diffs against the base branch first, which needs the full history.
       MOON_BASE: origin/main
@@ -34,6 +46,23 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: .bun-version
+      - name: Check a release tag names self-host/VERSION
+        if: github.ref_type == 'tag'
+        run: bun self-host/release-check.ts
+      # The version the image is built with, so the image the smoke tests already says what it is.
+      - id: version
+        shell: bash
+        run: |
+          v=$(cat self-host/VERSION)
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            echo "version=$v" >> "$GITHUB_OUTPUT"
+            echo "tags=$v latest" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = push ]; then
+            echo "version=$v-edge.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "tags=edge $v-edge.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$v-dev" >> "$GITHUB_OUTPUT"
+          fi
       - run: bun install --frozen-lockfile
       # Restored here and saved straight after the build, so a red smoke still keeps a fresh product.
       - id: pixelslash
@@ -51,7 +80,7 @@ jobs:
         shell: bash
         run: for f in "$RUNNER_TEMP/product-images"/*.tar.gz; do if [ -e "$f" ]; then docker load -i "$f"; fi; done
       - name: Build the image (and any product whose pin has no cached image)
-        run: bun self-host/build.ts --tag slashslash:smoke
+        run: bun self-host/build.ts --tag slashslash:smoke --version "${{ steps.version.outputs.version }}"
       - name: Export the product images that were built
         if: steps.pixelslash.outputs.cache-hit != 'true' || steps.toggleslash.outputs.cache-hit != 'true'
         shell: bash
@@ -73,3 +102,18 @@ jobs:
       - run: bunx moon run self-host:smoke
         env:
           SMOKE_IMAGE: slashslash:smoke
+          SMOKE_VERSION: ${{ steps.version.outputs.version }}
+      # Only after the smoke passed (a failed step skips these), and never on a pull request.
+      - name: Log in to ghcr
+        if: github.event_name == 'push'
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push the tested image
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          for t in ${{ steps.version.outputs.tags }}; do
+            docker tag slashslash:smoke "ghcr.io/madangryscientist/slashslash:$t"
+            docker push "ghcr.io/madangryscientist/slashslash:$t"
+          done
