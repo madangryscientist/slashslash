@@ -489,6 +489,11 @@ if __name__ == "__main__":
     if "--og" in sys.argv:
         src = sys.argv[sys.argv.index("--og") + 1]
         pages = json.load(sys.stdin if src == "-" else open(src))
+        # A page that left the list takes its card with it (the SVG and the PNG made from it).
+        slugs = {entry["slug"] for entry in pages}
+        for name in os.listdir(OG_OUT) if os.path.isdir(OG_OUT) else []:
+            if os.path.splitext(name)[0] not in slugs:
+                os.remove(os.path.join(OG_OUT, name))
         for entry in pages:
             og(entry)
     print("ok")

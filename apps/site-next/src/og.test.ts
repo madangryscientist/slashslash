@@ -68,9 +68,10 @@ describe("share cards", () => {
       const svg = readFileSync(resolve(PUBLIC_OG, `${card.slug}.svg`), "utf8");
       expect(decode(svg.match(/aria-label="([^"]*)"/)?.[1]), card.slug).toBe(card.alt);
       // og-png.ts writes the SVG's hash into the PNG, so a PNG not re-made after its SVG changed shows here.
-      const png = readFileSync(resolve(PUBLIC_OG, `${card.slug}.png`)).toString("latin1");
+      const png = readFileSync(resolve(PUBLIC_OG, `${card.slug}.png`));
       const hash = createHash("sha256").update(svg).digest("hex");
-      expect(png.match(/tEXtsvg-sha256\0([0-9a-f]{64})/)?.[1], `${card.slug}.png`).toBe(hash);
+      expect(png.toString("latin1").match(/tEXtsvg-sha256\0([0-9a-f]{64})/)?.[1], `${card.slug}.png`).toBe(hash);
+      expect([png.readUInt32BE(16), png.readUInt32BE(20)], `${card.slug}.png size`).toEqual([1200, 630]);
     }
   });
 });
