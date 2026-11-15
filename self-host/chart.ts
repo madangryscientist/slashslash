@@ -92,8 +92,8 @@ function parse(yaml: string): Doc[] {
 
 /**
  * The restricted Pod Security Standard (kubernetes.io/docs/concepts/security/pod-security-standards),
- * plus what this image needs to run under it: UID and GID 1654 and a read-only root with its four
- * writable paths mounted.
+ * plus what this image needs to run under it: UID and GID 1654, a read-only root with its four
+ * writable paths mounted, and the supervisor's switch that accepts the emptyDir at /run.
  */
 function restrictedProblems(docs: Doc[]): string[] {
   const problems: string[] = [];
@@ -127,6 +127,9 @@ function restrictedProblems(docs: Doc[]): string[] {
       if ((c.ports ?? []).some((p: Doc) => p.hostPort)) said("sets a hostPort");
       const mounts = new Set((c.volumeMounts ?? []).map((m: Doc) => m.mountPath));
       for (const path of ["/data", "/run", "/tmp", "/home/app"]) if (!mounts.has(path)) said(`nothing mounted at ${path}`);
+      // s6-overlay refuses the root-owned emptyDir at /run without it (the image smoke runs it so).
+      if (!(c.env ?? []).some((e: Doc) => e.name === "S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES" && e.value === "1"))
+        said("does not set S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES=1");
     }
   }
   return problems;
