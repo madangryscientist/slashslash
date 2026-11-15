@@ -95,6 +95,9 @@ Secret too.
   runtime's default seccomp profile, no privilege escalation, every capability dropped and a
   read-only root filesystem, with empty folders at `/run`, `/tmp` and `/home/app`, the only places
   besides `/data` the image writes. It passes the `restricted` Pod Security admission level.
+  The `/run` emptyDir is root's, mode 2777, which the image's supervisor (s6-overlay) accepts as a
+  non-root user only with `S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES=1`; the chart sets
+  it. The image smoke runs the image this way (read-only root, those folders) on every change.
 - **Health.** A startup probe waits up to `startupSeconds` (180 by default) for PixelSlash; then
   readiness and liveness run the image's own `healthcheck`, which asks both tools through its front
   door.
