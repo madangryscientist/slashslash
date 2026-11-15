@@ -15,6 +15,7 @@ const TOOLS: Record<string, { deep: string; text: string; pastel: string }> = {
   toggleslash: { deep: "#2d7d1d", text: "#286f1a", pastel: "#a6e3a1" },
   bundleslash: { deep: "#9a5b00", text: "#9a5b00", pastel: "#f9e2af" },
   taskslash: { deep: "#1e66f5", text: "#1a5fe6", pastel: "#89b4fa" },
+  sightslash: { deep: "#c8399a", text: "#b8338a", pastel: "#f5c2e7" },
 };
 const INK_LIGHT = "#24273a";
 const INK_DARK = "#e2e8fc";
@@ -86,13 +87,13 @@ function textFiles(dir: string, out: string[] = []): string[] {
 }
 
 describe("the brand files in dist/brand", () => {
-  test("all 18 direction C files are there: six marks and twelve lockups", () => {
+  test("all 21 direction C files are there: seven marks and fourteen lockups", () => {
     const names = Object.keys(TOOLS).flatMap((slug) => [
       `${slug}-mark.svg`,
       `${slug}-lockup-light.svg`,
       `${slug}-lockup-dark.svg`,
     ]);
-    expect(names).toHaveLength(18);
+    expect(names).toHaveLength(21);
     for (const name of names) expect(existsSync(join(DIST, "brand", name)), name).toBe(true);
   });
 

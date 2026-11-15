@@ -1,5 +1,6 @@
 ---
 import { colourSchemeScript, appShellRootClassFor } from "@hackcove/ui-react";
+import { OG_HEIGHT, OG_WIDTH, ogCardFor } from "#content/og";
 import { SITE_NAME, SITE_URL } from "#content/site";
 import { SCHEMES } from "#content/schemes";
 import "#next/styles.css";
@@ -16,6 +17,9 @@ const path =
     .replace(/\.html$/, "")
     .replace(/(^|\/)index$/, "")
     .replace(/\/+$/, "") || "/";
+// The page's own share card (the suite's on the 404 page), as an absolute URL: link previews in chat apps want one.
+const card = ogCardFor(path);
+const shareImage = `${SITE_URL}/og/${card.slug}.png`;
 
 // colourSchemeScript knows the `dark` class only. The page is built with `latte` on <html>, so once that
 // script has decided, this takes `latte` off a dark page: exactly one scope is ever set.
@@ -29,6 +33,12 @@ const scopeScript = `${colourSchemeScript};(function(){var r=document.documentEl
     <meta name="color-scheme" content="light dark" />
     <title>{`${title} | ${SITE_NAME}`}</title>
     <link rel="canonical" href={`${SITE_URL}${path}`} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:width" content={String(OG_WIDTH)} />
+    <meta property="og:image:height" content={String(OG_HEIGHT)} />
+    <meta property="og:image:alt" content={card.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={shareImage} />
     <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <!-- Before first paint: the visitor's stored choice, else the system's light or dark. No cookie. -->
     <script is:inline set:html={scopeScript} />
