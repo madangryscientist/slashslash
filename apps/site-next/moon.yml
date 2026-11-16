@@ -40,7 +40,7 @@ tasks:
     inputs:
       - "@group(sources)"
   e2e:
-    # The page loop in a real browser, on the production build: Chromium desktop and a WebKit phone.
+    # The page loop in a real browser, on the production build: Chromium desktop and a Chromium phone.
     command: "bun run playwright test --project desktop --project phone"
     deps:
       - "~:build"

@@ -30,8 +30,8 @@ jobs:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
       - run: bunx moon run --concurrency 3 :lint :typecheck :build :test
-      # The page loop in a real browser: every page on a Chromium desktop and a WebKit phone.
-      - run: bunx playwright install --with-deps chromium webkit
+      # The page loop in a real browser: every page on a Chromium desktop and a Chromium phone.
+      - run: bunx playwright install --with-deps chromium
         working-directory: apps/site
       - run: bunx moon run site:e2e
       # The reskinned site, built beside the live one and never deployed: its pages and its 404.
