@@ -1,0 +1,4 @@
+# Every worktree links into one global store instead of writing its own node_modules tree.
+[install]
+linker = "isolated"
+globalStore = true
