@@ -14,7 +14,7 @@ const TAGS: Record<Exclude<EvidenceKind, "idea">, string> = {
 };
 
 export function IdeaPill(): ReactNode {
-  return <Pill tone="slate">Planned</Pill>;
+  return <Pill>Planned</Pill>;
 }
 
 export function Frame({

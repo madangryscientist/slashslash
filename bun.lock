@@ -18,8 +18,8 @@
       "dependencies": {
         "@astrojs/check": "^0.9.12",
         "@astrojs/react": "^7.1.9",
-        "@hackcove/themes": "^0.2.3",
-        "@hackcove/ui-react": "^0.10.13",
+        "@hackcove/themes": "^0.3.0",
+        "@hackcove/ui-react": "^0.11.0",
         "@tailwindcss/vite": "^4.3.5",
         "astro": "^7.4.12",
         "react": "^19.3.1",
@@ -42,8 +42,8 @@
       "dependencies": {
         "@astrojs/check": "^0.9.12",
         "@astrojs/react": "^7.1.9",
-        "@hackcove/themes": "^0.2.3",
-        "@hackcove/ui-react": "^0.10.13",
+        "@hackcove/themes": "^0.3.0",
+        "@hackcove/ui-react": "^0.11.0",
         "@tailwindcss/vite": "^4.3.5",
         "astro": "^7.4.12",
         "react": "^19.3.1",
@@ -240,9 +240,9 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.28.2", "", { "os": "win32", "cpu": "x64" }, "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g=="],
 
-    "@hackcove/themes": ["@hackcove/themes@0.2.3", "", { "peerDependencies": { "tailwindcss": "^4" } }, "sha512-WFprxtjBMfCuHtjsZ4Qc6VLZuvgGAwiktnq988BRAg7EfJ9SOG3XlO2wf//1+RSli63HoSK1tV1No0UQ9XBCew=="],
+    "@hackcove/themes": ["@hackcove/themes@0.3.0", "", { "peerDependencies": { "tailwindcss": "^4" } }, "sha512-91zPmG6aWpJUoYjN0e7uZGjtDRXWhSagnaONd1c2rWwQi0RKXUsNix2u5t9tVoCu7t8rg2BhRqdAgaIr0D3rBA=="],
 
-    "@hackcove/ui-react": ["@hackcove/ui-react@0.10.13", "", { "dependencies": { "@internationalized/date": "^3.12.4", "react-aria-components": "^1.22.1" }, "peerDependencies": { "@types/react": ">=18", "@types/react-dom": ">=18", "react": ">=18", "react-dom": ">=18", "tailwindcss": "^4" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-f+ncSTe9ZVLqp7IpX/bPxEqdrb2G3G0dp3GdhJXlyUoyXrLQf/YEOmJ93dmfquNTkEPHky0pgZuYO0LTU3Hjsw=="],
+    "@hackcove/ui-react": ["@hackcove/ui-react@0.11.0", "", { "dependencies": { "@internationalized/date": "^3.12.4", "react-aria-components": "^1.22.1" }, "peerDependencies": { "@types/react": ">=18", "@types/react-dom": ">=18", "react": ">=19", "react-dom": ">=19", "tailwindcss": "^4" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-DvKbvEBRnbwaEBvAKWurxg3bF1sYC0rW2YygrSY0i2mM5IRe2xNQlntitOfuO9OGbkP5BA297kmbgpQgBFCWww=="],
 
     "@img/colour": ["@img/colour@1.1.0", "", {}, "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ=="],
 
