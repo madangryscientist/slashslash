@@ -84,7 +84,7 @@ function Hero(): ReactNode {
       <div className="home-grid" aria-hidden="true" />
       <div className="relative mx-auto max-w-4xl text-center">
         <p className="home-rise">
-          <Pill tone="emerald" dot round>
+          <Pill tone="positive" dot round>
             Free · Source available · Elastic License 2.0 · Local first
           </Pill>
         </p>
@@ -96,7 +96,7 @@ function Hero(): ReactNode {
           your machine, for free.
         </p>
         <p className="home-rise mt-4 text-balance">
-          <Caption data-testid="stage">{STAGE_LINE}</Caption>
+          <Caption as="span" data-testid="stage">{STAGE_LINE}</Caption>
         </p>
         <div className="home-rise mt-9 flex flex-wrap justify-center gap-3">
           <Button href={psHref("/self-host")} size="lg">

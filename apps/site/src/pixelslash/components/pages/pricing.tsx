@@ -39,7 +39,7 @@ export function PricingPage(): ReactNode {
               <Display as="span">{STATEMENT}</Display>
             </PageHeading>
             <Lead>{LEAD}</Lead>
-            <Cluster>
+            <Cluster gap="xs" wrap={false}>
               <Button href={psHref(ACTION.href)} size="lg" data-testid="pricing-action">
                 {ACTION.label} <span aria-hidden="true">→</span>
               </Button>
@@ -67,7 +67,7 @@ export function PricingPage(): ReactNode {
           ) : null}
         </Stack>
       </Callout>
-      <Caption as="p">
+      <Caption>
         Questions? Write to <TextLink href={`mailto:${CONTACT}`}>{CONTACT}</TextLink>.
       </Caption>
     </Stack>

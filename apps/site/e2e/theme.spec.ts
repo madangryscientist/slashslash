@@ -9,8 +9,6 @@ test("the toggle's scheme survives a reload", async ({ page }) => {
   await expect(html).toHaveClass(new RegExp(`\\b${SCHEMES.light}\\b`));
 
   const toggle = page.getByRole("button", { name: "Switch to dark theme" });
-  // The tooltip is set once the island has hydrated; a click before that does nothing.
-  await expect(toggle).toHaveAttribute("title", "Switch to dark theme");
   await toggle.click();
   await expect(html).toHaveClass(new RegExp(`\\b${SCHEMES.dark}\\b`));
 

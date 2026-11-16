@@ -20,7 +20,7 @@ import { SCHEMES } from "#ps/schemes";
 
 /** Where the source is: a link once the repository is public (PS-257, PS-292), a plain sentence before. */
 function SourceLink(): ReactNode {
-  if (!REPO_PUBLIC) return <Caption data-testid="source-status">Source opens at launch</Caption>;
+  if (!REPO_PUBLIC) return <Caption as="span" data-testid="source-status">Source opens at launch</Caption>;
   return (
     <TextLink href={REPO_URL} external data-testid="source-status">
       GitHub
@@ -52,7 +52,7 @@ export function Footer(): ReactNode {
         <a href={psHref("/")} className="flex items-center" aria-label="PixelSlash home">
           <Wordmark />
         </a>
-        <Caption data-testid="stage-footer">{STAGE_LINE}</Caption>
+        <Caption as="span" data-testid="stage-footer">{STAGE_LINE}</Caption>
         <span>Elastic License 2.0</span>
         <TextLink href={`mailto:${CONTACT}`}>{CONTACT}</TextLink>
         <SourceLink />
@@ -114,7 +114,7 @@ export function Shell({
       controls={<Controls />}
       // One row from md: the nav sits between the brand and the controls. On a phone AppShell folds it
       // behind its Menu button; the controls stay in the header.
-      nav={<Tabs variant="pill" items={items} label="Site" size="md" data-testid="site-nav" />}
+      nav={<Tabs items={items} label="Site" data-testid="site-nav" />}
       footer={<Footer />}
       bleed
       data-art=""

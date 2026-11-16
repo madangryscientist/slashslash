@@ -30,10 +30,10 @@ export const STAGES: Record<StageId, { label: string; sentence: string }> = {
 };
 
 /** The pill tone for each stage. Each name is a tone `@hackcove/ui-react` Pill accepts. */
-export const STAGE_TONE: Record<StageId, "amber" | "sky" | "violet" | "emerald" | "slate"> = {
-  alpha: "amber",
-  beta: "sky",
-  "release-candidate": "violet",
-  stable: "emerald",
-  planned: "slate",
+export const STAGE_TONE: Record<StageId, "warn" | "info" | "accent" | "positive" | "neutral"> = {
+  alpha: "warn",
+  beta: "info",
+  "release-candidate": "accent",
+  stable: "positive",
+  planned: "neutral",
 };

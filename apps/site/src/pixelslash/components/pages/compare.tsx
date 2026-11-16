@@ -55,7 +55,7 @@ const TONE: Record<Value, "positive" | "warn" | "danger" | undefined> = {
 function TheirCell({ cell }: { cell: Cell }): ReactNode {
   const label = VALUE_LABEL[cell.v];
   return (
-    <TableCell numeric tone={TONE[cell.v]} title={cell.note || undefined}>
+    <TableCell align="start" numeric tone={TONE[cell.v]} title={cell.note || undefined}>
       {cell.link ? (
         <TextLink href={cell.link} external>
           {label}
@@ -78,7 +78,7 @@ function MatrixRow({ row }: { row: Row }): ReactNode {
         {row.label}
         {row.behind ? <Caption as="span"> (behind)</Caption> : null}
       </TableCell>
-      <TableCell numeric tone={TONE[row.ours.v]} title={row.ours.note || undefined}>
+      <TableCell align="start" numeric tone={TONE[row.ours.v]} title={row.ours.note || undefined}>
         <strong>{VALUE_LABEL[row.ours.v]}</strong>
       </TableCell>
       {TOOLS.map((tool) => {
@@ -91,7 +91,7 @@ function MatrixRow({ row }: { row: Row }): ReactNode {
 
 function Matrix(): ReactNode {
   return (
-    <Table data-testid="matrix" caption="PixelSlash against five other tools, by capability">
+    <Table data-testid="matrix" label="PixelSlash against five other tools, by capability">
       <TableHead>
         <TableRow>
           <TableHeaderCell>Capability</TableHeaderCell>
@@ -126,8 +126,8 @@ function aheadOf(row: Row): string {
 function Behind(): ReactNode {
   const behind = ROWS.filter((row) => row.behind);
   return (
-    <Section title={`Where we are behind (${behind.length})`}>
-      <Text as="p">
+    <Section gap="md" title={`Where we are behind (${behind.length})`}>
+      <Text>
         These are the rows where at least one other tool does more than we do. Each one says what is
         missing, in the words of the comparison file.
       </Text>
@@ -147,23 +147,23 @@ function Behind(): ReactNode {
 function WhoFor(): ReactNode {
   return (
     <>
-      <Text as="p">
+      <Text>
         PixelSlash is for developers and teams who want visual review of their pages without writing
         stories or signing up for a service. It is meant to replace a service such as Chromatic,
         Percy, Argos or Applitools, or Lost Pixel, whose repository is archived and whose makers are
         sunsetting it. Today that means running the review server yourself.
       </Text>
-      <Text as="p">
+      <Text>
         It is free: source available under the Elastic License 2.0, with all of it in the repository
         and no paid plan to buy. A paid service run by us is planned; it is not on sale.
       </Text>
-      <Text as="p">
+      <Text>
         No row below is ours alone, so the difference is the mix: a run is local by default, and the
         whole review app is source available and can be self-hosted for your own use. Argos is open
         source, but its docs say self-hosting is not officially supported, and it is run as a
         managed service. Lost Pixel is local and open source, and is being wound down.
       </Text>
-      <Text as="p">
+      <Text>
         The diff is measured. On the held-out half of{" "}
         {REPO_PUBLIC ? (
           <TextLink href={BENCH_RESULTS} external>
@@ -186,7 +186,7 @@ export function ComparePage(): ReactNode {
     <>
       <ProseLayout
         title="How we compare"
-        subtitle={`${SUMMARY.rows} capabilities, against five other tools.`}
+        description={`${SUMMARY.rows} capabilities, against five other tools.`}
         gap="lg"
       >
         <CardGrid columns={3}>
@@ -200,22 +200,22 @@ export function ComparePage(): ReactNode {
           <StatTile
             label="Behind"
             value={String(SUMMARY.behind)}
-            tone="negative"
+            tone="danger"
             data-testid="stat-behind"
           />
         </CardGrid>
         <WhoFor />
-        <Text as="p">{METHOD}</Text>
+        <Text>{METHOD}</Text>
         <Behind />
       </ProseLayout>
       <div className="mt-10 flex flex-col gap-10">
-        <Section title="The whole table">
-          <Text as="p">
+        <Section gap="md" title="The whole table">
+          <Text>
             Hover a cell for its note. Every competitor cell links the page it was read from.
           </Text>
           <Matrix />
         </Section>
-        <Section title="Sources">
+        <Section gap="md" title="Sources">
           <SubsectionHeading as="h3" size="sm">
             Their docs, fetched {SUMMARY.updated}
           </SubsectionHeading>
@@ -232,7 +232,7 @@ export function ComparePage(): ReactNode {
               </li>
             ))}
           </BulletList>
-          <Caption as="p">
+          <Caption>
             Our column was read from the code at {SUMMARY.oursCommit}, audited {SUMMARY.audited}.
           </Caption>
         </Section>
