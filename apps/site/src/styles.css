@@ -1772,7 +1772,13 @@ pre,
   .motion .panes:not(.played) .shop-btn {
     width: 50%;
     margin-left: 0;
+    color: var(--bg);
     background-color: var(--blue);
+  }
+  @media (prefers-color-scheme: light) {
+    .motion .panes:not(.played) .shop-btn {
+      color: var(--ink);
+    }
   }
   .motion .panes:not(.played) .shop-ring {
     stroke-dashoffset: 1;
