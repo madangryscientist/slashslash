@@ -13,7 +13,6 @@
     "noUnusedParameters": true,
     "paths": {
       "#/*": ["./src/*"],
-      "#ps/*": ["./src/pixelslash/*"],
       "@pixelslash-src/*": ["./.sources/pixelslash/*"]
     }
   }

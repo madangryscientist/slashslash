@@ -1,6 +1,6 @@
 /**
  * Every page's share card: the image a chat app shows for a link to it. One entry per `PAGES` path.
- * design/logos (`og-pages.ts`, then `gen.py --og`) draws the cards from this list, and the next app's head names them.
+ * design/logos (`og-pages.ts`, then `gen.py --og`) draws the cards from this list, and the layout's head names them.
  * The headline is the page's promise, taken from the content module that already holds it wherever one does.
  */
 import { HERO } from "#/content/landing";

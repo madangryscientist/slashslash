@@ -3,9 +3,8 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { PAGES } from "#/content/pages";
 import { PRODUCTS } from "#/content/products";
-import { STAGES } from "#/content/stages";
 import { SITE_URL } from "#/content/site";
-import { STAGE, STAGE_LINE } from "#/pixelslash/content/stage";
+import { STAGE } from "#/pixelslash/content/stage";
 
 const CLIENT = resolve(import.meta.dirname, "../../dist");
 const BUILT = resolve(CLIENT, "index.html");
@@ -21,8 +20,8 @@ function builtHtml(): string {
 }
 
 /**
- * Every built slashslash page: the landing page, /developers, /flakeslash, /toggleslash and the 404 page. The PixelSlash pages
- * (pixelslash/**) are PixelSlash's, with their own checks in src/pixelslash/pages.test.tsx.
+ * Every built slashslash page: the home, /developers, /flakeslash, /toggleslash and the 404 page. The PixelSlash pages
+ * (pixelslash/**) carry PixelSlash's own copy, with their own checks in src/pixelslash/pages.test.ts.
  */
 function builtPages(): string[] {
   builtHtml();
@@ -42,30 +41,8 @@ function visibleText(html: string): string {
 }
 
 describe("built page", () => {
-  test("every product has its stage label next to its name, and the stage's sentence, on /developers", () => {
-    builtHtml();
-    const html = readFileSync(resolve(CLIENT, "developers.html"), "utf8");
-    for (const product of PRODUCTS) {
-      const { label, sentence } = STAGES[product.stage];
-      expect(html, `${product.name} should carry "${label}"`).toMatch(
-        new RegExp(`data-status-for="${product.name}"[^>]*>${label}<`),
-      );
-      // The name, the label and the sentence must sit in this product's own header, so that header is cut out first.
-      const pill = html.indexOf(`data-status-for="${product.name}"`);
-      const header = html.slice(html.lastIndexOf('<header class="tool-head">', pill), html.indexOf("</header>", pill));
-      expect(header, `${product.name} should say "${sentence}" in its own header`).toContain(
-        `<p class="tool-stage">${sentence}</p>`,
-      );
-      expect(header, `${product.name}'s label should sit beside its name`).toContain(
-        `<h3 class="tool-name">${product.name}</h3>`,
-      );
-    }
-  });
-
-  test("PixelSlash's built page prints its stage line, and that stage is the product's stage on /developers", () => {
+  test("PixelSlash's pages take their stage from the product's stage in the shared table", () => {
     expect(STAGE).toBe(PRODUCTS.find((product) => product.name === "PixelSlash")?.stage);
-    const html = readFileSync(resolve(CLIENT, "pixelslash.html"), "utf8");
-    expect(html).toContain(STAGE_LINE);
   });
 
   test("no built page keeps the retired status words", () => {
@@ -80,9 +57,10 @@ describe("built page", () => {
     }
   });
 
+  // Agents and tokens were ruled out too, until the story put agents at the heart of the home (story.test.ts).
   test("keeps out the words the brief rules out, and the comparisons nobody checked", () => {
     const forbidden =
-      /salary|\bclients?\b|employer|job hunt|notice period|\bagents?\b|\btokens?\b|Unleash|Flagsmith|GrowthBook|PostHog|Piranha|OpenFeature|LaunchDarkly MCP/i;
+      /salary|\bclients?\b|employer|job hunt|notice period|Unleash|Flagsmith|GrowthBook|PostHog|Piranha|OpenFeature|LaunchDarkly MCP/i;
     for (const html of builtPages()) expect(visibleText(html).match(forbidden)?.[0]).toBeUndefined();
   });
 
@@ -95,12 +73,11 @@ describe("built page", () => {
     }
   });
 
-  test("has a title, description and share image", () => {
-    for (const html of builtPages()) {
-      expect(html).toMatch(/<title>[^<]+<\/title>/);
-      expect(html).toMatch(/name="description" content="[^"]{40,}"/);
-      expect(html).toContain(`property="og:image" content="${SITE_URL}/og.png"`);
-      expect(html).toContain(`name="twitter:image" content="${SITE_URL}/og.png"`);
+  // The share images are og.test.ts's; the 404 page has no description, since no search engine lists it.
+  test("has a title, and every page but the 404 a description", () => {
+    for (const html of builtPages()) expect(html).toMatch(/<title>[^<]+<\/title>/);
+    for (const { path } of PAGES) {
+      expect(readFileSync(resolve(CLIENT, builtFile(path)), "utf8"), path).toMatch(/name="description" content="[^"]{40,}"/);
     }
     expect(SITE_URL).toMatch(/^https:\/\/[^/]+$/);
   });

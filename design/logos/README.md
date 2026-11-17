@@ -23,7 +23,7 @@ bun design/logos/src/og-pages.ts | uvx --with brotli==1.2.1 --with uharfbuzz==0.
 bun design/logos/src/og-png.ts
 ```
 
-After both, `git status --porcelain apps/site-next/public/og apps/site/public/brand` is empty when nothing changed. Run
+After both, `git status --porcelain apps/site/public/og apps/site/public/brand` is empty when nothing changed. Run
 them whenever a page is added to `PAGES` or a headline in `og.ts` changes: a card's headline wraps at three lines,
 and one that will not fit is set smaller (the run says which), never cut.
 
@@ -31,8 +31,8 @@ and one that will not fit is set smaller (the run says which), never cut.
 
 - `apps/site/public/brand/<slug>-mark.svg` and `<slug>-lockup-{light,dark}.svg` for the seven Direction C tools
   (slash, pixelslash, flakeslash, toggleslash, bundleslash, taskslash, sightslash). Tracked in git.
-- `apps/site-next/public/og/<slug>.svg` and `<slug>.png`: one 1200x630 share card per page, from the list in
-  `apps/site/src/content/og.ts`. Tracked in git; the next app's head names the PNG.
+- `apps/site/public/og/<slug>.svg` and `<slug>.png`: one 1200x630 share card per page, from the list in
+  `apps/site/src/content/og.ts`. Tracked in git; the layout's head names the PNG.
 - `design/logos/out/` (gitignored): all three directions (`a-cut`, `b-pixel`, `c-glyph`) and the review boards in
   `boards/`. Look at these before you change a mark.
 
@@ -42,7 +42,7 @@ and one that will not fit is set smaller (the run says which), never cut.
   (the deep fill, for marks on light), a `text` tone (for links, labels and the wordmark letters on light), and a `dark`
   pastel (for marks and letters on dark).
 - `src/outline.py`: turns a line of text into path data from the site's own fonts in `apps/site/public/fonts/` (and
-  Inter from `apps/site-next/public/fonts/` for the card headlines), so the text is outlines and needs no font.
+  Bricolage Grotesque from `design/logos/fonts/` for the retired direction A boards), so the text is outlines and needs no font.
 - `src/og-pages.ts`: prints the share card list from `og.ts` as JSON, for `gen.py --og -`.
 - `src/og-png.ts`: rasterises the card SVGs with `@resvg/resvg-js`.
 

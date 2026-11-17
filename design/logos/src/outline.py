@@ -15,12 +15,12 @@ from fontTools.varLib import instancer
 
 # The site's own fonts, read from the repo: design/logos/src -> the repo root is three levels up.
 FONTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "apps", "site", "public", "fonts") + os.sep
-# Inter (the share card headlines) is the next app's file: the live app does not ship it.
-NEXT_FONTS = os.path.join(FONTS, "..", "..", "..", "site-next", "public", "fonts") + os.sep
+# Bricolage Grotesque draws only the retired direction A boards; the site no longer ships it.
+DESIGN_FONTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fonts") + os.sep
 FACES = {
-    "bricolage": FONTS + "bricolage-grotesque-latin-opsz-wght-subset.woff2",
+    "bricolage": DESIGN_FONTS + "bricolage-grotesque-latin-opsz-wght-subset.woff2",
     "mono": FONTS + "jetbrains-mono-latin-wght-subset.woff2",
-    "inter": NEXT_FONTS + "inter-latin-wght-normal.woff2",
+    "inter": FONTS + "inter-latin-wght-normal.woff2",
 }
 
 

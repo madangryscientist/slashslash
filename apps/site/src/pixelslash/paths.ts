@@ -15,7 +15,7 @@ export function psHref(path: string): string {
   return path === "/" ? "/pixelslash" : `/pixelslash${path}`;
 }
 
-/** A file fetched into public/pixelslash: `/favicon.svg` -> `/pixelslash/favicon.svg`. */
+/** A file fetched into public/pixelslash: `/report.png` -> `/pixelslash/report.png`. */
 export function psAsset(path: string): string {
   return `/pixelslash${path}`;
 }

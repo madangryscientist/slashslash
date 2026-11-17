@@ -6,7 +6,6 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "#ps": fileURLToPath(new URL("./src/pixelslash", import.meta.url)),
       "#": fileURLToPath(new URL("./src", import.meta.url)),
       "@pixelslash-src": fileURLToPath(new URL("./.sources/pixelslash", import.meta.url)),
     },

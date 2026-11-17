@@ -1,8 +1,17 @@
 ---
-import PixelSlash from "#/layouts/PixelSlash.astro";
-import { PricingPage } from "#ps/components/pages/pricing";
+// /pixelslash/pricing: the PixelSlash pricing page on the shell, in the PixelSlash section.
+import { Container } from "@hackcove/ui-react";
+import Slash from "#/layouts/Slash.astro";
+import { PricingPage } from "#/pixelslash/pages/pricing";
+import { psPage } from "#/pixelslash/page";
+
+const page = psPage("/pricing");
 ---
 
-<PixelSlash path="/pricing">
-  <PricingPage />
-</PixelSlash>
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  <div class="py-8">
+    <Container>
+      <PricingPage />
+    </Container>
+  </div>
+</Slash>

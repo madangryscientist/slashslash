@@ -7,8 +7,8 @@ components, the scripts, the tests and the workflows.
 
 It does not cover, and nothing here licenses you to reuse:
 
-  - the site copy, meaning the words on the pages (src/content/ and the text in src/components/);
-  - the images, including report.png, og.png and the favicon;
+  - the site copy, meaning the words on the pages (src/content/ and the text in the page components under src/);
+  - the images, including report.png and the share images in public/og/;
   - the logos in public/brand/ (the marks and lockups) and the slashslash.build name and wordmark;
   - the names ToggleSlash, BundleSlash, FlakeSlash and PixelSlash.
 

@@ -1,8 +1,17 @@
 ---
-import PixelSlash from "#/layouts/PixelSlash.astro";
-import { HowItWorksPage } from "#ps/components/pages/how-it-works";
+// /pixelslash/how-it-works: the PixelSlash how it works page on the shell, in the PixelSlash section.
+import { Container } from "@hackcove/ui-react";
+import Slash from "#/layouts/Slash.astro";
+import { HowItWorksPage } from "#/pixelslash/pages/how-it-works";
+import { psPage } from "#/pixelslash/page";
+
+const page = psPage("/how-it-works");
 ---
 
-<PixelSlash path="/how-it-works">
-  <HowItWorksPage />
-</PixelSlash>
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  <div class="py-8">
+    <Container>
+      <HowItWorksPage />
+    </Container>
+  </div>
+</Slash>

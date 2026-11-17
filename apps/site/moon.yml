@@ -29,7 +29,9 @@ tasks:
     outputs:
       - "dist"
   dev:
-    command: "bun run astro dev"
+    # PORT from the shared range; bound to the LAN so a phone on the network can open it. The port is
+    # strict through vite's server.strictPort in astro.config.mjs, since astro has no flag for it.
+    command: "bun run astro dev --host --port $PORT"
     deps:
       - "~:fetch-sources"
     preset: "server"

@@ -73,12 +73,12 @@ function read(file: string): string {
   return readFileSync(path, "utf8");
 }
 
-/** Every text file under dist/ except the PixelSlash pages, which keep their own assets. */
+/** Every text file under dist/, the PixelSlash pages and their fetched files included. */
 function textFiles(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) {
-      if (relative(DIST, path) !== "pixelslash") textFiles(path, out);
+      textFiles(path, out);
     } else if (/\.(html|css|js|mjs|xml|json|txt|svg|webmanifest)$/.test(name)) {
       out.push(path);
     }
@@ -167,9 +167,9 @@ describe("the icon and the header on the built pages", () => {
     expect(iconOf(read("toggleslash.html"))).toBe("/brand/toggleslash-mark.svg");
   });
 
-  test("nothing outside the PixelSlash pages still points at the old logo files", () => {
-    // The old root-level files, however they are referenced: relative, root, absolute or in CSS. A PixelSlash path is not one of them.
-    const stale = /(?<!pixelslash\/)\b(favicon|logo-light|logo-dark)\.svg\b/;
+  test("no page still points at the old logo files or PixelSlash's own favicon", () => {
+    // However they are referenced: relative, root, absolute or in CSS.
+    const stale = /\b(favicon|logo-light|logo-dark)\.svg\b/;
     const hits = textFiles(DIST)
       .filter((file) => stale.test(readFileSync(file, "utf8")))
       .map((file) => relative(DIST, file));
