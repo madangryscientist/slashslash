@@ -54,7 +54,7 @@ export function Walkthrough(): ReactNode {
                   <SubsectionHeading as="h4" size="sm">
                     {fit.tool} <Pill tone={STAGE_TONE[fit.stage]}>{STAGES[fit.stage].label}</Pill>
                   </SubsectionHeading>
-                  <Text>{fit.text}</Text>
+                  <Text>{fit.text.text}</Text>
                   {fit.output ? <Artefact output={fit.output} tool={fit.tool} /> : null}
                 </div>
               ))}

@@ -39,6 +39,8 @@ export default defineConfig({
       alias: {
         // The PixelSlash files scripts/fetch-sources.ts downloads at the pinned commit.
         "@pixelslash-src": here("./.sources/pixelslash"),
+        // Each product's FACTS.md, at the commit facts.sha.json pins.
+        "@facts": here("./.sources/facts"),
       },
     },
   },

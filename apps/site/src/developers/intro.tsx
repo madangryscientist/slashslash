@@ -17,8 +17,7 @@ export function Intro(): ReactNode {
         </Container>
       </div>
       <DevSection id="agents" title={DEVELOPERS.title}>
-        <Text>{DEVELOPERS.today}</Text>
-        <Text>{DEVELOPERS.next}</Text>
+        <Text>{DEVELOPERS.next.text}</Text>
       </DevSection>
     </>
   );

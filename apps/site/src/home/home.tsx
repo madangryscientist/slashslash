@@ -19,8 +19,8 @@ function HomeHero(): ReactNode {
     <section className="hero-ground" aria-label="Introduction">
       <Container>
         <div className="pt-12 pb-8 md:pt-16">
-          <CentredHero title={HERO.title}>
-            <Lead>{HERO.lead}</Lead>
+          <CentredHero title={HERO.title.text}>
+            <Lead>{HERO.lead.text}</Lead>
           </CentredHero>
           {/* The full column, so the panes line up with the pipeline below. */}
           <HeroPanes />
@@ -39,7 +39,7 @@ function ToolRow({ tool, divided }: { tool: ToolCard; divided: boolean }): React
         divided={divided}
         {...(tool.href === undefined ? {} : { href: tool.href })}
         leading={<img src={tool.mark} alt="" width={28} height={28} />}
-        secondary={tool.does}
+        secondary={tool.does.text}
       >
         <span className="inline-flex flex-wrap items-center gap-2">
           <strong>{tool.name}</strong>
@@ -68,7 +68,7 @@ function Pipeline(): ReactNode {
         {PIPELINE.stages.map((stage) => (
           <Step key={stage.name} title={<h3 className="font-semibold">{stage.name}</h3>} data-step={stage.name}>
             <div className="space-y-4">
-              <Text>{stage.text}</Text>
+              <Text>{stage.text.text}</Text>
               {stage.tools.length === 0 ? null : (
                 <Card flush>
                   {stage.tools.map((row, index) => (
@@ -80,7 +80,7 @@ function Pipeline(): ReactNode {
           </Step>
         ))}
       </Steps>
-      <Text>{PIPELINE.next}</Text>
+      <Text>{PIPELINE.next.text}</Text>
     </HomeSection>
   );
 }

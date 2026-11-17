@@ -30,7 +30,7 @@ export const ogSlug = (path: string): string => (path === "/" ? "slashslash" : p
 const question = (name: Product["name"]): string => {
   const product = PRODUCTS.find((item) => item.name === name);
   if (product === undefined) throw new Error(`No product ${name}`);
-  return product.question;
+  return product.question.text;
 };
 
 const LOCKUP: Record<OgTool, string> = {
@@ -49,7 +49,7 @@ const CARDS: Record<string, { tool: OgTool; headline: string }> = {
   "/pixelslash": { tool: "pixelslash", headline: "See what your change did to the page." },
   "/pixelslash/compare": { tool: "pixelslash", headline: "How we compare" },
   "/pixelslash/how-it-works": { tool: "pixelslash", headline: "How it works" },
-  "/pixelslash/pricing": { tool: "pixelslash", headline: STATEMENT },
+  "/pixelslash/pricing": { tool: "pixelslash", headline: STATEMENT.text },
   "/taskslash": { tool: "taskslash", headline: question("TaskSlash") },
   "/toggleslash": { tool: "toggleslash", headline: question("ToggleSlash") },
 };

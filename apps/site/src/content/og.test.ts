@@ -28,12 +28,12 @@ describe("the share card list", () => {
   });
 
   test("takes its headlines from the content modules that hold them", () => {
-    const question = (name: string) => PRODUCTS.find((product) => product.name === name)?.question;
+    const question = (name: string) => PRODUCTS.find((product) => product.name === name)?.question.text;
     expect(card("/")?.headline).toBe(HERO.title);
     expect(card("/flakeslash")?.headline).toBe(question("FlakeSlash"));
     expect(card("/toggleslash")?.headline).toBe(question("ToggleSlash"));
     expect(card("/taskslash")?.headline).toBe(question("TaskSlash"));
-    expect(card("/pixelslash/pricing")?.headline).toBe(STATEMENT);
+    expect(card("/pixelslash/pricing")?.headline).toBe(STATEMENT.text);
   });
 
   test("gives the 404 page the suite's card and refuses a page it does not know", () => {

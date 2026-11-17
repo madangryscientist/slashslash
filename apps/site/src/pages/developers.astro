@@ -3,6 +3,7 @@
 // developers, then the walkthrough, env, flags, the tools in detail, how to run PixelSlash today and the
 // ask. The walkthrough and Today hydrate when they scroll into view, for their copy buttons; Motion
 // replays the flags drawing. Nothing else runs in the browser.
+import { licenceLine } from "#/content/facts";
 import { DEVELOPERS_DESCRIPTION, DEVELOPERS_TITLE } from "#/content/site";
 import { Ask } from "#/developers/ask";
 import { Env } from "#/developers/env";
@@ -21,7 +22,7 @@ import Slash from "#/layouts/Slash.astro";
   <Env />
   <Flags />
   <ToolsInDetail />
-  <Today client:visible />
+  <Today client:visible licence={licenceLine("pixelslash")} />
   <Ask />
   <Motion client:load />
 </Slash>

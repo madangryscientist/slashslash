@@ -6,7 +6,6 @@ import {
   CardGrid,
   Cluster,
   Code,
-  CodeBlock,
   Container,
   Lead,
   Pill,
@@ -16,9 +15,9 @@ import {
 } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
+import { LicenceLine } from "#/shell/licence-line";
 import { SECTIONS } from "#/shell/sections";
 import { CentredHero, CentredRow } from "#/stand-ins/centred-hero";
-import type { TryStep } from "#/content/flakeslash";
 import { promiseOf, stageOf, type Tool } from "#/tools/tools";
 
 /*
@@ -55,25 +54,6 @@ function StageLine({ tool }: { tool: Tool }): ReactNode {
   );
 }
 
-/** The hero's command, with a copy button. */
-export function HeroCode({ command }: { command: string }): ReactNode {
-  return <CodeBlock label="bash" language="bash" overflow="wrap" lines={[command]} copy />;
-}
-
-/** Each try-it step: its lead line and its commands in one block with a copy button. */
-export function TryIt({ steps }: { steps: readonly TryStep[] }): ReactNode {
-  return (
-    <Stack gap="lg">
-      {steps.map((step) => (
-        <Stack key={step.lead} gap="sm">
-          <Text>{step.lead}</Text>
-          <CodeBlock label="bash" language="bash" overflow="wrap" lines={[...step.commands]} copy />
-        </Stack>
-      ))}
-    </Stack>
-  );
-}
-
 export function ToolHome({
   tool,
   heroCode,
@@ -92,7 +72,8 @@ export function ToolHome({
           <div className="pt-12 pb-4 md:pt-16">
             <CentredHero overline={<Lockup tool={tool} />} title={promiseOf(tool)}>
               <StageLine tool={tool} />
-              <Lead>{tool.lead}</Lead>
+              <Lead>{tool.lead.text}</Lead>
+              <LicenceLine product={tool.facts} />
               <CentredRow>
                 <Button href="#try-it" size="lg">
                   Try it
@@ -117,20 +98,20 @@ export function ToolHome({
                       <span>
                         <Code>{feature.command}</Code>
                       </span>
-                      <Text>{feature.text}</Text>
+                      <Text>{feature.text.text}</Text>
                     </Stack>
                   </Card>
                 ))}
               </CardGrid>
             </Section>
-            <Section id="try-it" size="lg" title={`Try it on ${tool.tryOn}`} description={tool.tryIt.lead}>
+            <Section id="try-it" size="lg" title={`Try it on ${tool.tryOn}`} description={tool.tryIt.lead.text}>
               {tryIt}
             </Section>
             <Section id="planned" size="lg" title="Planned, not built" description={tool.planned.lead}>
               <Card>
                 <BulletList>
                   {tool.planned.items.map((item) => (
-                    <BulletItem key={item}>{item}</BulletItem>
+                    <BulletItem key={item.text}>{item.text}</BulletItem>
                   ))}
                 </BulletList>
               </Card>

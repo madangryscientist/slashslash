@@ -22,7 +22,7 @@ export function HomeSection({ id, title, children }: { id: string; title: string
 }
 
 /** The stage line either side of the words that link to the CI walkthrough. */
-const [stagesBefore, stagesAfter] = STANDS.stages.split(STANDS.tryLink.text);
+const [stagesBefore, stagesAfter] = STANDS.stages.text.split(STANDS.tryLink.text);
 
 /** Where it stands: what is built, what is planned, and where it runs. */
 export function Stands(): ReactNode {
@@ -33,8 +33,7 @@ export function Stands(): ReactNode {
         <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
         {stagesAfter}
       </Text>
-      <Text>{STANDS.selfHost}</Text>
-      <Text>{STANDS.hosted}</Text>
+      <Text>{STANDS.selfHost.text}</Text>
     </HomeSection>
   );
 }
