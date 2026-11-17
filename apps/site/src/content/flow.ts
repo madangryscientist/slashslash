@@ -171,7 +171,7 @@ export const FLOW: readonly FlowStep[] = [
         text: "The report shows Main, Branch and the Diff side by side. The review server lets a reviewer accept the change or reject it with a reason.",
         output: {
           kind: "real",
-          title: "the review app's compare view from the run above",
+          title: "the review app's compare view of one change",
           image: {
             src: psAsset("/report.png"),
             width: 2560,
