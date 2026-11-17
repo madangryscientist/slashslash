@@ -1,8 +1,11 @@
 ---
-// The suite home, on the shell in the suite's section: the hero and the tool cards. The hero's motion
-// guard runs before first paint, and the Motion island is the only thing on the page that hydrates.
+// The suite home, on the shell in the suite's section: the hero and the tool cards, then the rest of the
+// suite story and the ask. The hero's motion guard runs before first paint; the Motion island and the
+// report viewer are the only things on the page that hydrate.
 import { HERO } from "#next/content/story";
 import { Home } from "#next/home/home";
+import { ReportViewer } from "#next/home/report-viewer";
+import { Gaps, OneReport, Stands, StepsToday, YourView } from "#next/home/sections";
 import { Motion, MOTION_SCRIPT } from "#next/illustrations/motion";
 import Slash from "#next/layouts/Slash.astro";
 ---
@@ -10,7 +13,12 @@ import Slash from "#next/layouts/Slash.astro";
 <Slash section="suite" title={HERO.title} description={HERO.lead}>
   <script is:inline slot="head" set:html={MOTION_SCRIPT} />
   <Home />
+  <StepsToday />
+  <Gaps />
+  <OneReport />
+  <Stands>
+    <ReportViewer client:visible />
+  </Stands>
+  <YourView />
   <Motion client:load />
-  {/* Holds the hero's first action until the ask section, which replaces it, lands. */}
-  <section id="your-view"></section>
 </Slash>

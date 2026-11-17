@@ -131,3 +131,30 @@ test("on Slash Day a card's mark is the tool's deep tone, even on a dark system"
   // PixelSlash's deep tone is #8839ef; its pastel #cba6f7 would read near 203.
   expect(pixel[0]).toBeLessThan(160);
 });
+
+test("the report screenshot opens full screen in a dialog, closed at first, and its close button shuts it", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const open = page.getByRole("link", { name: "Open the report full screen" });
+  await open.scrollIntoViewIfNeeded();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  // client:visible: the viewer hydrates once it is on screen, then the tap opens the dialog in place.
+  await expect(page.locator('astro-island[component-export="ReportViewer"]')).not.toHaveAttribute("ssr", "");
+  await open.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  expect(page.url()).not.toContain("report.png");
+  await dialog.getByRole("button", { name: "Close" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+
+test("the pipeline sits under the steps on a phone and beside them from md", async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const steps = page.locator('[data-home-section="how-today"] ol[role="list"]');
+  const drawing = page.getByTestId("pipeline");
+  const [a, b] = [await steps.boundingBox(), await drawing.boundingBox()];
+  if (!a || !b) throw new Error("the steps or the drawing is not laid out");
+  if (info.project.name === "phone") expect(b.y).toBeGreaterThanOrEqual(a.y + a.height);
+  else expect(b.x).toBeGreaterThanOrEqual(a.x + a.width);
+});

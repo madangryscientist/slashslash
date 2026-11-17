@@ -39,9 +39,9 @@ function text(html: string): string {
 const html = read("index.html");
 const hero = html.slice(html.indexOf('class="hero-ground"'), html.indexOf('id="tools"'));
 
-/** Each card's HTML, by the tool it names, in page order. */
+/** Each card's HTML, by the tool it names, in page order: from the tools to the first section after them. */
 const cards = html
-  .slice(html.indexOf('id="tools"'), html.indexOf('id="your-view"'))
+  .slice(html.indexOf('id="tools"'), html.indexOf("data-home-section="))
   .split('data-tool="')
   .slice(1)
   .map((chunk) => ({ name: chunk.slice(0, chunk.indexOf('"')), html: chunk }));
@@ -106,9 +106,11 @@ describe("/", () => {
     expect(text(html)).not.toMatch(/\b(two|three|four|five|six|\d+)\s+(slash\s+)?(tools|questions)\b/i);
   });
 
-  test("hydrates only the motion island", () => {
-    const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]*)"/g)].map((m) => m[1]);
-    expect(islands).toEqual(["Motion"]);
+  test("hydrates only the report viewer, when it comes into view, and the motion island", () => {
+    const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]*)"[^>]*client="([^"]*)"/g)].map(
+      (m) => `${m[1]}:${m[2]}`,
+    );
+    expect(islands).toEqual(["ReportViewer:visible", "Motion:load"]);
   });
 });
 
