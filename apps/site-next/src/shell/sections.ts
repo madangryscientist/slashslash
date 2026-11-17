@@ -25,6 +25,9 @@ export type Section = {
   pages: readonly SubPage[];
 };
 
+/** A product's mark by its name, under public/brand: every section and every product in PRODUCTS has one. */
+export const markFor = (name: string): string => `/brand/${name.toLowerCase()}-mark.svg`;
+
 export const SECTIONS = {
   suite: {
     day: "slash-suite",
@@ -38,7 +41,7 @@ export const SECTIONS = {
     // Becomes slash-pixelslash / slash-pixelslash-dark when @hackcove/themes ships slash-pixelslash.css.
     day: "slash-suite",
     night: "slash-suite-dark",
-    mark: "/brand/pixelslash-mark.svg",
+    mark: markFor("PixelSlash"),
     name: "PixelSlash",
     home: "/pixelslash",
     pages: [
@@ -53,7 +56,7 @@ export const SECTIONS = {
     // Becomes slash-flakeslash / slash-flakeslash-dark when @hackcove/themes ships slash-flakeslash.css.
     day: "slash-suite",
     night: "slash-suite-dark",
-    mark: "/brand/flakeslash-mark.svg",
+    mark: markFor("FlakeSlash"),
     name: "FlakeSlash",
     home: "/flakeslash",
     pages: [
@@ -65,7 +68,7 @@ export const SECTIONS = {
     // Becomes slash-toggleslash / slash-toggleslash-dark when @hackcove/themes ships slash-toggleslash.css.
     day: "slash-suite",
     night: "slash-suite-dark",
-    mark: "/brand/toggleslash-mark.svg",
+    mark: markFor("ToggleSlash"),
     name: "ToggleSlash",
     home: "/toggleslash",
     pages: [{ label: "Overview", href: "/toggleslash" }],
@@ -77,5 +80,3 @@ export type SectionKey = keyof typeof SECTIONS;
 /** The tools in the switcher, in its order: every section but the suite. */
 export const TOOL_KEYS = ["pixelslash", "flakeslash", "toggleslash"] as const satisfies readonly Exclude<SectionKey, "suite">[];
 
-/** A product's mark by its name, for the footer: every product in PRODUCTS has one under public/brand. */
-export const markFor = (name: string): string => `/brand/${name.toLowerCase()}-mark.svg`;

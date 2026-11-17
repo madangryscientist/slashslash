@@ -2,7 +2,9 @@ import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { PRODUCTS } from "#content/products";
-import { SECTIONS, TOOL_KEYS } from "#next/shell/sections";
+import { renderToStaticMarkup } from "react-dom/server";
+import { SECTIONS, TOOL_KEYS, markFor } from "#next/shell/sections";
+import { SlashShell } from "#next/shell/SlashShell";
 
 // The shell as it is built: the 404 page's header, switcher and footer, and the stylesheet that
 // defines every section's scopes.
@@ -75,7 +77,29 @@ describe("the stylesheet", () => {
   });
 
   test("every mark a section or the footer names is in public/brand", () => {
-    const marks = [...Object.values(SECTIONS).map((s) => s.mark), ...PRODUCTS.map((p) => `/brand/${p.name.toLowerCase()}-mark.svg`)];
+    const marks = [...Object.values(SECTIONS).map((s) => s.mark), ...PRODUCTS.map((p) => markFor(p.name))];
     expect(marks.filter((mark) => !existsSync(resolve(import.meta.dirname, "../../public", mark.slice(1))))).toEqual([]);
+  });
+});
+
+describe("the shell on a tool's page", () => {
+  // No tool page is built yet, so the shell is rendered here as a tool page would render it.
+  const html = renderToStaticMarkup(
+    <SlashShell section="pixelslash" path="/pixelslash/pricing">
+      <p>page</p>
+    </SlashShell>,
+  );
+  const current = (label: string): string[] =>
+    elements(html, "nav")
+      .filter((nav) => nav.includes(`aria-label="${label}"`))
+      .flatMap((nav) => links(nav.replace(/<a\b(?![^>]*aria-current="page")[^>]*>[\s\S]*?<\/a>/g, "")))
+      .map((link) => link.href);
+
+  test("the tool's tab is current in the switcher", () => {
+    expect(new Set(current("Tools"))).toEqual(new Set([SECTIONS.pixelslash.home]));
+  });
+
+  test("the page's entry is current in the tool's own row", () => {
+    expect(new Set(current(SECTIONS.pixelslash.name))).toEqual(new Set(["/pixelslash/pricing"]));
   });
 });
