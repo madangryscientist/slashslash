@@ -1,0 +1,81 @@
+import { existsSync, globSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, test } from "vitest";
+import { PRODUCTS } from "#content/products";
+import { SECTIONS, TOOL_KEYS } from "#next/shell/sections";
+
+// The shell as it is built: the 404 page's header, switcher and footer, and the stylesheet that
+// defines every section's scopes.
+
+const DIST = resolve(import.meta.dirname, "../../dist");
+
+function built(file: string): string {
+  const path = resolve(DIST, file);
+  if (!existsSync(path)) throw new Error(`No ${file} in ${DIST}. Run "bunx moon run site-next:build" first.`);
+  return readFileSync(path, "utf8");
+}
+
+/** Every element of `tag` in `html`, outermost only, with its contents. */
+const elements = (html: string, tag: string): string[] =>
+  [...html.matchAll(new RegExp(`<${tag}\\b[^>]*>[\\s\\S]*?</${tag}>`, "g"))].map((m) => m[0]);
+
+/** The text of an HTML fragment, tags dropped and whitespace collapsed. */
+const text = (html: string): string => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+/** Every link in `html` as its href and its text. */
+const links = (html: string): { href: string; text: string }[] =>
+  [...html.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => ({
+    href: m[1] ?? "",
+    text: text(m[2] ?? ""),
+  }));
+
+describe("the shell on the 404 page", () => {
+  const page = (): string => built("404.html");
+
+  test("<html> is built in the suite's light scope", () => {
+    expect(page().match(/<html[^>]*class="([^"]*)"/)?.[1]?.split(/\s+/)).toContain(SECTIONS.suite.day);
+  });
+
+  test("one header, whose suite lockup links home", () => {
+    const headers = elements(page(), "header");
+    expect(headers).toHaveLength(1);
+    expect(links(headers[0] ?? "")[0]).toEqual({ href: "/", text: SECTIONS.suite.name });
+  });
+
+  test("the switcher, named Tools, links each tool's home and no other", () => {
+    const nav = elements(page(), "nav").find((n) => /aria-label="Tools"/.test(n));
+    expect(nav, "no nav named Tools").toBeDefined();
+    expect(links(nav ?? "")).toEqual(TOOL_KEYS.map((key) => ({ href: SECTIONS[key].home, text: SECTIONS[key].name })));
+  });
+
+  test("the footer names every product", () => {
+    const footers = elements(page(), "footer");
+    expect(footers).toHaveLength(1);
+    const words = text(footers[0] ?? "");
+    for (const product of PRODUCTS) expect(words).toContain(product.name);
+  });
+
+  test("the head script names the suite's dark scope", () => {
+    const head = page().match(/<head>[\s\S]*<\/head>/)?.[0] ?? "";
+    const scripts = elements(head, "script").join("");
+    expect(scripts).toContain(SECTIONS.suite.night);
+  });
+});
+
+describe("the stylesheet", () => {
+  test("defines every section's day and night scope", () => {
+    const css = globSync("_astro/*.css", { cwd: DIST })
+      .map((file) => readFileSync(resolve(DIST, file), "utf8"))
+      .join("\n");
+    expect(css.length).toBeGreaterThan(0);
+    const missing = Object.entries(SECTIONS)
+      .flatMap(([key, s]) => [`${key} ${s.day}`, `${key} ${s.night}`])
+      .filter((entry) => !new RegExp(`\\.${entry.split(" ")[1]}(?![\\w-])`).test(css));
+    expect(missing).toEqual([]);
+  });
+
+  test("every mark a section or the footer names is in public/brand", () => {
+    const marks = [...Object.values(SECTIONS).map((s) => s.mark), ...PRODUCTS.map((p) => `/brand/${p.name.toLowerCase()}-mark.svg`)];
+    expect(marks.filter((mark) => !existsSync(resolve(import.meta.dirname, "../../public", mark.slice(1))))).toEqual([]);
+  });
+});
