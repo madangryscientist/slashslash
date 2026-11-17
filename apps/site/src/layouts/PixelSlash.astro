@@ -1,5 +1,6 @@
 ---
 import { appShellRootClassFor, colourSchemeScript } from "@hackcove/ui-react";
+import { thisBuildCommit } from "#/content/build-commit";
 import interFont from "@pixelslash-src/apps/site/public/fonts/inter-latin-wght-normal.woff2?url";
 import { Shell } from "#ps/components/shell";
 import type { SitePath } from "#ps/content/pages";
@@ -30,6 +31,7 @@ const scopeScript = `${colourSchemeScript};(function(){var r=document.documentEl
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="build-commit" content={thisBuildCommit()} />
     {
       head.meta.map(({ title, name, property, content }) =>
         title !== undefined ? (

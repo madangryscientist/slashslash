@@ -110,6 +110,18 @@ second job, the only one that holds the Cloudflare token (in the `production` en
 `apps/site/dist/` to Cloudflare Pages with `wrangler pages deploy`. Pull requests run only `ci.yml`, which gets
 the moon cache read token and nothing else; the Cloudflare token stays with the deploy job.
 
+Every page names the commit it was built from in a hidden `<meta name="build-commit">` in its head. To see
+which commit is live:
+
+```sh
+curl -s https://slashslash.build/ | grep build-commit
+```
+
+The workflow passes its commit to the build as `BUILD_COMMIT`, and after the upload its `smoke` job checks
+that the live home page names that commit, retrying for up to two minutes while the edge catches up. A
+local build without `BUILD_COMMIT` reads `git rev-parse HEAD` (with `-dirty` on a dirty tree), and a moon
+cache hit there can carry an older commit; only CI deploys, so that never reaches the live site.
+
 ## Shared build cache
 
 moon reads a shared remote cache when `MOON_REMOTE_TOKEN` holds a read token: `export MOON_REMOTE_TOKEN=<read

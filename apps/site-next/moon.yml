@@ -15,6 +15,8 @@ tasks:
       - "site:fetch-sources"
     inputs:
       - "@group(sources)"
+      # The commit the pages name in their build-commit meta; see the site app's build task.
+      - "$BUILD_COMMIT"
     outputs:
       - "dist"
   dev:

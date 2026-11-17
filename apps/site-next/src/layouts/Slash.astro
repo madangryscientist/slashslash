@@ -1,5 +1,6 @@
 ---
 import { appShellRootClassFor, colourSchemeScript } from "@hackcove/ui-react";
+import { thisBuildCommit } from "#content/build-commit";
 import { OG_HEIGHT, OG_WIDTH, ogCardFor } from "#content/og";
 import { SITE_NAME, SITE_URL } from "#content/site";
 import { SECTIONS, type SectionKey } from "#next/shell/sections";
@@ -39,6 +40,7 @@ const toggleScript = `(function(c){document.querySelectorAll("[data-scheme-toggl
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="build-commit" content={thisBuildCommit()} />
     <title>{`${title} | ${SITE_NAME}`}</title>
     <link rel="canonical" href={`${SITE_URL}${path}`} />
     <link rel="icon" href={mark} type="image/svg+xml" />
