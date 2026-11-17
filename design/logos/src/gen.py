@@ -6,7 +6,7 @@ Writes SVGs under ../out (gitignored): a-cut, b-pixel, c-glyph, and a board per 
 Direction C is the one the suite ships: its seven marks and fourteen lockups also go to apps/site/public/brand/ (tracked).
 
 With `--og <file>` (or `--og -` for stdin) it also writes one share card per page, from the JSON list that
-og-pages.ts prints, to apps/site-next/public/og/<slug>.svg (tracked); og-png.ts then rasterises them.
+og-pages.ts prints, to apps/site/public/og/<slug>.svg (tracked); og-png.ts then rasterises them.
 Every mark is hand-placed geometry (no tracing); wordmarks are the site's own fonts, outlined (outline.py).
 """
 import json
@@ -133,7 +133,7 @@ def a_word(tool, h=64):
 
 # ================================================================ Direction B: pixel
 # PixelSlash's own pixel art becomes the suite's: Hack Cove letterforms on a 16-row grid.
-# P, I, X, E, L, S, A, H are lifted verbatim from apps/site/src/pixelslash/components/logo.tsx;
+# P, I, X, E, L, S, A, H are lifted verbatim from the old PixelSlash logo (apps/site/src/pixelslash/components/logo.tsx, since removed);
 # the rest are drawn here to the same rules (3-pixel stems, chamfered corners, tapered ends).
 GLYPHS = {
     "P": ".#######.. .########. .###...### .###...### .###...### .###...### .###...### #########. ########.. .###...... .###...... .###...... .###...... .###...... .###...... .###......",
@@ -425,8 +425,8 @@ def board(d):
 
 
 # ================================================================ share cards
-# The next app's share cards, one per page, written beside the PNGs og-png.ts makes from them.
-OG_OUT = os.path.join(HERE, "..", "..", "..", "apps", "site-next", "public", "og")
+# The site's share cards, one per page, written beside the PNGs og-png.ts makes from them.
+OG_OUT = os.path.join(HERE, "..", "..", "..", "apps", "site", "public", "og")
 # Light only: chat apps show the card on their own ground, whatever the reader's theme.
 OG_THEME = "light"
 OG_SIZE, OG_STEP, OG_LINES = 72, 80, 3

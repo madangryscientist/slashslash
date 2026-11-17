@@ -8,7 +8,6 @@ $schema: "./cache/schemas/workspace.json"
 
 projects:
   site: "apps/site"
-  site-next: "apps/site-next"
   scripts: "scripts"
   self-host: "self-host"
 

@@ -1,21 +1,6 @@
 ---
-import {
-  FlakeSlashIntro,
-  FlakeSlashLinks,
-  FlakeSlashPlanned,
-  FlakeSlashToday,
-  FlakeSlashTry,
-} from "#/components/flakeslash";
-import { FLAKESLASH_DESCRIPTION, FLAKESLASH_TITLE } from "#/content/flakeslash";
-import Base from "#/layouts/Base.astro";
-
-// /flakeslash: what FlakeSlash is and does today. The docs stay in the FlakeSlash repository.
+// /flakeslash: the tool's home, on ToolHome.
+import ToolPage from "#/tools/ToolPage.astro";
 ---
 
-<Base title={FLAKESLASH_TITLE} description={FLAKESLASH_DESCRIPTION} icon="/brand/flakeslash-mark.svg">
-  <FlakeSlashIntro />
-  <FlakeSlashToday />
-  <FlakeSlashTry client:visible />
-  <FlakeSlashPlanned />
-  <FlakeSlashLinks />
-</Base>
+<ToolPage tool="flakeslash" />

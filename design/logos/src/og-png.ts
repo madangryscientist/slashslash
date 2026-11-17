@@ -1,4 +1,4 @@
-// Rasterises every share card in apps/site-next/public/og/*.svg to a 1200x630 PNG beside it.
+// Rasterises every share card in apps/site/public/og/*.svg to a 1200x630 PNG beside it.
 // The text in the cards is outlined, so no font is loaded. A design tool: the PNGs are committed, and no build runs this.
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -6,7 +6,7 @@ import { join, resolve } from "node:path";
 import { crc32 } from "node:zlib";
 import { Resvg } from "@resvg/resvg-js";
 
-const DIR = resolve(import.meta.dirname, "../../../apps/site-next/public/og");
+const DIR = resolve(import.meta.dirname, "../../../apps/site/public/og");
 
 /** A PNG tEXt chunk. Each PNG carries its SVG's hash in one, so a test can tell a PNG left behind by its SVG. */
 function textChunk(key: string, value: string): Buffer {

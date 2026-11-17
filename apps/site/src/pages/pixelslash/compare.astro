@@ -1,8 +1,17 @@
 ---
-import PixelSlash from "#/layouts/PixelSlash.astro";
-import { ComparePage } from "#ps/components/pages/compare";
+// /pixelslash/compare: the PixelSlash comparison on the shell, in the PixelSlash section.
+import { Container } from "@hackcove/ui-react";
+import Slash from "#/layouts/Slash.astro";
+import { ComparePage } from "#/pixelslash/pages/compare";
+import { psPage } from "#/pixelslash/page";
+
+const page = psPage("/compare");
 ---
 
-<PixelSlash path="/compare">
-  <ComparePage />
-</PixelSlash>
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  <div class="py-8">
+    <Container>
+      <ComparePage />
+    </Container>
+  </div>
+</Slash>

@@ -10,12 +10,6 @@ export const SITE_NAME = "slashslash.build";
 /** The landing page's h1 without its full stop, and the page title, link previews included. */
 export const LANDING_HEADLINE = HERO.title.replace(/\.$/, "");
 
-/** The hero's lead, word for word: the description in search results and link previews. */
-export const SITE_DESCRIPTION: string = HERO.lead;
-
-/** What public/og.png really shows, for og:image:alt. Change it whenever the image changes. */
-export const OG_IMAGE_ALT = `The ${SITE_NAME} logo above the words: ${LANDING_HEADLINE}.`;
-
 /** The /developers page lead, also its description in search results and link previews. */
 export const DEVELOPERS_DESCRIPTION =
   "The details behind slashslash.build: how the tools would work in a CI pipeline, what exists today, and how to try PixelSlash.";

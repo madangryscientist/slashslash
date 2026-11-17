@@ -58,32 +58,35 @@ Each runs `moon run --concurrency 3 :<task>` across the projects; CI runs all fo
 
 The tests read `apps/site/dist/` and check the agreed copy and its order, that every product shows its status label,
 that made-up material says so, that no privacy claim and no forbidden word is present, that nothing is hidden
-or in a start state without motion, that the colour pairs pass AA contrast in both themes, and that the site
-is open to search engines (`robots.txt`, `sitemap.xml`, a canonical address per page, no robots meta tag).
+or in a start state without motion, that every page links the one stylesheet, and that the site is open to
+search engines (`robots.txt`, `sitemap.xml`, a canonical address per page, no robots meta tag).
 
 ## How the page is built
 
-Astro renders every section to HTML at build time (`src/pages/`, `src/layouts/Base.astro`). The sections are
-React components in `src/components/`, one file per section, with the words in `src/content/`. Only four
-things run in the browser, as Astro islands:
+Astro renders every page to HTML at build time (`src/pages/`), on one layout, `src/layouts/Slash.astro`, which
+puts each page on the Slash shell (`src/shell/`): the header, the tool switcher and the footer, in the page's
+section (the suite or one tool). The pages are React components grouped by page (`src/home/`,
+`src/developers/`, `src/tools/` for the FlakeSlash and ToggleSlash homes, `src/pixelslash/`), the drawings are
+in `src/illustrations/`, and the words are in `src/content/`. Only a few things run in the browser:
 
-- the light/dark toggle (`client:load`),
-- the motion script (`src/components/motion.tsx`, `client:load`), which plays each drawing once as it scrolls
+- the light/dark toggle (an inline script in the layout),
+- the motion island (`src/illustrations/motion.tsx`, `client:load`), which plays each drawing once as it scrolls
   into view,
-- the report dialog on `/` (inside `stands.tsx`, `client:visible`),
-- the copy buttons and the count-up on `/developers` (`today.tsx` and `flags.tsx`, `client:visible`).
+- the report viewer on `/` (`src/home/report-viewer.tsx`, `client:visible`),
+- the copy buttons on `/developers` and the tool homes (`client:visible`).
 
-`Base.astro` carries an inline script that runs before first paint: it applies the stored or system colour
-scheme (so there is no flash) and adds the `motion` class when the reader allows motion. If the motion
-script has not started within 3 seconds, it takes `motion` off again, so no start state can hide the copy.
+The layout carries an inline script that runs before first paint: it applies the stored or system colour
+scheme, so there is no flash. The home adds its own guard that sets the `motion` class when the reader allows
+motion and takes it off again if the motion island has not started within 3 seconds, so no start state can hide
+the copy.
 
 **Motion only decorates.** Everything is SVG and CSS. The base style of every element is its finished state;
 start states sit under `.motion ...:not(.played)`, and every animation is inside
 `@media (prefers-reduced-motion: no-preference)`. A test refuses one outside it.
 
-**Real and imagined look different.** `Frame` in `src/components/evidence.tsx` draws four kinds: `real`
-(captured by running the tool), `quoted` (printed in the tool's docs), `made-up` and `idea` (dashed and
-hatched, labelled where they appear). Never give something unbuilt a `real` frame; a test refuses it.
+**Real and imagined look different.** `Evidence` in `src/developers/evidence.tsx` draws four kinds: `real`
+(captured by running the tool), `quoted` (printed in the tool's docs), `made-up` and `idea` (dashed,
+labelled where they appear). Never give something unbuilt a `real` frame; a test refuses it.
 
 ## Things to change in one place
 
@@ -95,11 +98,11 @@ hatched, labelled where they appear). Never give something unbuilt a `real` fram
 
 ## Design system
 
-Status pills, copy lines, links and the theme toggle come from `@hackcove/ui-react`, on `@hackcove/themes`.
-Everything else is plain CSS in `src/styles.css` with per-theme tokens, because the pipeline, the hero panes
-and the other drawings are one-off.
+The shell, the type, the pills, the code blocks, the links and the theme toggle come from `@hackcove/ui-react`,
+on the Slash Day and Slash Night themes of `@hackcove/themes`. `src/styles.css` is the one stylesheet: Tailwind,
+the themes, and the plain CSS of the one-off drawings (`src/illustrations/`), each on the themes' variables.
 
-Fonts are self-hosted and subset (`apps/site/public/fonts/`, licences beside them): Bricolage Grotesque for text,
+Fonts are self-hosted and subset (`apps/site/public/fonts/`, licences beside them): Inter for text,
 JetBrains Mono for code. The mono subset holds ASCII plus nbsp and the middle dot, so code on the page must
 stay within those; a missing glyph means re-subsetting.
 

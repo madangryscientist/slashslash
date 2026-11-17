@@ -1,8 +1,8 @@
 /**
  * Downloads the few PixelSlash repository files the /pixelslash pages need, at the commit pinned in
  * pixelslash.sha (PIXELSLASH_SHA overrides it, for trying another commit locally). Each file lands in
- * .sources/pixelslash/<path>; those under apps/site/public/ (but the font, which the stylesheet
- * imports) are also copied to public/pixelslash/, so the built site serves them under /pixelslash/. Both folders are gitignored. A failed download exits
+ * .sources/pixelslash/<path>; those under apps/site/public/ are also copied to public/pixelslash/, so
+ * the built site serves them under /pixelslash/. Both folders are gitignored. A failed download exits
  * non-zero naming the path and the commit.
  *
  * `--list` prints PIXELSLASH_FILES, one per line, and exits without fetching or deleting anything. The
@@ -14,9 +14,6 @@ import { dirname, resolve } from "node:path";
 /** Every PixelSlash file the pages read, by its path in that repository. */
 export const PIXELSLASH_FILES = [
   "apps/web/github-app/manifest.json",
-  "apps/site/public/favicon.svg",
-  "apps/site/public/fonts/inter-latin-wght-normal.woff2",
-  "apps/site/public/fonts/OFL.txt",
   "apps/site/public/hero/main.png",
   "apps/site/public/hero/branch.png",
   "apps/site/public/report.png",
@@ -24,9 +21,6 @@ export const PIXELSLASH_FILES = [
   "apps/site/src/content/hero.json",
   "docs/capabilities/data.json",
 ] as const;
-
-/** Files the stylesheet imports, so Vite serves them hashed; copying them to public/ would ship them twice. */
-const IMPORTED = new Set<string>(["apps/site/public/fonts/inter-latin-wght-normal.woff2"]);
 
 const REPO = "madangryscientist/pixelslash";
 const SITE = resolve(import.meta.dirname, "..");
@@ -69,7 +63,7 @@ async function main(): Promise<void> {
     const target = resolve(SOURCES, path);
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, bodies[i] ?? new Uint8Array());
-    if (path.startsWith(PUBLIC_PREFIX) && !IMPORTED.has(path)) {
+    if (path.startsWith(PUBLIC_PREFIX)) {
       const served = resolve(PUBLIC, path.slice(PUBLIC_PREFIX.length));
       mkdirSync(dirname(served), { recursive: true });
       copyFileSync(target, served);

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { NotFound } from "@hackcove/ui-react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { NotFoundPage } from "../src/components/not-found.tsx";
 import { BUILD_COMMIT_PATTERN } from "../src/content/build-commit.ts";
 
 /*
@@ -11,7 +11,7 @@ import { BUILD_COMMIT_PATTERN } from "../src/content/build-commit.ts";
  */
 
 const h1 = (html: string): string | undefined => /<h1[^>]*>(.*?)<\/h1>/s.exec(html)?.[1];
-const heading = h1(renderToStaticMarkup(createElement(NotFoundPage)));
+const heading = h1(renderToStaticMarkup(createElement(NotFound)));
 
 test("an unknown path answers 404 with the site's 404 page", async ({ request }) => {
   expect(heading).toBeTruthy();

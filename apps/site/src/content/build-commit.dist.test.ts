@@ -3,8 +3,8 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { BUILD_COMMIT_PATTERN } from "./build-commit";
 
-/** The built site to check: this app's dist/, or the one SITE_DIST names (the next app's vitest config sets it). */
-const DIST = process.env["SITE_DIST"] ?? resolve(import.meta.dirname, "../../dist");
+/** The built site to check. */
+const DIST = resolve(import.meta.dirname, "../../dist");
 
 describe("built pages", () => {
   const pages = (): string[] => {
