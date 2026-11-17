@@ -21,8 +21,8 @@ export const FLAKESLASH_TITLE: Claim = {
 export const FLAKESLASH_INTRO: { title: string; lead: Claim } = {
   title: "FlakeSlash",
   lead: {
-    text: "FlakeSlash finds the CI jobs that both fail and pass on the same commit, so a failure means something again. It is a command line tool you run yourself, and it reads GitHub Actions today.",
-    facts: ["flakeslash/flake-same-commit", "flakeslash/cli-from-checkout", "flakeslash/scan-github-actions"],
+    text: "FlakeSlash finds the CI jobs that both fail and pass on the same commit, so a failure means something again. It reads GitHub Actions today.",
+    facts: ["flakeslash/flake-same-commit", "flakeslash/scan-github-actions"],
   },
 };
 
