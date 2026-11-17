@@ -72,7 +72,7 @@ export function HowItWorksPage(): ReactNode {
           aspect="natural"
           width="full"
         />
-        {/* The numbers below come from PixelSlash's report.json at the pinned commit; re-read them when the pin moves. */}
+        {/* The numbers below come from apps/site/src/content/report.json in PixelSlash at the pinned commit (not fetched here); re-read them when the pin moves. */}
         <Caption>
           A real run, not a mock-up: the repository's own fixtures/pages/live.html against
           local.html, shot in Chromium at 1280×720. It printed 19033 changed pixels and one changed
