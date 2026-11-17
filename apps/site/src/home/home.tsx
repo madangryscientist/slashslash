@@ -1,33 +1,24 @@
-import { Button, Card, CardGrid, Container, Lead, Pill, Stack, Text } from "@hackcove/ui-react";
+import { Card, CardGrid, Container, Lead, Pill, Stack, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { HERO } from "#/content/story";
 import { TOOL_CARDS, type ToolCard } from "#/home/tools";
 import { HeroPanes } from "#/illustrations/hero";
-import { CentredHero, CentredRow } from "#/stand-ins/centred-hero";
+import { CentredHero } from "#/stand-ins/centred-hero";
 
 /*
- * The suite home's first screen, on the kit's parts: the hero (the story's title, lead and two actions,
- * over the hand-drawn panes) and a card for every tool the story names. Nothing here runs in the
- * browser; the page adds the Motion island beside it.
+ * The suite home's first screen, on the kit's parts: the hero (the story's title and lead, over the
+ * hand-drawn panes, with no link or button) and a card for every tool the story names. Nothing here runs
+ * in the browser; the page adds the Motion island beside it.
  */
 
 function HomeHero(): ReactNode {
-  const [primary, secondary] = HERO.actions;
   return (
     <section className="hero-ground" aria-label="Introduction">
       <Container>
         <div className="pt-12 pb-8 md:pt-16">
           <CentredHero title={HERO.title}>
             <Lead>{HERO.lead}</Lead>
-            <CentredRow>
-              <Button href={primary.href} size="lg">
-                {primary.label}
-              </Button>
-              <Button href={secondary.href} variant="outline" size="lg">
-                {secondary.label}
-              </Button>
-            </CentredRow>
           </CentredHero>
           <div className="mx-auto max-w-4xl">
             <HeroPanes />

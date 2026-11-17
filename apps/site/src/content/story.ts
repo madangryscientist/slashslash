@@ -21,10 +21,11 @@ const listNames = (names: readonly string[]): string =>
 export const HERO = {
   title: "Your agents ship faster than anyone can check. Slash checks what they shipped.",
   lead: "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash gives every change a plain report of what it will do, before your customers find out.",
-  actions: [
-    { label: "I would like your view", href: "#your-view" },
-    { label: "The tools", href: "#tools" },
-  ],
+} as const;
+
+/** The title of the ask at the end of the home, where the questions are. */
+export const VIEW = {
+  title: "I would like your view",
 } as const;
 
 export const STEPS_TODAY = {

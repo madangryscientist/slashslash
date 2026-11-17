@@ -5,14 +5,14 @@ import { STANDS as LANDING_STANDS } from "#/content/landing";
 import { PRODUCTS } from "#/content/products";
 import { CONTACT_LINE } from "#/content/site";
 import { STAGES } from "#/content/stages";
-import { GAPS, HERO, REPORT, STANDS, STEPS_TODAY, STORY_TOOLS, VIEW_QUESTIONS } from "#/content/story";
+import { GAPS, HERO, REPORT, STANDS, STEPS_TODAY, STORY_TOOLS, VIEW, VIEW_QUESTIONS } from "#/content/story";
 import { TOOL_CARDS } from "#/home/tools";
 import { SECTIONS } from "#/shell/sections";
 
 /*
  * The suite home as the site builds it, read from dist (`bunx moon run site:test` builds first):
- * on the shell in the suite's section, the hero from the story module with both actions landing on the
- * page, one card per tool the story names, and no count of tools anywhere. After the cards, the rest of
+ * on the shell in the suite's section, the hero from the story module with no link and no button, one
+ * card per tool the story names, and no count of tools anywhere. After the cards, the rest of
  * the story in its order: every string of its sections on the page, a row per gap and per report
  * question, a stage Pill per tool, the ask at #your-view, and every drawing finished before any script.
  */
@@ -67,14 +67,9 @@ describe("/", () => {
     expect(hero).not.toContain("@@");
   });
 
-  test("the hero's two actions go to #your-view and #tools, and both ids are on the page", () => {
-    const links = [...hero.matchAll(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => ({
-      href: m[1],
-      label: text(m[2] ?? ""),
-    }));
-    expect(links).toEqual(HERO.actions.map((action) => ({ href: action.href, label: action.label })));
-    expect(links.map((l) => l.href)).toEqual(["#your-view", "#tools"]);
-    for (const { href } of links) expect(html).toContain(`id="${href?.slice(1)}"`);
+  test("the hero has no link and no button", () => {
+    expect(hero).not.toMatch(/<a[\s>]/);
+    expect(hero).not.toMatch(/<button[\s>]/);
   });
 
   test("has one card per tool the story names, in its order, each with its question and stage", () => {
@@ -153,7 +148,7 @@ function rows(chunk: string, attr: string): { name: string; html: string }[] {
 }
 
 const afterTools = html.slice(html.indexOf('id="tools"'));
-const TITLES = [STEPS_TODAY.title, GAPS.title, REPORT.title, STANDS.title, HERO.actions[0].label];
+const TITLES = [STEPS_TODAY.title, GAPS.title, REPORT.title, STANDS.title, VIEW.title];
 
 describe("the home after the tool cards", () => {
   test("opens each section with its title as an h2, in the story's order", () => {
