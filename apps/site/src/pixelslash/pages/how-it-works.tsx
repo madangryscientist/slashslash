@@ -15,7 +15,7 @@ import { psAsset, psHref } from "#/pixelslash/paths";
 /** The four questions a visitor comes with; the figures are bench/results/2026-10-20.md. */
 function WhoFor(): ReactNode {
   return (
-    <Section gap="md" title="Who it is for, and what it costs">
+    <Section title="Who it is for, and what it costs">
       <Text>
         PixelSlash is for developers and teams who ship web pages and want to see what a change did
         to them before it merges, without writing stories or signing up for a service.
@@ -65,7 +65,7 @@ export function HowItWorksPage(): ReactNode {
           counts and both sizes. It opens from disk: nothing is uploaded.
         </Step>
       </Steps>
-      <Section gap="md" title="A real report">
+      <Section title="A real report">
         <Image
           src={psAsset("/report.png")}
           alt="The report.html of the run below: Main, Branch and Diff of a card whose background turned yellow"
@@ -86,7 +86,7 @@ export function HowItWorksPage(): ReactNode {
           ].join("\n")}
         </CodeBlock>
       </Section>
-      <Section gap="md" title="Exit codes">
+      <Section title="Exit codes">
         <Text>
           0 means the run finished, whatever it found in pixels. 1 means a design-system judge found
           new violations on Branch. 2 is a usage error. A crash never exits 1, so CI can read the
@@ -95,7 +95,7 @@ export function HowItWorksPage(): ReactNode {
           is in the docs.
         </Text>
       </Section>
-      <Section gap="md" title="Then, if you want a person to decide">
+      <Section title="Then, if you want a person to decide">
         <Text>
           pixelslash upload sends the shots to a PixelSlash review server you run. It diffs them
           against the default branch, holds the build for review and reports a GitHub check, and

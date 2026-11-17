@@ -39,7 +39,7 @@ export function PricingPage(): ReactNode {
               <Display as="span">{STATEMENT}</Display>
             </PageHeading>
             <Lead>{LEAD}</Lead>
-            <Cluster gap="xs" wrap={false}>
+            <Cluster gap="xs">
               <Button href={psHref(ACTION.href)} size="lg" data-testid="pricing-action">
                 {ACTION.label} <span aria-hidden="true">→</span>
               </Button>
