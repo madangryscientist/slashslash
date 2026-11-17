@@ -34,11 +34,17 @@ test("the home page names the commit it was built from", async ({ request }) => 
   let seen: string | undefined;
   let status = 0;
   for (;;) {
-    // A fresh query each time, so no cache answers with an older copy of the page. An error answer while
-    // the edge switches over counts as not yet, like an older sha.
-    const response = await request.get(`/?commit-check=${crypto.randomUUID()}`);
-    status = response.status();
-    seen = response.ok() ? buildCommitOf(await response.text()) : undefined;
+    // A fresh query each time, so no cache answers with an older copy of the page. An error answer or a
+    // dropped connection while the edge switches over counts as not yet, like an older sha.
+    try {
+      const response = await request.get(`/?commit-check=${crypto.randomUUID()}`, { timeout: 15_000 });
+      status = response.status();
+      seen = response.ok() ? buildCommitOf(await response.text()) : undefined;
+    } catch (error) {
+      if (!EXPECT_COMMIT || Date.now() >= deadline) throw error;
+      status = 0;
+      seen = undefined;
+    }
     if (!EXPECT_COMMIT || seen === EXPECT_COMMIT || Date.now() >= deadline) break;
     await new Promise((done) => setTimeout(done, 5_000));
   }
