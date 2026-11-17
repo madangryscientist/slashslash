@@ -31,10 +31,6 @@ export const VIEW = {
 /** A step a change goes through, in the order most teams run them. */
 export type StageName = "Written" | "Built and tested" | "Reviewed" | "Released";
 
-/**
- * The one view of the suite: the steps a change goes through, in order, and under each step the tools
- * that run there, each with one sentence saying what it does. A planned tool says what it will do.
- */
 /** A step of the pipeline: its name, what happens there, and the tools that run there. */
 export type PipelineStage = {
   name: StageName;
@@ -42,6 +38,10 @@ export type PipelineStage = {
   tools: readonly { tool: StoryTool; does: string }[];
 };
 
+/**
+ * The one view of the suite: the steps a change goes through, in order, and under each step the tools
+ * that run there, each with one sentence saying what it does. A planned tool says what it will do.
+ */
 export const PIPELINE: { title: string; lead: string; stages: readonly PipelineStage[]; next: string } = {
   title: "Where each tool fits",
   lead: "Most teams send a change through the same steps. Each Slash tool does one job at one of those steps, so you can start with the one that hurts most and leave the rest.",
@@ -61,7 +61,7 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
         },
         {
           tool: "FlakeSlash",
-          does: "Finds the tests that pass and fail at random on the same code, so a red result means something and nobody learns to re-run until it goes green.",
+          does: "Finds the checks that both failed and passed on the same commit, so a red result means something and is not just a reason to run it again.",
         },
         {
           tool: "BundleSlash",
@@ -116,7 +116,7 @@ export const DEVELOPERS = {
 
 export const VIEW_QUESTIONS = [
   "Has a change made by an agent ever surprised you or your customers?",
-  "Which of these questions would you most want answered on every change?",
+  "Which of these tools would you most want running on every change?",
   "Was anything on this page hard to follow?",
   "Would you want these tools together or separately?",
 ] as const;

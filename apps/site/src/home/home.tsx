@@ -1,7 +1,8 @@
-import { Card, Container, Lead, ListRow, Pill, Section, Step, Steps, Text } from "@hackcove/ui-react";
+import { Card, Container, Lead, ListRow, Pill, Step, Steps, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { HERO, PIPELINE } from "#/content/story";
+import { HomeSection } from "#/home/sections";
 import { TOOL_CARDS, type ToolCard } from "#/home/tools";
 import { HeroPanes } from "#/illustrations/hero";
 import { CentredHero } from "#/stand-ins/centred-hero";
@@ -32,6 +33,7 @@ function HomeHero(): ReactNode {
 /** A tool's row: its mark, its name and release stage, and what it does; a link to its page here if it has one. */
 function ToolRow({ tool, divided }: { tool: ToolCard; divided: boolean }): ReactNode {
   return (
+    // On a linked row the kit puts data-* on the stretched link, not the row, so the name rides a wrapper.
     <div data-tool={tool.name}>
       <ListRow
         divided={divided}
@@ -50,36 +52,36 @@ function ToolRow({ tool, divided }: { tool: ToolCard; divided: boolean }): React
   );
 }
 
-/** The pipeline: one numbered step per stage, in order, with the tools that run at it. */
+/** A tool's card by name: every tool in the pipeline has one. */
+function cardFor(name: ToolCard["name"]): ToolCard {
+  const card = TOOL_CARDS.find((tool) => tool.name === name);
+  if (card === undefined) throw new Error(`No tool card for ${name}.`);
+  return card;
+}
+
+/** The pipeline, at #tools: one numbered step per stage, in order, with the tools that run at it. */
 function Pipeline(): ReactNode {
   return (
-    <div id="tools" className="scroll-mt-24 py-16" data-home-section="tools">
-      <Container>
-        <Section id="pipeline" title={PIPELINE.title} level={2}>
-          <Text>{PIPELINE.lead}</Text>
-          <Steps>
-            {PIPELINE.stages.map((stage) => {
-              const tools = TOOL_CARDS.filter((tool) => tool.step === stage.name);
-              return (
-                <Step key={stage.name} title={<h3 className="font-semibold">{stage.name}</h3>} data-step={stage.name}>
-                  <div className="space-y-4">
-                    <Text>{stage.text}</Text>
-                    {tools.length === 0 ? null : (
-                      <Card flush>
-                        {tools.map((tool, index) => (
-                          <ToolRow key={tool.name} tool={tool} divided={index > 0} />
-                        ))}
-                      </Card>
-                    )}
-                  </div>
-                </Step>
-              );
-            })}
-          </Steps>
-          <Text>{PIPELINE.next}</Text>
-        </Section>
-      </Container>
-    </div>
+    <HomeSection id="tools" title={PIPELINE.title}>
+      <Text>{PIPELINE.lead}</Text>
+      <Steps>
+        {PIPELINE.stages.map((stage) => (
+          <Step key={stage.name} title={<h3 className="font-semibold">{stage.name}</h3>} data-step={stage.name}>
+            <div className="space-y-4">
+              <Text>{stage.text}</Text>
+              {stage.tools.length === 0 ? null : (
+                <Card flush>
+                  {stage.tools.map((row, index) => (
+                    <ToolRow key={row.tool} tool={cardFor(row.tool)} divided={index > 0} />
+                  ))}
+                </Card>
+              )}
+            </div>
+          </Step>
+        ))}
+      </Steps>
+      <Text>{PIPELINE.next}</Text>
+    </HomeSection>
   );
 }
 

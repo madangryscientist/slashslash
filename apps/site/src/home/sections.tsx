@@ -10,7 +10,7 @@ import { ContactLine } from "#/shell/contact-line";
  */
 
 /** One home section: the kit's Section in the page's column, its title an h2. */
-function HomeSection({ id, title, children }: { id: string; title: string; children: ReactNode }): ReactNode {
+export function HomeSection({ id, title, children }: { id: string; title: string; children: ReactNode }): ReactNode {
   return (
     <div className="py-12" data-home-section={id}>
       <Container>
