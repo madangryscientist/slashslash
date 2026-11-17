@@ -93,6 +93,11 @@ export const FLOW: readonly FlowStep[] = [
           ],
         },
       },
+      {
+        tool: "TaskSlash",
+        stage: "alpha",
+        text: "The developer's builds and tests queue with everything else on the machine and start only when they fit, so a test that times out does so because of the code.",
+      },
     ],
   },
   {

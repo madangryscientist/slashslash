@@ -140,8 +140,11 @@ describe("/developers", () => {
     expect(words).not.toMatch(/\b(two|three|four|five|six|\d+)\s+(slash\s+)?(tools|questions)\b/i);
   });
 
-  test("never names TaskSlash", () => {
-    expect(html).not.toMatch(/taskslash/i);
+  test("names TaskSlash, with its card linking its page", () => {
+    const tools = between('id="tools-detail"', 'id="today"');
+    const card = tools.split("<article").find((chunk) => text(chunk).includes("TaskSlash"));
+    expect(card, "no TaskSlash card").toBeDefined();
+    expect(card).toContain('href="/taskslash"');
   });
 });
 

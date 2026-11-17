@@ -51,7 +51,14 @@ describe("the shell on the 404 page", () => {
       { href: "/pixelslash", text: "PixelSlash" },
       { href: "/flakeslash", text: "FlakeSlash" },
       { href: "/toggleslash", text: "ToggleSlash" },
+      { href: "/taskslash", text: "TaskSlash" },
     ]);
+  });
+
+  test("the footer names each tool's own licence: TaskSlash is MIT, the others Elastic License 2.0", () => {
+    const footer = elements(page(), "footer")[0] ?? "";
+    const licences = [...footer.matchAll(/data-licence="[^"]*">([\s\S]*?)<\/span>/g)].map((m) => text(m[1] ?? ""));
+    expect(licences).toEqual(["Elastic License 2.0: PixelSlash, ToggleSlash, FlakeSlash", "MIT: TaskSlash"]);
   });
 
   test("the footer names every product", () => {

@@ -44,6 +44,17 @@ function productItems(): ReactNode[] {
   });
 }
 
+/** Each licence with the tools under it, in PRODUCTS order: "MIT: TaskSlash". */
+function licenceItems(): ReactNode[] {
+  const byLicence = new Map<string, string[]>();
+  for (const { name, licence } of PRODUCTS) if (licence) byLicence.set(licence, [...(byLicence.get(licence) ?? []), name]);
+  return [...byLicence].map(([licence, names]) => (
+    <span data-licence={licence}>
+      {`${licence}: ${names.join(", ")}`}
+    </span>
+  ));
+}
+
 function Footer(): ReactNode {
   return (
     <FooterColumns
@@ -67,7 +78,7 @@ function Footer(): ReactNode {
             </TextLink>,
           ],
         },
-        { title: "Licence", items: [<span>Elastic License 2.0</span>, <Caption as="span">{TRADEMARK}</Caption>] },
+        { title: "Licence", items: [...licenceItems(), <Caption as="span">{TRADEMARK}</Caption>] },
       ]}
     />
   );

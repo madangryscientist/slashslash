@@ -23,8 +23,8 @@ import { promiseOf, stageOf, type Tool } from "#/tools/tools";
 
 /*
  * A tool's home on the Slash shell, on the kit's parts: the hero (the lockup, the stage, the promise,
- * the way in), what works today, how to try it, what is planned and where to read more. FlakeSlash and
- * ToggleSlash differ only in the Tool they pass. The copy blocks are islands: the page hands them in
+ * the way in), what works today, how to try it, what is planned and where to read more. Every tool
+ * home differs only in the Tool it passes. The copy blocks are islands: the page hands them in
  * hydrated, through `heroCode` and `tryIt`, and nothing else here runs in the browser.
  */
 

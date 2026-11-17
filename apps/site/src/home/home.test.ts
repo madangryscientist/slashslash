@@ -97,9 +97,11 @@ describe("/", () => {
     }
   });
 
-  test("never names TaskSlash", () => {
-    expect(text(html)).not.toMatch(/TaskSlash/i);
-    expect(html).not.toContain("taskslash");
+  test("names TaskSlash, with a card that links its page", () => {
+    const card = cards.find((item) => item.name === "TaskSlash");
+    expect(card, "no TaskSlash card").toBeDefined();
+    expect(card?.html).toContain('href="/taskslash"');
+    expect(card?.html).toContain('src="/brand/taskslash-mark.svg"');
   });
 
   test("counts no tools and no questions", () => {

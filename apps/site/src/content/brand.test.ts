@@ -162,9 +162,10 @@ describe("the icon and the header on the built pages", () => {
     }
   });
 
-  test("FlakeSlash and ToggleSlash use their own tool mark", () => {
+  test("FlakeSlash, ToggleSlash and TaskSlash use their own tool mark", () => {
     expect(iconOf(read("flakeslash.html"))).toBe("/brand/flakeslash-mark.svg");
     expect(iconOf(read("toggleslash.html"))).toBe("/brand/toggleslash-mark.svg");
+    expect(iconOf(read("taskslash.html"))).toBe("/brand/taskslash-mark.svg");
   });
 
   test("no page still points at the old logo files or PixelSlash's own favicon", () => {

@@ -32,6 +32,7 @@ describe("the share card list", () => {
     expect(card("/")?.headline).toBe(HERO.title);
     expect(card("/flakeslash")?.headline).toBe(question("FlakeSlash"));
     expect(card("/toggleslash")?.headline).toBe(question("ToggleSlash"));
+    expect(card("/taskslash")?.headline).toBe(question("TaskSlash"));
     expect(card("/pixelslash/pricing")?.headline).toBe(STATEMENT);
   });
 

@@ -1,9 +1,9 @@
-/** The four tools, each with the label that is shown next to its name. Plain data, so a test can check it. */
+/** The tools, each with the label that is shown next to its name. Plain data, so a test can check it. */
 
 import type { StageId } from "#/content/stages";
 
 export type Product = {
-  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash";
+  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash" | "TaskSlash";
   /** The release stage, from the shared `STAGES` table. */
   stage: StageId;
   /** The one question it answers about a CI run. */
@@ -12,12 +12,15 @@ export type Product = {
   summary: string[];
   /** The tool's own page on this site, linked from its entry on /developers. */
   page?: string;
+  /** The licence its source is public under; left out for a tool with no source yet. The footer lists these. */
+  licence?: "Elastic License 2.0" | "MIT";
 };
 
 export const PRODUCTS: readonly Product[] = [
   {
     name: "PixelSlash",
     stage: "alpha",
+    licence: "Elastic License 2.0",
     question: "Does the page look different?",
     summary: [
       "It compares screenshots from before and after a change and points out what really changed.",
@@ -27,6 +30,7 @@ export const PRODUCTS: readonly Product[] = [
   {
     name: "ToggleSlash",
     stage: "alpha",
+    licence: "Elastic License 2.0",
     question: "Which features are switched on, and for whom?",
     summary: [
       "It keeps track of feature switches, so you know what turning one on will do.",
@@ -37,12 +41,24 @@ export const PRODUCTS: readonly Product[] = [
   {
     name: "FlakeSlash",
     stage: "alpha",
+    licence: "Elastic License 2.0",
     question: "Can the test results be trusted?",
     summary: [
       "It spots automated checks that pass and fail at random, so a failure means something.",
       "It is being built now. Its source is public under the Elastic License 2.0, and you host it yourself. Today its command line tool scans GitHub Actions history and lists the jobs that failed and passed on the same commit, grouped into issues with their log excerpts. A dashboard and readers for other CI systems are planned.",
     ],
     page: "/flakeslash",
+  },
+  {
+    name: "TaskSlash",
+    stage: "alpha",
+    licence: "MIT",
+    question: "Why did the tests time out?",
+    summary: [
+      "It queues builds and tests on one machine, so a test fails because of the code, not because everything ran at once.",
+      "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when it fits in the room the machine has left. A release you can install is planned.",
+    ],
+    page: "/taskslash",
   },
   {
     name: "BundleSlash",
