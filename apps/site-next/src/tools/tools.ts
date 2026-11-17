@@ -3,16 +3,15 @@
  * in the shape `ToolHome` takes. The pages differ only in this data.
  */
 import * as flakeslash from "#content/flakeslash";
+import type { TryStep } from "#content/flakeslash";
 import { PRODUCTS, type Product } from "#content/products";
 import { TOGGLESLASH_REPO_URL } from "#content/site";
 import * as toggleslash from "#content/toggleslash";
-
-export type TryStep = { lead: string; commands: readonly string[] };
+import { SECTIONS } from "#next/shell/sections";
 
 export type Tool = {
   /** Its section in SECTIONS, which is also the hero's id and the page's path. */
   key: "flakeslash" | "toggleslash";
-  name: Product["name"];
   /** The page title, and the promise after its colon. */
   title: string;
   description: string;
@@ -29,7 +28,6 @@ export type Tool = {
 export const TOOLS = {
   flakeslash: {
     key: "flakeslash",
-    name: "FlakeSlash",
     title: flakeslash.FLAKESLASH_TITLE,
     description: flakeslash.FLAKESLASH_DESCRIPTION,
     lead: flakeslash.FLAKESLASH_INTRO.lead,
@@ -45,7 +43,6 @@ export const TOOLS = {
   },
   toggleslash: {
     key: "toggleslash",
-    name: "ToggleSlash",
     title: toggleslash.TOGGLESLASH_TITLE,
     description: toggleslash.TOGGLESLASH_DESCRIPTION,
     lead: toggleslash.TOGGLESLASH_INTRO.lead,
@@ -69,7 +66,15 @@ export function promiseOf(tool: Tool): string {
 
 /** The tool's release stage, from PRODUCTS. */
 export function stageOf(tool: Tool): Product["stage"] {
-  const product = PRODUCTS.find((p) => p.name === tool.name);
-  if (!product) throw new Error(`No product named ${tool.name} in PRODUCTS.`);
+  const { name } = SECTIONS[tool.key];
+  const product = PRODUCTS.find((p) => p.name === name);
+  if (!product) throw new Error(`No product named ${name} in PRODUCTS.`);
   return product.stage;
+}
+
+/** The hero's command: the last line of the try-it steps, the one that shows the tool at work. */
+export function heroCommandOf(tool: Tool): string {
+  const last = tool.tryIt.steps.at(-1)?.commands.at(-1);
+  if (last === undefined) throw new Error(`${tool.key}'s try-it has no command.`);
+  return last;
 }

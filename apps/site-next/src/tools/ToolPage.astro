@@ -4,7 +4,7 @@
 // sits in the shell's full-width main.
 import Slash from "#next/layouts/Slash.astro";
 import { HeroCode, ToolHome, TryIt } from "#next/tools/tool-home";
-import { TOOLS } from "#next/tools/tools";
+import { heroCommandOf, TOOLS } from "#next/tools/tools";
 
 interface Props {
   tool: keyof typeof TOOLS;
@@ -15,7 +15,7 @@ const tool = TOOLS[Astro.props.tool];
 
 <Slash section={tool.key} title={tool.title} description={tool.description}>
   <ToolHome tool={tool}>
-    <HeroCode slot="heroCode" steps={tool.tryIt.steps} client:visible />
+    <HeroCode slot="heroCode" command={heroCommandOf(tool)} client:visible />
     <TryIt slot="tryIt" steps={tool.tryIt.steps} client:visible />
   </ToolHome>
 </Slash>

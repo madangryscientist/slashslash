@@ -18,7 +18,8 @@ import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#content/stages";
 import { SECTIONS } from "#next/shell/sections";
 import { CentredHero, CentredRow } from "#next/stand-ins/centred-hero";
-import { promiseOf, stageOf, type Tool, type TryStep } from "#next/tools/tools";
+import type { TryStep } from "#content/flakeslash";
+import { promiseOf, stageOf, type Tool } from "#next/tools/tools";
 
 /*
  * A tool's home on the Slash shell, on the kit's parts: the hero (the lockup, the stage, the promise,
@@ -54,11 +55,9 @@ function StageLine({ tool }: { tool: Tool }): ReactNode {
   );
 }
 
-/** The command a reader runs to see the tool work, with a copy button: the last line of the try-it steps. */
-export function HeroCode({ steps }: { steps: readonly TryStep[] }): ReactNode {
-  const last = steps.at(-1)?.commands.at(-1);
-  if (last === undefined) throw new Error("A tool's try-it has no command.");
-  return <CodeBlock label="bash" language="bash" overflow="wrap" lines={[last]} copy />;
+/** The hero's command, with a copy button. */
+export function HeroCode({ command }: { command: string }): ReactNode {
+  return <CodeBlock label="bash" language="bash" overflow="wrap" lines={[command]} copy />;
 }
 
 /** Each try-it step: its lead line and its commands in one block with a copy button. */
