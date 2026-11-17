@@ -2,7 +2,7 @@ import { Callout, Card, Container, ListRow, Pill, Section, Step, Steps, Text } f
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { CONTACT_LINE } from "#/content/site";
-import { GAPS, HERO, REPORT, STANDS, STEPS_TODAY, VIEW_QUESTIONS, type StoryTool } from "#/content/story";
+import { GAPS, REPORT, STANDS, STEPS_TODAY, VIEW, VIEW_QUESTIONS, type StoryTool } from "#/content/story";
 import { TOOL_CARDS } from "#/home/tools";
 import { Pipeline } from "#/illustrations/pipeline";
 
@@ -141,10 +141,10 @@ export function Stands({ children }: { children?: ReactNode }): ReactNode {
   );
 }
 
-/** The ask: the hero's first action lands here. */
+/** The ask, at #your-view, where the questions are. */
 export function YourView(): ReactNode {
   return (
-    <HomeSection id="your-view" title={HERO.actions[0].label}>
+    <HomeSection id="your-view" title={VIEW.title}>
       <ol className="list-decimal space-y-2 pl-6">
         {VIEW_QUESTIONS.map((question) => (
           <li key={question}>
