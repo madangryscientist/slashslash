@@ -158,7 +158,9 @@
    */
   stroke-width: 1.6;
   stroke-linecap: round;
-  stroke-dasharray: 1 1;
+  /* One dash the length of the ring, then a gap long enough that a start offset past 1 hides all of it,
+   * round cap included (at exactly 1 the cap still showed as a dot). */
+  stroke-dasharray: 1 2;
 }
 
 /*
@@ -183,7 +185,7 @@
     background-color: var(--hc-cat-1);
   }
   .motion .panes:not(.played) .shop-ring {
-    stroke-dashoffset: 1;
+    stroke-dashoffset: 1.1;
   }
   .motion .panes:not(.played) .shop-note {
     opacity: 0;
@@ -225,7 +227,7 @@
   }
   @keyframes hero-ring-draw {
     from {
-      stroke-dashoffset: 1;
+      stroke-dashoffset: 1.1;
     }
   }
   @keyframes hero-note-in {

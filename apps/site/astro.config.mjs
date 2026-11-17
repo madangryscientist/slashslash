@@ -1,9 +1,20 @@
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
+import { realpathSync } from "node:fs";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
+
+// bunfig.toml links every package into Bun's one global store (~/.bun/install/cache/links), outside
+// the repo. The dev server only serves files under the repo by default, so it refused (403) the React
+// runtime the islands load, and nothing hydrated: no motion, no report viewer. It may also read the
+// store, found from where react really lives.
+const store = (() => {
+  const real = realpathSync(here("./node_modules/react"));
+  return dirname(real.slice(0, real.indexOf("/node_modules/")));
+})();
 
 // The slashslash pages and the PixelSlash pages under /pixelslash, built to static HTML on the Slash
 // shell. React renders the pages at build time; only the colour scheme toggle, the copy buttons, the
@@ -22,7 +33,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
     // Astro has no --strictPort flag. A busy port fails the dev server and the browser tests instead of
     // moving the server to a port nobody leased or the tests do not look at.
-    server: { strictPort: true },
+    server: { strictPort: true, fs: { allow: [here("../.."), store] } },
     preview: { strictPort: true },
     resolve: {
       alias: {
