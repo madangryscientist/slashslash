@@ -25,9 +25,9 @@ const POSITIONS: readonly [string, string][] = [
 
 const IDEA_NOTES: Partial<Record<Product["name"], string>> = {
   BundleSlash:
-    "Research so far is light and no tool has been tried. RelativeCI, Codecov Bundle Analysis and BundleMon are hosted, and bundle-stats is the closest open source tool found. It is not yet known whether there is room for one more.",
+    "Research so far is light and no tool has been tried. RelativeCI, Codecov Bundle Analysis and BundleMon are hosted, and bundle-stats is the closest open source tool found. It is not yet known whether one more tool is needed.",
   FlakeSlash:
-    "Research so far is light and relies on vendors' own descriptions. Trunk Flaky Tests, Buildkite Test Engine, Mergify CI Insights, BuildPulse and Datadog Test Optimization exist, and the open source options found are small. It is not yet known whether there is room for one more.",
+    "Research so far is light and relies on vendors' own descriptions. Trunk Flaky Tests, Buildkite Test Engine, Mergify CI Insights, BuildPulse and Datadog Test Optimization exist, and the open source options found are small. It is not yet known whether one more tool is needed.",
 };
 
 function ToggleSlashDetail(): ReactNode {

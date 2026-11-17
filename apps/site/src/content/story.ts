@@ -53,19 +53,19 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
     },
     {
       name: "Built and tested",
-      text: "The change is built and the automated tests run. A green result should mean the change works, not that the run got lucky.",
+      text: "The change is built and the automated tests run. A pass should mean the change works, not that the run got lucky.",
       tools: [
         {
           tool: "TaskSlash",
-          does: "Queues builds and tests and starts each only when there is room, on one machine today and across your CI runners next, so a test fails because of the code, not because everything ran at once.",
+          does: "Queues builds and tests and starts each one when your computer has capacity, on one machine today and across your CI runners next, so a test fails because of the code, not because everything ran at once.",
         },
         {
           tool: "FlakeSlash",
-          does: "Finds the checks that both failed and passed on the same commit, so a red result means something and is not just a reason to run it again.",
+          does: "Finds the checks that both failed and passed on the same commit, so a failure means something and is not just a reason to run it again.",
         },
         {
           tool: "BundleSlash",
-          does: "Will measure how much code your customers download after each build, so a page cannot grow heavy one change at a time.",
+          does: "Will measure how much code your customers download after each build, so a page cannot get slower to load one change at a time.",
         },
       ],
     },
@@ -75,7 +75,7 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
       tools: [
         {
           tool: "PixelSlash",
-          does: "Takes screenshots of each page before and after the change and shows the reviewer every one that looks different, with harmless noise left out.",
+          does: "Takes screenshots of each page before and after the change and shows the reviewer every one that looks different, leaving out tiny differences nobody would notice.",
         },
         {
           tool: "SightSlash",
@@ -110,7 +110,7 @@ export const STANDS = {
 export const DEVELOPERS = {
   title: "Built for working with agents",
   today:
-    "Your agents open pull requests all day. Slash gives each one a check that answers the questions a careful reviewer would have asked: what the page looks like, what switched on, whether the tests mean it, what it weighs, and how each component holds up in every state. Run it in CI today.",
+    "Your agents open pull requests all day. Slash gives each one a check that answers the questions a careful reviewer would have asked: what the page looks like, what switched on, whether the tests mean it, how much it adds to the download, and how each component holds up in every state. Run it in CI today.",
   next: "Next, point your agent at it and let it fix its own change first.",
 } as const;
 

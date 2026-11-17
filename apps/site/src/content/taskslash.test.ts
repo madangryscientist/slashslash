@@ -34,7 +34,7 @@ describe("the /taskslash content", () => {
       question: "Why did the tests time out?",
       summary: [
         "It queues builds and tests on one machine, so a test fails because of the code, not because everything ran at once.",
-        "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when it fits in the room the machine has left. A release you can install is planned.",
+        "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when your computer has capacity for it. A release you can install is planned.",
       ],
       page: "/taskslash",
     });
