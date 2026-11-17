@@ -1,7 +1,7 @@
 $schema: "../../.moon/cache/schemas/project.json"
 
 # The tools live in node_modules/.bin, which moon does not put on PATH, so `bun run` finds them.
-# Only fetch-sources sets its own `inputs`; every other task keeps the default `**/*` of the project.
+# Only fetch-sources and build set their own `inputs`; every other task keeps the default `**/*` of the project.
 tasks:
   # The PixelSlash files the /pixelslash pages read, at the commit pinned in pixelslash.sha. The pin
   # is a tracked file, so a new commit there re-runs this and everything after it.
@@ -19,6 +19,12 @@ tasks:
     command: "bun run astro build"
     deps:
       - "~:fetch-sources"
+    # The default `**/*`, plus the commit the pages name in their build-commit meta (set in the Deploy
+    # workflow), so a commit that changes no file the build reads still builds afresh instead of
+    # taking a cached dist/ that names the previous commit.
+    inputs:
+      - "**/*"
+      - "$BUILD_COMMIT"
     # .astro/ is generated types that check and build rewrite each run; the tests read dist/ alone.
     outputs:
       - "dist"

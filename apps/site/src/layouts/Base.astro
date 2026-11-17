@@ -8,6 +8,7 @@ import {
   SITE_URL,
 } from "#/content/site";
 import { SCHEMES } from "#/content/schemes";
+import { thisBuildCommit } from "#/content/build-commit";
 import "#/styles.css";
 
 interface Props {
@@ -51,6 +52,7 @@ const scopeScript = `${colourSchemeScript};(function(){var r=document.documentEl
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="build-commit" content={thisBuildCommit()} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

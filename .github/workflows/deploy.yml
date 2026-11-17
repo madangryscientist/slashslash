@@ -33,7 +33,11 @@ jobs:
         with:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
+      # Every page names this commit in its build-commit meta; it is also an input of the build tasks,
+      # so a cached dist/ from another commit is never reused.
       - run: bunx moon run --concurrency 3 :lint :typecheck :build :test
+        env:
+          BUILD_COMMIT: ${{ github.sha }}
       # Uploaded as the `dist` artifact; the deploy job downloads it to dist/ in its own checkout.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -62,8 +66,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: bunx wrangler pages deploy dist --project-name slashslash --branch main --commit-dirty=true
 
-  # After the deploy, what only the live host can show: an unknown path answers a real 404 with the
-  # site's 404 page. It only reads the live site.
+  # After the deploy, what only the live host can show: the home page names the commit this run
+  # deployed, and an unknown path answers a real 404 with the site's 404 page. It only reads the live site.
   smoke:
     if: github.ref == 'refs/heads/main'
     needs: deploy
@@ -79,3 +83,4 @@ jobs:
         working-directory: apps/site
         env:
           SMOKE_BASE_URL: https://slashslash.build
+          SMOKE_EXPECT_COMMIT: ${{ github.sha }}
