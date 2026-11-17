@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 import { FLOW } from "#content/flow";
 import { PRODUCTS } from "#content/products";
 import { CONTACT_LINE, DEVELOPERS_DESCRIPTION, DEVELOPERS_TITLE, SITE_NAME } from "#content/site";
+import { STAGES } from "#content/stages";
 import { DEVELOPERS } from "#next/content/story";
 import { DEVELOPER_QUESTIONS } from "#next/developers/questions";
 import { SECTIONS } from "#next/shell/sections";
@@ -158,16 +159,27 @@ describe("real and imagined stay apart", () => {
     expect(flags.match(/<table/g)).toHaveLength(1);
   });
 
+  /** Each fit in the built walkthrough, in FLOW's order: from its h4 to the next one. */
+  const fits = (() => {
+    const walkthrough = between('id="walkthrough"', 'id="env"');
+    const chunks = walkthrough.split("<h4").slice(1);
+    return FLOW.flatMap((step) => step.fits).map((fit, i) => ({ fit, html: chunks[i] ?? "" }));
+  })();
+
   test("a tool's stage in the walkthrough is the stage in the product data", () => {
-    for (const fit of FLOW.flatMap((step) => step.fits)) {
+    expect(fits.length).toBeGreaterThan(0);
+    for (const { fit, html: chunk } of fits) {
       const product = PRODUCTS.find((p) => p.name === fit.tool);
-      expect(fit.stage).toBe(product?.stage);
+      if (product === undefined) throw new Error(`No product ${fit.tool}`);
+      const heading = text(`<h4${chunk.slice(0, chunk.indexOf("</h4>"))}`);
+      expect(heading).toBe(`${fit.tool} ${STAGES[product.stage].label}`);
     }
   });
 
   test("a planned tool never shows real output", () => {
-    const planned = FLOW.flatMap((step) => step.fits).filter((fit) => fit.stage === "planned");
-    expect(planned.map((fit) => fit.output?.kind).filter((kind) => kind === "real")).toEqual([]);
+    for (const { fit, html: chunk } of fits) {
+      if (fit.stage === "planned") expect(chunk, fit.tool).not.toContain('data-kind="real"');
+    }
   });
 });
 

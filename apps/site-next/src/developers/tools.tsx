@@ -6,11 +6,11 @@ import { STAGES, STAGE_TONE } from "#content/stages";
 import { DevSection } from "#next/developers/section";
 
 /** "Not public yet" until the constant holds a URL, then the link in its place. */
-function ToggleSlashAccess({ url = TOGGLESLASH_REPO_URL }: { url?: string }): ReactNode {
-  if (!url) return <Text>Not public yet.</Text>;
+function ToggleSlashAccess(): ReactNode {
+  if (!TOGGLESLASH_REPO_URL) return <Text>Not public yet.</Text>;
   return (
     <Text>
-      <TextLink href={url} external>
+      <TextLink href={TOGGLESLASH_REPO_URL} external>
         Repository on GitHub
       </TextLink>
     </Text>

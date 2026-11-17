@@ -225,10 +225,8 @@ describe("the home after the tool cards", () => {
   test("with no JavaScript every drawing is finished: nothing is held in a start frame", () => {
     // The start frame is only ever drawn under `.motion`, which only the head script sets, so a page
     // with no script shows every drawing's base style: the finished drawing.
-    // A drawing with no start frame (the flags grid on /developers only replays while lit) has nothing to check.
-    const files = globSync("illustrations/*.css", { cwd: SRC }).filter((file) =>
-      readFileSync(resolve(SRC, file), "utf8").includes(":not(.played)"),
-    );
+    // The flags grid on /developers has no start frame: it only replays while lit, from its finished style.
+    const files = globSync("illustrations/*.css", { cwd: SRC }).filter((file) => file !== "illustrations/combinations.css");
     expect(files).toContain("illustrations/pipeline.css");
     for (const file of files) {
       const css = readFileSync(resolve(SRC, file), "utf8");

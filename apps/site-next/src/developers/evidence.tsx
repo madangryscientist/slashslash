@@ -1,12 +1,7 @@
 import { CodeBlock, Pill, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 
-/**
- * What the reader is looking at, shown the same way everywhere: a solid frame for output that exists,
- * a dashed one for anything imagined, and the words saying which on every one. On a phone it takes half
- * the page's gutter, so the FS_ table fits without scrolling sideways.
- */
-export type EvidenceKind = "real" | "quoted" | "made-up" | "idea";
+type EvidenceKind = "real" | "quoted" | "made-up" | "idea";
 
 const TAGS: Record<Exclude<EvidenceKind, "idea">, string> = {
   real: "Real output, captured by running it",
@@ -14,6 +9,11 @@ const TAGS: Record<Exclude<EvidenceKind, "idea">, string> = {
   "made-up": "Made up",
 };
 
+/**
+ * What the reader is looking at, shown the same way everywhere: a solid frame for output that exists,
+ * a dashed one for anything imagined, and the words saying which on every one. On a phone it takes half
+ * the page's gutter, so the FS_ table fits without scrolling sideways.
+ */
 export function Evidence({
   kind,
   title,
@@ -55,7 +55,7 @@ export function Evidence({
 type Run = { command: boolean; lines: string[] };
 
 /** Terminal lines cut into runs, in order: each run of commands, then the output it printed. */
-export function runsOf(lines: readonly string[]): Run[] {
+function runsOf(lines: readonly string[]): Run[] {
   const runs: Run[] = [];
   for (const line of lines) {
     const command = line.startsWith("$ ");
