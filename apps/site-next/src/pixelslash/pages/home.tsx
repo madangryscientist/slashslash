@@ -32,7 +32,7 @@ import { CentredHero, CentredRow } from "#next/stand-ins/centred-hero";
 export const PROMISE = "See what your change did to the page.";
 
 /** What the CLI does, each one a section of PixelSlash's docs. */
-export const FEATURES = [
+const FEATURES = [
   {
     title: "Two pages, one diff",
     body: "Shoot Main and Branch with Playwright, or hand it PNGs you already have. It writes a report.html that shows what changed.",

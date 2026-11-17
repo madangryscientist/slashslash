@@ -9,7 +9,8 @@ const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
 // The PixelSlash files site:fetch-sources downloads into the live app's public/pixelslash (the slash
 // demo's two shots, the report), served here at the same /pixelslash/... addresses: copied into dist
-// after a build, and answered from that folder by the dev server. Nothing is copied into this app.
+// after a build, and answered from that folder by the dev server. Nothing is copied into this app. The
+// whole folder goes, favicon and font licence included: the fetch list decides what is in it, not this.
 const FETCHED = here("../site/public/pixelslash");
 const TYPES = { ".png": "image/png", ".svg": "image/svg+xml", ".txt": "text/plain; charset=utf-8" };
 

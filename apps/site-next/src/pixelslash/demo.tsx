@@ -76,17 +76,16 @@ export function SlashDemo(): ReactNode {
             <img src={psAsset("/hero/main.png")} alt="" width={hero.width} height={hero.height} />
             <div className="ps-demo-branch">
               <img src={psAsset("/hero/branch.png")} alt="" width={hero.width} height={hero.height} />
-              {CHANGES.map((region, index) => (
+              {CHANGES.map((region) => (
                 <span
                   key={`${region.x},${region.y}`}
                   className="ps-region"
-                  style={vars({
+                  style={{
                     left: pct(region.x, hero.width),
                     top: pct(region.y, hero.height),
                     width: pct(region.w, hero.width),
                     height: pct(region.h, hero.height),
-                    "--i": index,
-                  })}
+                  }}
                 />
               ))}
             </div>
