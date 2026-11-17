@@ -22,8 +22,3 @@ export function Rich({ text, external = [] }: { text: string; external?: readonl
     return <Fragment key={i}>{part}</Fragment>;
   });
 }
-
-/** A claim's words with the marks taken out: what the page shows. */
-export function plain(text: string): string {
-  return text.replace(/`([^`]+)`/g, "$1").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
-}
