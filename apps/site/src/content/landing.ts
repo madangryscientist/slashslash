@@ -48,7 +48,7 @@ export const TODAY = {
 
 export const STANDS = {
   reportAlt:
-    "The real PixelSlash report for a checkout change: the page before, the page after with a tax line added and the pay button turned from blue to green, and the changed area marked.",
+    "PixelSlash's review app for one change: a card on Main and the same card on Branch side by side, with the changed area outlined in red and a yellow bar on Branch.",
   reportOpen: "Open the report full screen",
   reportClose: "Close",
 } as const;
