@@ -127,7 +127,7 @@ function aheadOf(row: Row): string {
 function Behind(): ReactNode {
   const behind = ROWS.filter((row) => row.behind);
   return (
-    <Section gap="md" title={`Where we are behind (${behind.length})`}>
+    <Section title={`Where we are behind (${behind.length})`}>
       <Text>
         These are the rows where at least one other tool does more than we do. Each one says what is
         missing, in the words of the comparison file.
@@ -210,13 +210,13 @@ export function ComparePage(): ReactNode {
         <Behind />
       </ProseLayout>
       <Stack gap="xl">
-        <Section gap="md" title="The whole table">
+        <Section title="The whole table">
           <Text>
             Hover a cell for its note. Every competitor cell links the page it was read from.
           </Text>
           <Matrix />
         </Section>
-        <Section gap="md" title="Sources">
+        <Section title="Sources">
           <SubsectionHeading as="h3" size="sm">
             Their docs, fetched {SUMMARY.updated}
           </SubsectionHeading>
