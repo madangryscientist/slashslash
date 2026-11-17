@@ -77,6 +77,8 @@ export const SECTIONS = {
 
 export type SectionKey = keyof typeof SECTIONS;
 
-/** The tools in the switcher, in its order: every section but the suite. */
-export const TOOL_KEYS = ["pixelslash", "flakeslash", "toggleslash"] as const satisfies readonly Exclude<SectionKey, "suite">[];
+/** The tools in the switcher: every section but the suite, in SECTIONS' order. */
+export const TOOL_KEYS = (Object.keys(SECTIONS) as SectionKey[]).filter(
+  (key): key is Exclude<SectionKey, "suite"> => key !== "suite",
+);
 

@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { PRODUCTS } from "#content/products";
 import { renderToStaticMarkup } from "react-dom/server";
-import { SECTIONS, TOOL_KEYS, markFor } from "#next/shell/sections";
+import { SECTIONS, markFor } from "#next/shell/sections";
 import { SlashShell } from "#next/shell/SlashShell";
 
 // The shell as it is built: the 404 page's header, switcher and footer, and the stylesheet that
@@ -47,7 +47,11 @@ describe("the shell on the 404 page", () => {
   test("the switcher, named Tools, links each tool's home and no other", () => {
     const nav = elements(page(), "nav").find((n) => /aria-label="Tools"/.test(n));
     expect(nav, "no nav named Tools").toBeDefined();
-    expect(links(nav ?? "")).toEqual(TOOL_KEYS.map((key) => ({ href: SECTIONS[key].home, text: SECTIONS[key].name })));
+    expect(links(nav ?? "")).toEqual([
+      { href: "/pixelslash", text: "PixelSlash" },
+      { href: "/flakeslash", text: "FlakeSlash" },
+      { href: "/toggleslash", text: "ToggleSlash" },
+    ]);
   });
 
   test("the footer names every product", () => {
