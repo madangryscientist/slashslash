@@ -7,10 +7,17 @@ import { PAGES } from "../../site/src/content/pages.ts";
 /*
  * Every page this app has built so far, plus one unknown path, in each theme, on a desktop and a phone:
  * it answers its status and loads, never scrolls sideways on the phone, passes axe, and makes no
- * request off the site. The unknown path keeps the loop from ever being empty.
+ * request off the site. The unknown path keeps the loop from ever being empty. The PixelSlash home and
+ * pricing also leave a full-page shot in each theme and viewport, for a person to look at.
  */
 
 const THEMES = ["light", "dark"] as const;
+
+/** The pages whose full-page shot is kept for the flip review, by path, with the shot's name. */
+const FLIP_SHOTS: Partial<Record<string, string>> = {
+  "/pixelslash": "pixelslash-home",
+  "/pixelslash/pricing": "pixelslash-pricing",
+};
 const UNKNOWN = "/no-such-page";
 
 const built = new Set(
@@ -71,6 +78,16 @@ for (const { path, status } of ROUTES) {
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
         );
         expect(overflow, "the page scrolls sideways").toBe(0);
+      }
+
+      // The pages a person looks at before the flip: the whole page, kept in test-results/flip-shots.
+      const shot = FLIP_SHOTS[path];
+      if (shot !== undefined) {
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.screenshot({
+          path: resolve(import.meta.dirname, `../test-results/flip-shots/${shot}-${theme}-${info.project.name}.png`),
+          fullPage: true,
+        });
       }
     });
   }

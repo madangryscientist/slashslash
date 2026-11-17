@@ -15,6 +15,7 @@
       "#next/*": ["./src/*"],
       "#content/*": ["../site/src/content/*"],
       "#ps/*": ["../site/src/pixelslash/*"],
+      "#/*": ["../site/src/*"],
       "@pixelslash-src/*": ["../site/.sources/pixelslash/*"]
     }
   }

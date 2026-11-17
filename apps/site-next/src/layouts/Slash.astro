@@ -12,9 +12,11 @@ interface Props {
   section: SectionKey;
   /** The page title. */
   title: string;
+  /** What the page says about itself to a search engine and a link preview. */
+  description?: string | undefined;
 }
 
-const { section, title } = Astro.props;
+const { section, title, description } = Astro.props;
 const { day: light, night: dark, mark } = SECTIONS[section];
 // The page's own address on the live site, with no trailing slash.
 const path =
@@ -42,6 +44,7 @@ const toggleScript = `(function(c){document.querySelectorAll("[data-scheme-toggl
     <meta name="color-scheme" content="light dark" />
     <meta name="build-commit" content={thisBuildCommit()} />
     <title>{`${title} | ${SITE_NAME}`}</title>
+    {description !== undefined && <meta name="description" content={description} />}
     <link rel="canonical" href={`${SITE_URL}${path}`} />
     <link rel="icon" href={mark} type="image/svg+xml" />
     <meta property="og:image" content={shareImage} />

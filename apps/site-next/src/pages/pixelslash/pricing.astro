@@ -1,0 +1,17 @@
+---
+// /pixelslash/pricing: the PixelSlash pricing page on the shell, in the PixelSlash section.
+import { Container } from "@hackcove/ui-react";
+import Slash from "#next/layouts/Slash.astro";
+import { PricingPage } from "#next/pixelslash/pages/pricing";
+import { psPage } from "#next/pixelslash/page";
+
+const page = psPage("/pricing");
+---
+
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  <div class="py-8">
+    <Container>
+      <PricingPage />
+    </Container>
+  </div>
+</Slash>

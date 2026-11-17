@@ -1,0 +1,246 @@
+/*
+ * The PixelSlash home's slash demo (demo.tsx): Main under Branch, the slash wiping between them, a
+ * box on each changed region and a readout of the run's counts. Every colour is a theme variable
+ * (--hc-surface, --hc-subtle, --hc-line, --hc-ink, --hc-mute, --hc-accent), so the demo follows Slash
+ * Day, Slash Night and, once it ships, PixelSlash's own pair. The one accent is the theme's: the
+ * slash, the regions, the count and the Branch chip. Every moving part sits under
+ * prefers-reduced-motion: no-preference, so a visitor who asks for less motion sees it standing
+ * still, the slash halfway across.
+ */
+
+@property --ps-p {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 55%;
+}
+
+@property --ps-n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.ps-demo-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0 auto;
+  max-width: 64rem;
+}
+
+.ps-window {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.875rem;
+  border: 1px solid var(--hc-line);
+  background: var(--hc-subtle);
+  box-shadow: 0 24px 64px -32px color-mix(in srgb, var(--hc-ink) 45%, transparent);
+}
+
+.ps-window-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--hc-line);
+  background: var(--hc-surface);
+}
+
+.ps-window-bar span {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: var(--hc-line);
+}
+
+.ps-window-bar p {
+  margin: 0 auto;
+  padding: 0.15rem 1.2rem;
+  border-radius: 6px;
+  background: var(--hc-subtle);
+  color: var(--hc-mute);
+  font-size: 0.75rem;
+}
+
+.ps-demo {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Everything drawn in shot coordinates lives in the stage, which is always the shot's own ratio, so
+   each percentage inside it keeps its meaning. It fills the frame; a phone frames a crop (below). */
+.ps-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.ps-demo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 8% either side of --ps-p at the top and bottom: the slant of the slash at 16:9. */
+.ps-demo-branch {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, calc(var(--ps-p) + 8%) 0, calc(var(--ps-p) - 8%) 100%, 0 100%);
+}
+
+/* The bar rides a full-width box: a percentage in translate is of that box's own width, so --ps-p
+   moves it across the shot without a layout, and a moving demo is not a layout shift. */
+.ps-slash {
+  position: absolute;
+  inset: -2% 0;
+  translate: var(--ps-p) 0;
+}
+
+.ps-slash::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  translate: -50% 0;
+  transform: skewX(-15.9deg);
+  border-radius: 4px;
+  background: var(--hc-accent);
+  box-shadow: 0 0 16px 3px color-mix(in srgb, var(--hc-accent) 55%, transparent);
+}
+
+.ps-region {
+  position: absolute;
+  margin: -6px;
+  padding: 6px;
+  box-sizing: content-box;
+  border: 2px solid var(--hc-accent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--hc-accent) 12%, transparent);
+}
+
+.ps-chip {
+  position: absolute;
+  bottom: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hc-surface);
+}
+
+.ps-chip-branch {
+  left: 0.75rem;
+  background: var(--hc-accent);
+}
+
+.ps-chip-main {
+  right: 0.75rem;
+  background: var(--hc-ink);
+}
+
+/* A phone frames the part of the shot that holds the changes (--crop-* are shot pixels, written from
+   hero.json in SlashDemo). The stage is the whole shot, scaled so the crop fills the frame and shifted
+   so the crop's corner meets the frame's. The chips ride the top corners: at the bottom left the
+   Branch chip would cover the storage bar's region. */
+@media (max-width: 640px) {
+  .ps-stage {
+    inset: auto;
+    width: calc(100% * var(--shot-w) / var(--crop-w));
+    height: calc(100% * var(--shot-h) / var(--crop-h));
+    left: calc(-100% * var(--crop-x) / var(--crop-w));
+    top: calc(-100% * var(--crop-y) / var(--crop-h));
+  }
+
+  .ps-chip {
+    top: 0.4rem;
+    bottom: auto;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.55rem;
+  }
+
+  .ps-chip-branch {
+    left: 0.4rem;
+  }
+
+  .ps-chip-main {
+    right: 0.4rem;
+  }
+}
+
+.ps-readout {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 auto;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--hc-line);
+  background: var(--hc-surface);
+  color: var(--hc-mute);
+  font-size: 0.9rem;
+}
+
+.ps-count {
+  --ps-n: var(--to);
+  counter-reset: n var(--ps-n);
+  min-width: 5ch;
+  text-align: right;
+  color: var(--hc-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-count::after {
+  content: counter(n);
+}
+
+.ps-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hc-line);
+}
+
+@keyframes ps-wipe {
+  0%,
+  8% {
+    --ps-p: -10%;
+  }
+  42%,
+  64% {
+    --ps-p: 110%;
+  }
+  94%,
+  100% {
+    --ps-p: -10%;
+  }
+}
+
+@keyframes ps-count {
+  0%,
+  10% {
+    --ps-n: 0;
+  }
+  42%,
+  64% {
+    --ps-n: var(--to);
+  }
+  92%,
+  100% {
+    --ps-n: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ps-demo {
+    animation: ps-wipe 9s ease-in-out infinite;
+  }
+
+  .ps-count {
+    animation: ps-count 9s ease-in-out infinite;
+  }
+}
