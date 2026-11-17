@@ -56,6 +56,8 @@ const toggleScript = `(function(c){document.querySelectorAll("[data-scheme-toggl
     <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <!-- Before first paint: the visitor's stored choice, else the system's light or dark. No cookie. -->
     <script is:inline set:html={scopeScript} />
+    <!-- A page's own before-paint script (the home's motion guard). -->
+    <slot name="head" />
   </head>
   <body>
     <SlashShell section={section} path={path}>
