@@ -57,7 +57,7 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
       tools: [
         {
           tool: "TaskSlash",
-          does: "Queues builds and tests and starts each only when there is room, on one machine today and on your CI runners next, so a test fails because of the code, not because everything ran at once.",
+          does: "Queues builds and tests and starts each only when there is room, on one machine today and across your CI runners next, so a test fails because of the code, not because everything ran at once.",
         },
         {
           tool: "FlakeSlash",
