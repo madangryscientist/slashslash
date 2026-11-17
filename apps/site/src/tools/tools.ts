@@ -1,17 +1,18 @@
 /**
- * The two tool homes the site builds, each read from its tool's content module: what the page says,
+ * The tool homes the site builds, each read from its tool's content module: what the page says,
  * in the shape `ToolHome` takes. The pages differ only in this data.
  */
 import * as flakeslash from "#/content/flakeslash";
 import type { TryStep } from "#/content/flakeslash";
 import { PRODUCTS, type Product } from "#/content/products";
-import { TOGGLESLASH_REPO_URL } from "#/content/site";
+import { TASKSLASH_REPO_URL, TOGGLESLASH_REPO_URL } from "#/content/site";
+import * as taskslash from "#/content/taskslash";
 import * as toggleslash from "#/content/toggleslash";
 import { SECTIONS } from "#/shell/sections";
 
 export type Tool = {
   /** Its section in SECTIONS, which is also the hero's id and the page's path. */
-  key: "flakeslash" | "toggleslash";
+  key: "flakeslash" | "toggleslash" | "taskslash";
   /** The page title, and the promise after its colon. */
   title: string;
   description: string;
@@ -55,6 +56,21 @@ export const TOOLS = {
       items: toggleslash.PLANNED,
     },
     links: toggleslash.LINKS,
+  },
+  taskslash: {
+    key: "taskslash",
+    title: taskslash.TASKSLASH_TITLE,
+    description: taskslash.TASKSLASH_DESCRIPTION,
+    lead: taskslash.TASKSLASH_INTRO.lead,
+    repo: TASKSLASH_REPO_URL,
+    today: taskslash.WORKS_TODAY,
+    tryOn: "your own machine",
+    tryIt: taskslash.TRY_IT,
+    planned: {
+      lead: "The README marks these as coming. None of them works yet.",
+      items: taskslash.PLANNED,
+    },
+    links: taskslash.LINKS,
   },
 } as const satisfies Record<Tool["key"], Tool>;
 

@@ -9,7 +9,7 @@ import { PRODUCTS, type Product } from "#/content/products";
 import { STATEMENT } from "#/pixelslash/content/pricing";
 
 /** A tool's brand slug: its files in public/brand are `<tool>-mark.svg` and `<tool>-lockup-{light,dark}.svg`. */
-export type OgTool = "slash" | "pixelslash" | "flakeslash" | "toggleslash";
+export type OgTool = "slash" | "pixelslash" | "flakeslash" | "toggleslash" | "taskslash";
 
 export type OgCard = {
   /** The page's path, as in `PAGES`. */
@@ -38,9 +38,10 @@ const LOCKUP: Record<OgTool, string> = {
   pixelslash: "PixelSlash",
   flakeslash: "FlakeSlash",
   toggleslash: "ToggleSlash",
+  taskslash: "TaskSlash",
 };
 
-/** The headline and tool of each page. The four typed headlines are the words of that page's h1. */
+/** The headline and tool of each page. Each typed headline is the words of that page's h1. */
 const CARDS: Record<string, { tool: OgTool; headline: string }> = {
   "/": { tool: "slash", headline: HERO.title },
   "/developers": { tool: "slash", headline: "For developers" },
@@ -49,6 +50,7 @@ const CARDS: Record<string, { tool: OgTool; headline: string }> = {
   "/pixelslash/compare": { tool: "pixelslash", headline: "How we compare" },
   "/pixelslash/how-it-works": { tool: "pixelslash", headline: "How it works" },
   "/pixelslash/pricing": { tool: "pixelslash", headline: STATEMENT },
+  "/taskslash": { tool: "taskslash", headline: question("TaskSlash") },
   "/toggleslash": { tool: "toggleslash", headline: question("ToggleSlash") },
 };
 

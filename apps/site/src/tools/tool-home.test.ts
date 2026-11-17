@@ -7,8 +7,8 @@ import { SECTIONS } from "#/shell/sections";
 import { promiseOf, stageOf, TOOLS, type Tool } from "#/tools/tools";
 
 /*
- * The two tool homes as the site builds them, read from dist (`bunx moon run site:test` builds
- * first): both from ToolHome, on the shell in their own section, with every command they name, the
+ * The tool homes as the site builds them, read from dist (`bunx moon run site:test` builds
+ * first): each from ToolHome, on the shell in their own section, with every command they name, the
  * sections in order, keys set in a step of their own and a copy button on every block.
  */
 
@@ -44,7 +44,19 @@ function text(html: string): string {
 const between = (html: string, from: string, to: string): string =>
   html.slice(html.indexOf(`id="${from}"`), html.indexOf(`id="${to}"`));
 
+/** The variable each tool's try-it sets to the reader's own key. TaskSlash needs no key. */
+const KEY_VARIABLE: Record<Tool["key"], string | undefined> = {
+  flakeslash: "GITHUB_TOKEN",
+  toggleslash: "TOGGLESLASH_TOKEN",
+  taskslash: undefined,
+};
+
 const ORDER = (tool: Tool): string[] => [tool.key, "works-today", "try-it", "planned", "docs"];
+
+test("builds a home for every tool in the switcher, TaskSlash included", () => {
+  expect(Object.keys(TOOLS).toSorted()).toEqual(["flakeslash", "taskslash", "toggleslash"]);
+  expect(existsSync(resolve(PAGES_DIR, "taskslash.astro"))).toBe(true);
+});
 
 describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
   const html = read(`${tool.key}.html`);
@@ -117,8 +129,8 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
   test("sets the access key in a step of its own, never to a literal placeholder", () => {
     const lines = text(between(html, "try-it", "planned"));
     expect(lines).not.toContain("=...");
-    const variable = tool.key === "flakeslash" ? "GITHUB_TOKEN" : "TOGGLESLASH_TOKEN";
-    expect(lines).toContain(`export ${variable}=<your key>`);
+    const variable = KEY_VARIABLE[tool.key];
+    if (variable !== undefined) expect(lines).toContain(`export ${variable}=<your key>`);
   });
 
   test("gives every code block a copy button, and hydrates only the two copy islands", () => {

@@ -11,5 +11,6 @@ export const PAGES: readonly { path: string; file: string }[] = [
   { path: "/pixelslash/compare", file: "pixelslash/compare.astro" },
   { path: "/pixelslash/how-it-works", file: "pixelslash/how-it-works.astro" },
   { path: "/pixelslash/pricing", file: "pixelslash/pricing.astro" },
+  { path: "/taskslash", file: "taskslash.astro" },
   { path: "/toggleslash", file: "toggleslash.astro" },
 ];

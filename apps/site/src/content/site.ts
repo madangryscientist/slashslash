@@ -34,3 +34,6 @@ export const PIXELSLASH_COMMAND =
  * clone command and docs links from it, so it must stay a full URL.
  */
 export const TOGGLESLASH_REPO_URL: string = "https://github.com/madangryscientist/toggleslash";
+
+/** The TaskSlash repository, public under the MIT license. /taskslash builds its clone command and docs links from it. */
+export const TASKSLASH_REPO_URL = "https://github.com/madangryscientist/taskslash";

@@ -68,6 +68,11 @@ export const GAPS = {
       tool: "FlakeSlash",
     },
     {
+      where: "Checked",
+      gap: "Builds and tests started at once overload the machine, and a test times out for reasons that have nothing to do with the code.",
+      tool: "TaskSlash",
+    },
+    {
       where: "Live",
       gap: "The page gets heavier one change at a time, and no single change looks guilty.",
       tool: "BundleSlash",
@@ -102,6 +107,11 @@ export const REPORT = {
       why: "Agents re-run a red check until it goes green.",
     },
     {
+      tool: "TaskSlash",
+      question: "Why did the tests time out?",
+      why: "Agents in several worktrees start their builds and tests at once.",
+    },
+    {
       tool: "BundleSlash",
       question: "Did the app get heavier to load?",
       why: "Weight creeps in a little with every quick change.",
@@ -118,7 +128,7 @@ export const REPORT = {
 export const STANDS = {
   title: "Where it stands",
   stages:
-    "PixelSlash works today and runs inside a team's existing checks. ToggleSlash and FlakeSlash are in alpha. BundleSlash and SightSlash are planned.",
+    "PixelSlash works today and runs inside a team's existing checks. ToggleSlash, FlakeSlash and TaskSlash are in alpha. BundleSlash and SightSlash are planned.",
   selfHost: `${listNames(SELF_HOSTED)} run on your own server from one install, today on Proxmox or Kubernetes.`,
   hosted: "A hosted version, run for you, is planned. Pricing follows once running costs are known.",
 } as const;
@@ -126,7 +136,7 @@ export const STANDS = {
 export const DEVELOPERS = {
   title: "Built for working with agents",
   today:
-    "Your agents open pull requests all day. Slash gives each one a check that answers the questions a careful reviewer would have asked: what the page looks like, what switched on, whether the tests mean it, what it weighs, and how each component holds up in every state. Run it in CI today.",
+    "Your agents open pull requests all day. Slash gives each one a check that answers the questions a careful reviewer would have asked: what the page looks like, what switched on, whether the tests mean it, why they timed out, what it weighs, and how each component holds up in every state. Run it in CI today.",
   next: "Next, point your agent at it and let it fix its own change first.",
 } as const;
 

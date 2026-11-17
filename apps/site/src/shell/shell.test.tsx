@@ -51,6 +51,7 @@ describe("the shell on the 404 page", () => {
       { href: "/pixelslash", text: "PixelSlash" },
       { href: "/flakeslash", text: "FlakeSlash" },
       { href: "/toggleslash", text: "ToggleSlash" },
+      { href: "/taskslash", text: "TaskSlash" },
     ]);
   });
 

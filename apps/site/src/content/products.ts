@@ -1,9 +1,9 @@
-/** The four tools, each with the label that is shown next to its name. Plain data, so a test can check it. */
+/** The tools, each with the label that is shown next to its name. Plain data, so a test can check it. */
 
 import type { StageId } from "#/content/stages";
 
 export type Product = {
-  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash";
+  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash" | "TaskSlash";
   /** The release stage, from the shared `STAGES` table. */
   stage: StageId;
   /** The one question it answers about a CI run. */
@@ -43,6 +43,16 @@ export const PRODUCTS: readonly Product[] = [
       "It is being built now. Its source is public under the Elastic License 2.0, and you host it yourself. Today its command line tool scans GitHub Actions history and lists the jobs that failed and passed on the same commit, grouped into issues with their log excerpts. A dashboard and readers for other CI systems are planned.",
     ],
     page: "/flakeslash",
+  },
+  {
+    name: "TaskSlash",
+    stage: "alpha",
+    question: "Why did the tests time out?",
+    summary: [
+      "It queues builds and tests on one machine, so a test fails because of the code, not because everything ran at once.",
+      "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when it fits in the room the machine has left. A release you can install is planned.",
+    ],
+    page: "/taskslash",
   },
   {
     name: "BundleSlash",
