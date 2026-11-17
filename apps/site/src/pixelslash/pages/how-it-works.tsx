@@ -68,21 +68,21 @@ export function HowItWorksPage(): ReactNode {
       <Section title="A real report">
         <Image
           src={psAsset("/report.png")}
-          alt="The report.html of the run below: Main, Branch and Diff of a card whose background turned yellow"
+          alt="PixelSlash's review app for one change: a card on Main and on Branch side by side, the changed area outlined in red and a yellow bar on Branch"
           aspect="natural"
           width="full"
         />
-        {/* The numbers below are what that run printed; regenerating public/report.png means re-reading them. */}
+        {/* The numbers below are what that run printed; the fetched public/pixelslash/report.png is that run's screenshot, so re-read them when the pin moves. */}
         <Caption>
           A real run, not a mock-up: the repository's own fixtures/pages/live.html against
-          local.html, shot in Chromium at 1280×720. It printed 19103 changed pixels and one changed
+          local.html, shot in Chromium at 1280×720. It printed 19033 changed pixels and one changed
           region.
         </Caption>
         <CodeBlock language="bash" label="bash" copy>
           {[
             "bun run pixelslash -- --live http://localhost:4391/live.html \\",
             "  --local http://localhost:4391/local.html --out out",
-            "pixelslash: 19103 changed pixels",
+            "pixelslash: 19033 changed pixels",
           ].join("\n")}
         </CodeBlock>
       </Section>

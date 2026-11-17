@@ -1,6 +1,7 @@
 /** One feature's trip from ticket to cleanup, and where each tool would plug in. Plain data. */
 import type { Product } from "#/content/products";
 import type { StageId } from "#/content/stages";
+import { psAsset } from "#/pixelslash/paths";
 
 /**
  * What the reader sees back from a tool at this stop. `real` was captured by running the tool for this
@@ -170,12 +171,12 @@ export const FLOW: readonly FlowStep[] = [
         text: "The report shows Main, Branch and the Diff side by side. The review server lets a reviewer accept the change or reject it with a reason.",
         output: {
           kind: "real",
-          title: "the report from the run above",
+          title: "the review app's compare view from the run above",
           image: {
-            src: "/report.png",
-            width: 1100,
-            height: 394,
-            alt: "A PixelSlash report on a toy checkout page: Main with a blue Pay now button, Branch with a tax row and a green Pay button, and the Diff in magenta, side by side and cropped to the change",
+            src: psAsset("/report.png"),
+            width: 2560,
+            height: 1600,
+            alt: "PixelSlash's review app comparing one change: a card on Main and on Branch side by side, the changed area outlined in red and a yellow bar on Branch",
           },
         },
       },

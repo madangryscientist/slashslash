@@ -202,11 +202,12 @@ describe("the home after the tool cards", () => {
     expect(TOOL_CARDS.find((tool) => tool.name === "SightSlash")?.stage).toBe("planned");
   });
 
-  test("links the report screenshot to the image itself, which is built", () => {
+  test("links the report screenshot to the fetched PixelSlash image, which is built, and no tracked copy is left", () => {
     const stands = section("stands");
-    expect(stands).toContain('href="/report.png"');
+    expect(stands).toContain('href="/pixelslash/report.png"');
     expect(text(stands)).toContain(LANDING_STANDS.reportOpen);
-    expect(existsSync(resolve(DIST, "report.png"))).toBe(true);
+    expect(existsSync(resolve(DIST, "pixelslash/report.png"))).toBe(true);
+    expect(existsSync(resolve(DIST, "report.png"))).toBe(false);
   });
 
   test("puts the ask at #your-view: the questions in order as a numbered list, and the contact line", () => {

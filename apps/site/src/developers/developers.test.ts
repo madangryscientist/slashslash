@@ -86,6 +86,11 @@ describe("/developers", () => {
     }
   });
 
+  test("reads the PixelSlash report from the fetched files, not a tracked copy", () => {
+    expect(html).toContain('src="/pixelslash/report.png"');
+    expect(html).not.toContain('src="/report.png"');
+  });
+
   test("renders the install commands, the env and flags sections, and every developer question", () => {
     expect(words).toContain("npx @hackcove/pixelslash --live-png a.png --local-png b.png --out out");
     expect(words).toContain("npx @hackcove/pixelslash install-browser");
