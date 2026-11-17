@@ -31,9 +31,6 @@ export const CONTACT = {
   end: ".",
 } as const;
 
-/** The contact line as plain text. */
-export const CONTACT_LINE = `${CONTACT.lead}${CONTACT.link}${CONTACT.end}`;
-
 export const PIXELSLASH_REPO_URL = "https://github.com/madangryscientist/pixelslash";
 export const PIXELSLASH_SITE_URL = "https://pixelslash.dev";
 export const PIXELSLASH_NPM_URL = "https://www.npmjs.com/package/@hackcove/pixelslash";
