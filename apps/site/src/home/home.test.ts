@@ -5,16 +5,16 @@ import { HERO as HERO_DRAWING, STANDS as LANDING_STANDS } from "#/content/landin
 import { PRODUCTS } from "#/content/products";
 import { CONTACT } from "#/content/site";
 import { STAGES } from "#/content/stages";
-import { GAPS, HERO, REPORT, STANDS, STEPS_TODAY, STORY_TOOLS, VIEW, VIEW_QUESTIONS } from "#/content/story";
+import { HERO, PIPELINE, STANDS, STORY_TOOLS, VIEW, VIEW_QUESTIONS } from "#/content/story";
 import { TOOL_CARDS } from "#/home/tools";
 import { SECTIONS } from "#/shell/sections";
 
 /*
  * The suite home as the site builds it, read from dist (`bunx moon run site:test` builds first):
- * on the shell in the suite's section, the hero from the story module with no link and no button, one
- * card per tool the story names, and no count of tools anywhere. After the cards, the rest of
- * the story in its order: every string of its sections on the page, a row per gap and per report
- * question, a stage Pill per tool, the ask at #your-view, and every drawing finished before any script.
+ * on the shell in the suite's section, the hero from the story module with no link and no button, then
+ * the pipeline: its steps in order, a row per tool under the step it runs at with what it does and its
+ * release stage, and no count of tools anywhere. Then where it stands and the ask at #your-view, and
+ * every drawing finished before any script.
  */
 
 const DIST = resolve(import.meta.dirname, "../../dist");
@@ -46,9 +46,9 @@ function text(html: string): string {
 const html = read("index.html");
 const hero = html.slice(html.indexOf('class="hero-ground"'), html.indexOf('id="tools"'));
 
-/** Each card's HTML, by the tool it names, in page order: from the tools to the first section after them. */
-const cards = html
-  .slice(html.indexOf('id="tools"'), html.indexOf("data-home-section="))
+/** Each tool row's HTML, by the tool it names, in page order: from the pipeline to the first section after it. */
+const pipeline = html.slice(html.indexOf('id="tools"'), html.indexOf('data-home-section="stands"'));
+const cards = pipeline
   .split('data-tool="')
   .slice(1)
   .map((chunk) => ({ name: chunk.slice(0, chunk.indexOf('"')), html: chunk }));
@@ -91,20 +91,33 @@ describe("/", () => {
     expect(hero).not.toMatch(/<button[\s>]/);
   });
 
-  test("has one card per tool the story names, in its order, each with its question and stage", () => {
-    expect(cards.map((card) => card.name)).toEqual([...STORY_TOOLS]);
+  test("has one row per tool, in pipeline order, each with what it does and its release stage", () => {
+    expect(cards.map((card) => card.name)).toEqual(TOOL_CARDS.map((tool) => tool.name));
+    expect(cards.map((card) => card.name).toSorted()).toEqual([...STORY_TOOLS].toSorted());
     for (const card of cards) {
       const words = text(`<x ${card.html}`);
-      const question = REPORT.rows.find((row) => row.tool === card.name)?.question;
+      const tool = TOOL_CARDS.find((item) => item.name === card.name);
       const stage = PRODUCTS.find((product) => product.name === card.name)?.stage ?? "planned";
-      expect(question, card.name).toBeDefined();
+      expect(tool, card.name).toBeDefined();
       expect(words, card.name).toContain(card.name);
-      expect(words, card.name).toContain(question);
+      expect(words, card.name).toContain(tool?.does);
       expect(words, card.name).toContain(STAGES[stage].label);
       const mark = `/brand/${card.name.toLowerCase()}-mark.svg`;
       expect(card.html, card.name).toContain(`src="${mark}"`);
       expect(existsSync(resolve(DIST, mark.slice(1))), `${mark} is built`).toBe(true);
     }
+  });
+
+  test("shows the pipeline steps in order, each with its words, and each tool under the step it runs at", () => {
+    const steps = rows(pipeline, "data-step");
+    expect(steps.map((step) => step.name)).toEqual(PIPELINE.stages.map((stage) => stage.name));
+    PIPELINE.stages.forEach((stage, index) => {
+      const chunk = steps[index]?.html ?? "";
+      expect(text(`<x ${chunk}`)).toContain(stage.text);
+      expect(rows(chunk, "data-tool").map((row) => row.name)).toEqual(stage.tools.map((row) => row.tool));
+    });
+    expect(text(pipeline)).toContain(PIPELINE.lead);
+    expect(text(pipeline)).toContain(PIPELINE.next);
   });
 
   test("a card links exactly when its tool has a page here", () => {
@@ -169,9 +182,9 @@ function rows(chunk: string, attr: string): { name: string; html: string }[] {
 }
 
 const afterTools = html.slice(html.indexOf('id="tools"'));
-const TITLES = [STEPS_TODAY.title, GAPS.title, REPORT.title, STANDS.title, VIEW.title];
+const TITLES = [PIPELINE.title, STANDS.title, VIEW.title];
 
-describe("the home after the tool cards", () => {
+describe("the home from the pipeline on", () => {
   test("opens each section with its title as an h2, in the story's order", () => {
     const h2s = [...afterTools.matchAll(/<h2[^>]*\sid="[^"]*"[^>]*>([\s\S]*?)<\/h2>/g)].map((m) => text(m[1] ?? ""));
     expect(h2s).toEqual(TITLES);
@@ -180,40 +193,13 @@ describe("the home after the tool cards", () => {
   test("carries every string of the story's sections", () => {
     const words = text(afterTools);
     // A string that starts with "/" is a link's address, not words on the page.
-    for (const line of strings([STEPS_TODAY, GAPS, REPORT, STANDS, VIEW_QUESTIONS]).filter((line) => !line.startsWith("/"))) {
+    for (const line of strings([STANDS, VIEW_QUESTIONS]).filter((line) => !line.startsWith("/"))) {
       expect(words, line).toContain(line);
     }
   });
 
   test("has no @@ label", () => {
     expect(afterTools).not.toContain("@@");
-  });
-
-  test("has one gap row per gap, in order, each with its gap and its tool", () => {
-    const found = rows(section("gaps"), "data-gap");
-    expect(found.map((row) => row.name)).toEqual(GAPS.rows.map((row) => row.tool));
-    found.forEach((row, index) => {
-      const gap = GAPS.rows[index];
-      const words = text(`<x ${row.html}`);
-      expect(words).toContain(gap?.where);
-      expect(words).toContain(gap?.gap);
-      expect(words).toContain(gap?.tool);
-    });
-  });
-
-  test("the report section does not list the tool questions again: the cards above carry them", () => {
-    expect(section("report")).not.toContain("data-report=");
-  });
-
-  test("gives every tool the story names one stage Pill, SightSlash planned", () => {
-    const found = rows(section("stands"), "data-stage-for");
-    expect(found.map((row) => row.name)).toEqual([...STORY_TOOLS]);
-    for (const row of found) {
-      const stage = TOOL_CARDS.find((tool) => tool.name === row.name)?.stage;
-      expect(stage, row.name).toBeDefined();
-      expect(text(`<x ${row.html}`), row.name).toContain(STAGES[stage ?? "planned"].label);
-    }
-    expect(TOOL_CARDS.find((tool) => tool.name === "SightSlash")?.stage).toBe("planned");
   });
 
   test("links the report screenshot to the fetched PixelSlash image, which is built, and no tracked copy is left", () => {
@@ -242,7 +228,7 @@ describe("the home after the tool cards", () => {
     // with no script shows every drawing's base style: the finished drawing.
     // The flags grid on /developers has no start frame: it only replays while lit, from its finished style.
     const files = globSync("illustrations/*.css", { cwd: SRC }).filter((file) => file !== "illustrations/combinations.css");
-    expect(files).toContain("illustrations/pipeline.css");
+    expect(files.length).toBeGreaterThan(0);
     for (const file of files) {
       const css = readFileSync(resolve(SRC, file), "utf8");
       const starts = [...css.matchAll(/[^{}]*:not\(\.played\)[^{}]*\{/g)].flatMap((m) =>

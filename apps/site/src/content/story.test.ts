@@ -45,13 +45,31 @@ describe("suite story copy", () => {
     expect(strings.filter((text) => forbidden.test(text))).toEqual([]);
   });
 
-  test("every PRODUCTS entry, and SightSlash, has exactly one GAPS row and one REPORT row", () => {
-    for (const tool of story.STORY_TOOLS) {
-      expect(story.GAPS.rows.filter((row) => row.tool === tool), `GAPS ${tool}`).toHaveLength(1);
-      expect(story.REPORT.rows.filter((row) => row.tool === tool), `REPORT ${tool}`).toHaveLength(1);
+  test("every PRODUCTS entry, and SightSlash, sits at exactly one pipeline step", () => {
+    const placed = story.PIPELINE.stages.flatMap((stage) => stage.tools.map((row) => row.tool));
+    expect(placed.toSorted()).toEqual([...story.STORY_TOOLS].toSorted());
+  });
+
+  test("the pipeline runs in one order: written, built and tested, reviewed, released", () => {
+    expect(story.PIPELINE.stages.map((stage) => stage.name)).toEqual([
+      "Written",
+      "Built and tested",
+      "Reviewed",
+      "Released",
+    ]);
+  });
+
+  test("each tool says what it does in one sentence, and a planned tool says what it will do", () => {
+    const planned = new Set<string>([
+      ...PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name),
+      "SightSlash",
+    ]);
+    for (const row of story.PIPELINE.stages.flatMap((stage) => stage.tools)) {
+      expect(sentences(row.does), row.tool).toHaveLength(1);
+      expect(row.does.endsWith("."), row.tool).toBe(true);
+      expect(row.does.includes("?"), row.tool).toBe(false);
+      expect(row.does.startsWith("Will "), row.tool).toBe(planned.has(row.tool));
     }
-    expect(story.GAPS.rows).toHaveLength(story.STORY_TOOLS.length);
-    expect(story.REPORT.rows).toHaveLength(story.STORY_TOOLS.length);
   });
 
   test("the stage sentences name exactly the alpha tools and exactly the planned tools", () => {

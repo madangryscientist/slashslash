@@ -28,96 +28,74 @@ export const VIEW = {
   title: "I would like your view",
 } as const;
 
-export const STEPS_TODAY = {
-  title: "How a change reaches your customers today",
-  steps: [
-    { label: "Asked.", text: 'Someone asks for a change: "Add tax to the checkout total."' },
-    { label: "Made.", text: "An agent makes it, in minutes. It edits more lines than a person would." },
+/** A step a change goes through, in the order most teams run them. */
+export type StageName = "Written" | "Built and tested" | "Reviewed" | "Released";
+
+/**
+ * The one view of the suite: the steps a change goes through, in order, and under each step the tools
+ * that run there, each with one sentence saying what it does. A planned tool says what it will do.
+ */
+/** A step of the pipeline: its name, what happens there, and the tools that run there. */
+export type PipelineStage = {
+  name: StageName;
+  text: string;
+  tools: readonly { tool: StoryTool; does: string }[];
+};
+
+export const PIPELINE: { title: string; lead: string; stages: readonly PipelineStage[]; next: string } = {
+  title: "Where each tool fits",
+  lead: "Most teams send a change through the same steps. Each Slash tool does one job at one of those steps, so you can start with the one that hurts most and leave the rest.",
+  stages: [
     {
-      label: "Approved.",
-      text: "A person approves it. They skim the edited lines and trust that the rest is fine.",
+      name: "Written",
+      text: "An agent writes the change in minutes, and often touches more than a person would. Slash does not write code: it checks what the code does at each step after this one.",
+      tools: [],
     },
     {
-      label: "Checked.",
-      text: "Automated checks run. A green light means nothing that was tested broke.",
+      name: "Built and tested",
+      text: "The change is built and the automated tests run. A green result should mean the change works, not that the run got lucky.",
+      tools: [
+        {
+          tool: "TaskSlash",
+          does: "Queues builds and tests on one machine and starts each only when there is room, so a test fails because of the code, not because everything ran at once.",
+        },
+        {
+          tool: "FlakeSlash",
+          does: "Finds the tests that pass and fail at random on the same code, so a red result means something and nobody learns to re-run until it goes green.",
+        },
+        {
+          tool: "BundleSlash",
+          does: "Will measure how much code your customers download after each build, so a page cannot grow heavy one change at a time.",
+        },
+      ],
     },
     {
-      label: "Live.",
-      text: "It goes live. Your customers are the first to use the finished result.",
+      name: "Reviewed",
+      text: "A person approves the change. They read the edited lines; Slash shows them what those lines do to the product.",
+      tools: [
+        {
+          tool: "PixelSlash",
+          does: "Takes screenshots of each page before and after the change and shows the reviewer every one that looks different, with harmless noise left out.",
+        },
+        {
+          tool: "SightSlash",
+          does: "Will show each component in every state, not only the one someone happened to try.",
+        },
+      ],
+    },
+    {
+      name: "Released",
+      text: "The change goes live, to every customer at once or to some first.",
+      tools: [
+        {
+          tool: "ToggleSlash",
+          does: "Feature flags you run yourself: choose which customers get a feature, switch it off again without a new release, and keep a record of every switch.",
+        },
+      ],
     },
   ],
-} as const;
-
-export const GAPS = {
-  title: "What the old way got away with",
-  lead: "These gaps were always there. A careful person used to cover them by hand. With agents making changes faster than anyone can look, they no longer get covered.",
-  rows: [
-    {
-      where: "Approved",
-      gap: "Nobody looks at the page. The approver sees edited lines, not what your customer will see.",
-      tool: "PixelSlash",
-    },
-    {
-      where: "Made",
-      gap: "A small edit can switch on a feature nobody mentioned, and an agent will not mention it either.",
-      tool: "ToggleSlash",
-    },
-    {
-      where: "Checked",
-      gap: "Some checks fail at random, so people learn to re-run until green, and agents learn it too.",
-      tool: "FlakeSlash",
-    },
-    {
-      where: "Checked",
-      gap: "Builds and tests started at once overload the machine, and a test times out for reasons that have nothing to do with the code.",
-      tool: "TaskSlash",
-    },
-    {
-      where: "Live",
-      gap: "The page gets heavier one change at a time, and no single change looks guilty.",
-      tool: "BundleSlash",
-    },
-    {
-      where: "Made",
-      gap: "A component looks right in the state someone tried, and broken in the ones nobody did.",
-      tool: "SightSlash",
-    },
-  ] satisfies readonly { where: string; gap: string; tool: StoryTool }[],
-  close: "Today a person testing by hand before each release fills that gap. What they miss, customers find.",
-} as const;
-
-export const REPORT = {
-  title: "One report on every change",
-  body: "Every change arrives with a plain report of what it will do, on the change itself, where your team already approves work. Each Slash tool answers one of the questions above, and the tools share one report, so nobody opens a pile of dashboards.",
-  next: "Next, the same report goes back to the agent that made the change, so it can fix what it broke before anyone has to look.",
-  rows: [
-    {
-      tool: "PixelSlash",
-      question: "Does the page look different?",
-    },
-    {
-      tool: "ToggleSlash",
-      question: "What switches on, and for whom?",
-    },
-    {
-      tool: "FlakeSlash",
-      question: "Can the test results be trusted?",
-    },
-    {
-      tool: "TaskSlash",
-      question: "Why did the tests time out?",
-    },
-    {
-      tool: "BundleSlash",
-      question: "Did the app get heavier to load?",
-    },
-    {
-      tool: "SightSlash",
-      question: "What does each component look like, in every state?",
-    },
-  ] satisfies readonly { tool: StoryTool; question: string }[],
-  close: "With Slash, Approved means a person has seen what customers will see, and Checked says what the change does, not only whether something broke.",
-} as const;
+  next: "Next, what the tools find goes back to the agent that made the change, so it can fix its own work before a person has to look.",
+};
 
 export const STANDS = {
   title: "Where it stands",

@@ -1,16 +1,12 @@
-import { Card, Container, ListRow, Pill, Section, Step, Steps, Text, TextLink } from "@hackcove/ui-react";
+import { Container, Section, Text, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
-import { STAGES, STAGE_TONE } from "#/content/stages";
-import { GAPS, REPORT, STANDS, STEPS_TODAY, VIEW, VIEW_QUESTIONS, type StoryTool } from "#/content/story";
-import { TOOL_CARDS } from "#/home/tools";
+import { STANDS, VIEW, VIEW_QUESTIONS } from "#/content/story";
 import { ContactLine } from "#/shell/contact-line";
-import { Pipeline } from "#/illustrations/pipeline";
 
 /*
- * The rest of the suite home, after the tool cards, in the order and words of the suite story: how a
- * change reaches customers today, the gaps the old way left, the one report, where it stands, and the
- * ask. Each is a kit Section whose title is an h2. Nothing here runs in the browser; "Where it stands"
- * takes the report viewer island as its children.
+ * The rest of the suite home, after the pipeline: where it stands, and the ask. Each is a kit Section
+ * whose title is an h2. Nothing here runs in the browser; "Where it stands" takes the report viewer
+ * island as its children.
  */
 
 /** One home section: the kit's Section in the page's column, its title an h2. */
@@ -26,82 +22,10 @@ function HomeSection({ id, title, children }: { id: string; title: string; child
   );
 }
 
-/** A tool by its mark and name, linked to its page here when it has one. */
-function ToolName({ name }: { name: StoryTool }): ReactNode {
-  const card = TOOL_CARDS.find((tool) => tool.name === name);
-  if (card === undefined) throw new Error(`No tool card for ${name}.`);
-  const body = (
-    <span className="inline-flex items-center gap-2 font-semibold">
-      <img src={card.mark} alt="" width={20} height={20} />
-      {name}
-    </span>
-  );
-  return card.href === undefined ? body : (
-    <a href={card.href} className="underline-offset-4 hover:underline">
-      {body}
-    </a>
-  );
-}
-
-export function StepsToday(): ReactNode {
-  return (
-    <HomeSection id="how-today" title={STEPS_TODAY.title}>
-      <div className="grid gap-10 md:grid-cols-2 md:items-start">
-        <Steps>
-          {STEPS_TODAY.steps.map((step) => (
-            <Step key={step.label} title={<strong>{step.label}</strong>}>
-              {step.text}
-            </Step>
-          ))}
-        </Steps>
-        <Pipeline />
-      </div>
-    </HomeSection>
-  );
-}
-
-export function Gaps(): ReactNode {
-  return (
-    <HomeSection id="gaps" title={GAPS.title}>
-      <Text>{GAPS.lead}</Text>
-      <Card flush>
-        {GAPS.rows.map((row, index) => (
-          <ListRow
-            key={`${row.where}-${row.tool}`}
-            divided={index > 0}
-            data-gap={row.tool}
-            leading={
-              <span className="inline-block w-24">
-                <Pill tone="neutral" round>
-                  {row.where}
-                </Pill>
-              </span>
-            }
-            secondary={<ToolName name={row.tool} />}
-          >
-            {row.gap}
-          </ListRow>
-        ))}
-      </Card>
-      <Text>{GAPS.close}</Text>
-    </HomeSection>
-  );
-}
-
-export function OneReport(): ReactNode {
-  return (
-    <HomeSection id="report" title={REPORT.title}>
-      <Text>{REPORT.body}</Text>
-      <Text>{REPORT.next}</Text>
-      <Text>{REPORT.close}</Text>
-    </HomeSection>
-  );
-}
-
 /** The stage line either side of the words that link to the CI walkthrough. */
 const [stagesBefore, stagesAfter] = STANDS.stages.split(STANDS.tryLink.text);
 
-/** Where it stands: the stage lines, a stage Pill per tool, and the report screenshot (the children). */
+/** Where it stands: the stage lines and the report screenshot (the children). */
 export function Stands({ children }: { children?: ReactNode }): ReactNode {
   return (
     <HomeSection id="stands" title={STANDS.title}>
@@ -112,16 +36,6 @@ export function Stands({ children }: { children?: ReactNode }): ReactNode {
             <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
             {stagesAfter}
           </Text>
-          <ul className="flex flex-wrap gap-x-6 gap-y-3">
-            {TOOL_CARDS.map((tool) => (
-              <li key={tool.name} className="inline-flex items-center gap-2" data-stage-for={tool.name}>
-                <ToolName name={tool.name} />
-                <Pill tone={STAGE_TONE[tool.stage]} dot round>
-                  {STAGES[tool.stage].label}
-                </Pill>
-              </li>
-            ))}
-          </ul>
           <Text>{STANDS.selfHost}</Text>
           <Text>{STANDS.hosted}</Text>
         </div>
