@@ -82,6 +82,9 @@
   overflow: hidden;
   border-bottom: 1px solid var(--hc-line);
 }
+.shop-row > span {
+  white-space: nowrap;
+}
 .shop-row .bar {
   width: calc(var(--w) * 1.6);
 }
