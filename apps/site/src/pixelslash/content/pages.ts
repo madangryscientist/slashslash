@@ -4,7 +4,9 @@ import type { Claim } from "#/content/facts";
  * Every page of the PixelSlash site, in nav order. This site serves four of them (paths.ts LOCAL); the rest
  * stay on pixelslash.dev, so only the four served here carry a description, a Claim citing PixelSlash's facts.
  */
-export const PAGES: readonly { to: SitePath; label: string; title: string; description?: Claim }[] = [
+type Page = { to: string; label: string; title: string; description?: Claim };
+
+const LIST = [
   {
     to: "/",
     label: "Home",
@@ -56,7 +58,9 @@ export const PAGES: readonly { to: SitePath; label: string; title: string; descr
     label: "Security",
     title: "Security · PixelSlash",
   },
-];
+] as const satisfies readonly Page[];
 
 /** A PixelSlash page's path on pixelslash.dev. */
-export type SitePath = "/" | "/how-it-works" | "/docs" | "/self-host" | "/compare" | "/pricing" | "/security";
+export type SitePath = (typeof LIST)[number]["to"];
+
+export const PAGES: readonly (Page & { to: SitePath })[] = LIST;

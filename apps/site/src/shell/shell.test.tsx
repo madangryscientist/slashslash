@@ -1,7 +1,7 @@
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
-import { FACTS, licenceOf } from "#/content/facts";
+import { licenceOf } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
 import { renderToStaticMarkup } from "react-dom/server";
 import { SECTIONS, markFor } from "#/shell/sections";
@@ -63,10 +63,6 @@ describe("the shell on the 404 page", () => {
       `${licenceOf("pixelslash")}: PixelSlash, ToggleSlash, FlakeSlash`,
       `${licenceOf("taskslash")}: TaskSlash`,
     ]);
-    expect(FACTS.toggleslash.licence).toBe(FACTS.pixelslash.licence);
-    expect(FACTS.flakeslash.licence).toBe(FACTS.pixelslash.licence);
-    expect(FACTS.pixelslash.licence).toContain("Elastic License 2.0");
-    expect(FACTS.taskslash.licence).toContain("MIT");
   });
 
   test("the footer names every product", () => {

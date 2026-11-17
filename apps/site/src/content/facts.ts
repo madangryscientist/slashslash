@@ -11,8 +11,9 @@ import flakeslashSource from "@facts/flakeslash.md?raw";
 import pixelslashSource from "@facts/pixelslash.md?raw";
 import taskslashSource from "@facts/taskslash.md?raw";
 import toggleslashSource from "@facts/toggleslash.md?raw";
+import type { FactsProduct } from "../../scripts/fetch-sources";
 
-export type FactsProduct = "pixelslash" | "toggleslash" | "flakeslash" | "taskslash";
+export type { FactsProduct };
 
 /** A fact by its product and its id in that product's FACTS.md: `pixelslash/compare-two-urls`. */
 export type FactId = `${FactsProduct}/${string}`;

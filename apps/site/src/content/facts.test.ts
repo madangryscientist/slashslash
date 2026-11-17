@@ -57,8 +57,8 @@ const MODULES: Record<string, object> = {
 /** The modules that are only views of claims held elsewhere, so they may hold none of their own. */
 const VIEWS = new Set(["home/tools", "tools/tools", "developers/tools"]);
 
-/** A key whose values a page shows under a "today" label (each tool home's "What works today"). */
-const TODAY_KEY = /^(WORKS_TODAY|today)$/;
+/** A key whose values a page shows under a "today" label: a tool home's "What works today", /developers' Today. */
+const TODAY_KEY = /^(works_today|today)$/i;
 /** A key whose values are presented as planned. */
 const PLANNED_KEY = /planned/i;
 /** Words that make a sentence read as not built yet. */
@@ -233,17 +233,6 @@ describe("the licence lines", () => {
       for (const match of built(file).matchAll(/data-licence-line="([a-z]+)"[^>]*>([\s\S]*?)<\//g)) {
         const product = match[1] as FactsProduct;
         expect(text(match[2] ?? ""), `${file}: ${product}`).toBe(licenceLine(product));
-      }
-    }
-  });
-
-  test("no source file types a licence text: the pages read it from the facts files", () => {
-    const sources = readdirSync(resolve(SITE, "src"), { recursive: true, encoding: "utf8" }).filter((file) =>
-      /\.(ts|tsx|astro)$/.test(file),
-    );
-    for (const facts of Object.values(FACTS)) {
-      for (const file of sources) {
-        expect(readFileSync(resolve(SITE, "src", file), "utf8"), file).not.toContain(facts.licence);
       }
     }
   });

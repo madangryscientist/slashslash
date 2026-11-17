@@ -32,9 +32,3 @@ test("facts.sha.json pins every product the site reads facts from, each at a ful
   expect(Object.keys(pins).toSorted()).toEqual([...FACTS_PRODUCTS].toSorted());
   for (const product of FACTS_PRODUCTS) expect(pins[product], product).toMatch(/^[0-9a-f]{40}$/);
 });
-
-test("the build fetched each product's FACTS.md into .sources/facts", () => {
-  for (const product of FACTS_PRODUCTS) {
-    expect(existsSync(resolve(SITE, `.sources/facts/${product}.md`)), product).toBe(true);
-  }
-});

@@ -23,8 +23,8 @@ export const ACTION = { label: "Self-host it", href: "/self-host" } as const;
 
 /** The one promise about paid hosting: it buys having us run it, never a feature. */
 export const COMMITMENT: Claim = {
-  text: "No feature will ever sit behind a paid plan. Paid hosting, when it comes, pays for us running PixelSlash for you; everything it runs is in the source code you can host yourself.",
-  facts: ["pixelslash/licence", "pixelslash/self-host-docker", "pixelslash/self-host-cloudflare"],
+  text: "No feature will ever sit behind a paid plan.",
+  facts: ["pixelslash/licence"],
 };
 
 /** What the licence allows and forbids, in the callout after the facts (PS-386). */
