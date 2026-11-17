@@ -137,6 +137,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   text-align: right;
+  text-wrap: balance;
   color: var(--hc-cat-7);
 }
 .shop-ring {

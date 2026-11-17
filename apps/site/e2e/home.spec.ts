@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { HERO } from "../src/content/landing.ts";
 
 /*
  * The home's hand-drawn hero in a real browser. With motion on, every piece of text in the panes' start
@@ -91,7 +92,7 @@ for (const theme of THEMES) {
     await page.goto("/");
     const readings = await paneContrasts(page);
     expect(readings.map((r) => r.text)).toEqual(
-      expect.arrayContaining(["Before", "The change", "After", "Tax", "Asked for", "Not asked for", "Pay"]),
+      expect.arrayContaining(["Before", "The change", "After", "Tax", HERO.asked, HERO.notAsked, "Pay"]),
     );
     expect(readings.filter((r) => r.ratio < 4.5)).toEqual([]);
   });
@@ -99,6 +100,10 @@ for (const theme of THEMES) {
 
 test("with reduced motion the hero stands still", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  // Tall enough that the three stacked panes fit on a phone: a shot taller than the window scrolls,
+  // and the sticky header lands on it differently each time.
+  const width = page.viewportSize()?.width ?? 390;
+  await page.setViewportSize({ width, height: 2000 });
   await page.goto("/");
   await page.waitForLoadState("networkidle");
   expect(await page.locator("html").getAttribute("class")).not.toMatch(/\bmotion\b/);

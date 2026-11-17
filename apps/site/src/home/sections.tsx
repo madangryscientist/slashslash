@@ -1,9 +1,9 @@
-import { Callout, Card, Container, ListRow, Pill, Section, Step, Steps, Text } from "@hackcove/ui-react";
+import { Card, Container, ListRow, Pill, Section, Step, Steps, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
-import { CONTACT_LINE } from "#/content/site";
 import { GAPS, REPORT, STANDS, STEPS_TODAY, VIEW, VIEW_QUESTIONS, type StoryTool } from "#/content/story";
 import { TOOL_CARDS } from "#/home/tools";
+import { ContactLine } from "#/shell/contact-line";
 import { Pipeline } from "#/illustrations/pipeline";
 
 /*
@@ -92,23 +92,6 @@ export function OneReport(): ReactNode {
   return (
     <HomeSection id="report" title={REPORT.title}>
       <Text>{REPORT.body}</Text>
-      <Card flush>
-        {REPORT.rows.map((row, index) => (
-          <ListRow
-            key={row.tool}
-            divided={index > 0}
-            data-report={row.tool}
-            leading={
-              <span className="inline-block w-32 whitespace-nowrap">
-                <ToolName name={row.tool} />
-              </span>
-            }
-            secondary={row.why}
-          >
-            <span className="font-semibold">{row.question}</span>
-          </ListRow>
-        ))}
-      </Card>
       <Text>{REPORT.next}</Text>
       <Text>{REPORT.close}</Text>
     </HomeSection>
@@ -152,7 +135,7 @@ export function YourView(): ReactNode {
           </li>
         ))}
       </ol>
-      <Callout tone="info">{CONTACT_LINE}</Callout>
+      <ContactLine />
     </HomeSection>
   );
 }

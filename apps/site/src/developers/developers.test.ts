@@ -98,7 +98,7 @@ describe("/developers", () => {
     expect(words).toContain("FS_TIMEOUT");
     expect(words).toContain("The combination problem");
     for (const question of DEVELOPER_QUESTIONS) expect(words).toContain(question);
-    expect(words).toContain(CONTACT_LINE);
+    expect(words.replace(/ (?=[.,])/g, "")).toContain(CONTACT_LINE);
   });
 
   test("gives every tool a card with every paragraph of its summary", () => {

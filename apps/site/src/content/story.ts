@@ -19,7 +19,7 @@ const listNames = (names: readonly string[]): string =>
     : `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 
 export const HERO = {
-  title: "Your agents ship faster than anyone can check. Slash checks what they shipped.",
+  title: "Your agents ship fast. Slash makes sure they ship the right thing.",
   lead: "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash gives every change a plain report of what it will do, before your customers find out.",
 } as const;
 
@@ -88,47 +88,41 @@ export const GAPS = {
 
 export const REPORT = {
   title: "One report on every change",
-  body: "Every change arrives with a plain report of what it will do, on the change itself, where your team already approves work. Each Slash tool answers one question about the change, and the tools share one report, so nobody opens a pile of dashboards.",
+  body: "Every change arrives with a plain report of what it will do, on the change itself, where your team already approves work. Each Slash tool answers one of the questions above, and the tools share one report, so nobody opens a pile of dashboards.",
   next: "Next, the same report goes back to the agent that made the change, so it can fix what it broke before anyone has to look.",
   rows: [
     {
       tool: "PixelSlash",
       question: "Does the page look different?",
-      why: "Nobody reads every line, so somebody has to look at the result.",
     },
     {
       tool: "ToggleSlash",
       question: "What switches on, and for whom?",
-      why: "An agent can flip a switch in passing.",
     },
     {
       tool: "FlakeSlash",
       question: "Can the test results be trusted?",
-      why: "Agents re-run a red check until it goes green.",
     },
     {
       tool: "TaskSlash",
       question: "Why did the tests time out?",
-      why: "Agents in several worktrees start their builds and tests at once.",
     },
     {
       tool: "BundleSlash",
       question: "Did the app get heavier to load?",
-      why: "Weight creeps in a little with every quick change.",
     },
     {
       tool: "SightSlash",
       question: "What does each component look like, in every state?",
-      why: "An agent tries the happy path and stops.",
     },
-  ] satisfies readonly { tool: StoryTool; question: string; why: string }[],
-  close: "Step 3 becomes: a person approves it, having seen what customers will see. Step 4 gains a check that says what the change does, not only whether something broke.",
+  ] satisfies readonly { tool: StoryTool; question: string }[],
+  close: "With Slash, Approved means a person has seen what customers will see, and Checked says what the change does, not only whether something broke.",
 } as const;
 
 export const STANDS = {
   title: "Where it stands",
   stages:
-    "PixelSlash works today and runs inside a team's existing checks. ToggleSlash, FlakeSlash and TaskSlash are in alpha. BundleSlash and SightSlash are planned.",
+    "PixelSlash, ToggleSlash, FlakeSlash and TaskSlash are alphas: try them and see what they do. Expect the screens to change a lot, and expect bugs, which get fixed as they turn up. Between alpha versions the data you have built up may be cleared, to keep development fast. BundleSlash and SightSlash are planned.",
   selfHost: `${listNames(SELF_HOSTED)} run on your own server from one install, today on Proxmox or Kubernetes.`,
   hosted: "A hosted version, run for you, is planned. Pricing follows once running costs are known.",
 } as const;
