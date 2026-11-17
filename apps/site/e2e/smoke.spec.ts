@@ -32,16 +32,20 @@ test("the home page names the commit it was built from", async ({ request }) => 
   test.setTimeout(COMMIT_WAIT_MS + 30_000);
   const deadline = Date.now() + (EXPECT_COMMIT ? COMMIT_WAIT_MS : 0);
   let seen: string | undefined;
+  let status = 0;
   for (;;) {
-    // A fresh query each time, so no cache answers with an older copy of the page.
+    // A fresh query each time, so no cache answers with an older copy of the page. An error answer while
+    // the edge switches over counts as not yet, like an older sha.
     const response = await request.get(`/?commit-check=${crypto.randomUUID()}`);
-    expect(response.status()).toBe(200);
-    seen = buildCommitOf(await response.text());
+    status = response.status();
+    seen = response.ok() ? buildCommitOf(await response.text()) : undefined;
     if (!EXPECT_COMMIT || seen === EXPECT_COMMIT || Date.now() >= deadline) break;
     await new Promise((done) => setTimeout(done, 5_000));
   }
-  console.log(`build-commit on the home page: ${seen ?? "(none)"}`);
+  console.log(`build-commit on the home page: ${seen ?? "(none)"} (HTTP ${status})`);
+  expect(status).toBe(200);
   expect(seen, "the home page has no build-commit meta").toBeDefined();
   expect(seen).toMatch(BUILD_COMMIT_PATTERN);
-  if (EXPECT_COMMIT) expect(seen, `the live home page names ${seen}, not the deployed ${EXPECT_COMMIT}`).toBe(EXPECT_COMMIT);
+  if (EXPECT_COMMIT)
+    expect(seen, `the live home page names ${seen}, not the deployed ${EXPECT_COMMIT}`).toBe(EXPECT_COMMIT);
 });

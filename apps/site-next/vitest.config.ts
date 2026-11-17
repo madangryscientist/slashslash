@@ -18,7 +18,7 @@ export default defineConfig({
   test: {
     environment: "node",
     dir: here(".."),
-    include: ["site/src/content/links.test.ts", "site/src/content/build-commit.test.ts", "site-next/src/**/*.test.{ts,tsx}"],
+    include: ["site/src/content/links.test.ts", "site/src/content/build-commit.dist.test.ts", "site-next/src/**/*.test.{ts,tsx}"],
     env: { SITE_DIST: here("./dist"), SITE_NEXT: "1" },
   },
 });
