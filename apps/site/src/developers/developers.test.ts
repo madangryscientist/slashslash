@@ -105,6 +105,9 @@ describe("/developers", () => {
       expect(card).toContain(product.name);
       expect(card).toContain(product.question);
       for (const paragraph of product.summary) expect(card).toContain(paragraph);
+      // The stage's label beside the name and its sentence, in this product's own card.
+      expect(cards[i], product.name).toMatch(new RegExp(`data-status-for="${product.name}"[\\s\\S]*?${STAGES[product.stage].label}<`));
+      expect(card).toContain(STAGES[product.stage].sentence);
     }
   });
 

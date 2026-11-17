@@ -1,4 +1,4 @@
-import { STAGES, type StageId } from "#/content/stages";
+import type { StageId } from "#/content/stages";
 
 /**
  * PixelSlash's release stage. Every Hack Cove site states its stage from the shared `STAGES` table
@@ -9,6 +9,3 @@ import { STAGES, type StageId } from "#/content/stages";
 
 /** Where PixelSlash is today. */
 export const STAGE: StageId = "alpha";
-
-/** The stage as the one line a page prints: `Alpha. Changing fast. Expect breaking changes ...`. */
-export const STAGE_LINE = `${STAGES[STAGE].label}. ${STAGES[STAGE].sentence}`;
