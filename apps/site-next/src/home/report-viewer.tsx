@@ -20,7 +20,10 @@ export function ReportViewer(): ReactNode {
   return (
     <>
       <a href={SRC} aria-haspopup="dialog" onClick={show} className="group block space-y-2">
-        <Image src={SRC} alt={STANDS.reportAlt} aspect="natural" />
+        {/* The kit's natural Image reserves no space, so the screenshot's own 1100 by 394 frame holds it. */}
+        <span className="block aspect-[1100/394]">
+          <Image src={SRC} alt={STANDS.reportAlt} aspect="natural" />
+        </span>
         <span className="text-sm font-semibold underline-offset-4 group-hover:underline">{STANDS.reportOpen}</span>
       </a>
       {open ? (
