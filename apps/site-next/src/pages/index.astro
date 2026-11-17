@@ -1,0 +1,16 @@
+---
+// The suite home, on the shell in the suite's section: the hero and the tool cards. The hero's motion
+// guard runs before first paint, and the Motion island is the only thing on the page that hydrates.
+import { HERO } from "#next/content/story";
+import { Home } from "#next/home/home";
+import { Motion, MOTION_SCRIPT } from "#next/illustrations/motion";
+import Slash from "#next/layouts/Slash.astro";
+---
+
+<Slash section="suite" title={HERO.title} description={HERO.lead}>
+  <script is:inline slot="head" set:html={MOTION_SCRIPT} />
+  <Home />
+  <Motion client:load />
+  {/* Holds the hero's first action until the ask section, which replaces it, lands. */}
+  <section id="your-view"></section>
+</Slash>

@@ -1,0 +1,199 @@
+/*
+ * The suite home's hand-drawn hero (hero.tsx), on the theme's own variables only, so it follows Slash
+ * Day and Slash Night. Every rule outside the motion block is the finished drawing: what a reader with
+ * no script or with reduced motion sees. The start frame lives in the motion block at the end.
+ *
+ * Text and its ground, each a pair the theme holds at 4.5:1 or more in both schemes: captions in
+ * --hc-mute and the totals in --hc-ink on --hc-surface; the asked-for change in --hc-accent; the Pay
+ * button's label in --hc-surface on an --hc-accent fill, and in its start frame on --hc-cat-1.
+ */
+.panes {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  text-align: left;
+}
+@media (min-width: 48rem) {
+  .panes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+.pane {
+  margin: 0;
+  padding: 1rem;
+  background: var(--hc-surface);
+  border: 1.5px solid var(--hc-line);
+  border-radius: 0.5rem;
+  box-shadow: 4px 4px 0 var(--hc-line);
+}
+.pane-cap {
+  margin: 0 0 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--hc-mute);
+}
+.bar {
+  display: block;
+  width: var(--w);
+  height: 0.6rem;
+  background: var(--hc-line);
+  border-radius: 2px;
+}
+.code {
+  display: grid;
+  gap: 0.25rem;
+}
+.code-line {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  align-items: center;
+  padding-block: 0.45rem;
+}
+.code-line .bar {
+  margin-left: calc(var(--indent) * 1.5rem);
+}
+.code-sign {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+  color: var(--hc-accent);
+}
+.code-line.is-edit {
+  background: color-mix(in srgb, var(--hc-accent) 10%, var(--hc-surface));
+  box-shadow: inset 3px 0 0 var(--hc-accent);
+}
+.code-line.is-edit .bar {
+  background: var(--hc-accent);
+}
+.shop {
+  display: grid;
+  font-size: 0.9375rem;
+  color: var(--hc-mute);
+}
+.shop-head {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--hc-line);
+}
+.shop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 2rem;
+  overflow: hidden;
+  border-bottom: 1px solid var(--hc-line);
+}
+.shop-row .bar {
+  width: calc(var(--w) * 1.6);
+}
+.shop-tax {
+  font-weight: 700;
+  color: var(--hc-accent);
+}
+.shop-tax .bar {
+  background: var(--hc-accent);
+}
+.shop-total {
+  font-weight: 800;
+  color: var(--hc-ink);
+}
+.shop-total .bar {
+  background: var(--hc-mute);
+}
+.shop-pay {
+  position: relative;
+  display: block;
+  margin-top: 1.25rem;
+  padding-block: 0.6rem;
+}
+.shop-btn {
+  display: block;
+  width: 60%;
+  margin-left: 40%;
+  padding: 0.6rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--hc-surface);
+  background: var(--hc-accent);
+  border-radius: 6px;
+}
+.shop-ring {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(40% - 0.75rem);
+  width: calc(60% + 1.5rem);
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--hc-cat-7);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;
+}
+.shop-ring path {
+  vector-effect: non-scaling-stroke;
+}
+
+/*
+ * The motion: only for a reader who has not asked for less, and only once `motion` is on <html> (set
+ * before first paint). Each start state matches its keyframe's first frame; `.played` runs it once.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .motion .panes:not(.played) .code-line.is-edit {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 var(--hc-accent);
+  }
+  .motion .panes:not(.played) .shop-tax {
+    height: 0;
+    opacity: 0;
+    border-bottom-width: 0;
+  }
+  .motion .panes:not(.played) .shop-btn {
+    width: 50%;
+    margin-left: 0;
+    background-color: var(--hc-cat-1);
+  }
+  .motion .panes:not(.played) .shop-ring {
+    stroke-dashoffset: 1;
+  }
+  .panes.played .code-line.is-edit {
+    animation: hero-edit-in 0.5s 0.2s ease-out both;
+  }
+  .panes.played .shop-tax {
+    animation: hero-tax-in 0.5s 0.9s ease-out both;
+  }
+  .panes.played .shop-btn {
+    animation: hero-pay-move 0.7s 1.7s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+  }
+  .panes.played .shop-ring {
+    animation: hero-ring-draw 0.7s 2.6s ease-in-out both;
+  }
+  @keyframes hero-edit-in {
+    from {
+      background-color: transparent;
+      box-shadow: inset 0 0 0 var(--hc-accent);
+    }
+  }
+  @keyframes hero-tax-in {
+    from {
+      height: 0;
+      opacity: 0;
+      border-bottom-width: 0;
+    }
+  }
+  @keyframes hero-pay-move {
+    from {
+      width: 50%;
+      margin-left: 0;
+      background-color: var(--hc-cat-1);
+    }
+  }
+  @keyframes hero-ring-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+}
