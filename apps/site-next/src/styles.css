@@ -1,14 +1,16 @@
 @import "tailwindcss";
-@import "@hackcove/themes/catppuccin-mocha.css";
-@import "@hackcove/themes/catppuccin-latte.css";
+@import "@hackcove/themes/slash-suite.css";
+@import "@hackcove/themes/slash-suite-dark.css";
 @import "./fonts.css";
-/* Tailwind skips node_modules: scan the design system for the utilities its components use. */
+@import "./stand-ins/hero-ground.css";
+/* Tailwind skips node_modules: scan the design system for the utilities its components use, and this app. */
 @source "../node_modules/@hackcove/ui-react/dist";
+@source "./";
 
 /*
- * Catppuccin Mocha and Latte palettes © 2021 Catppuccin, MIT license (notice in
- * @hackcove/themes/NOTICE). Tailwind's build drops the credit comment from the
- * theme file, so it is repeated here.
+ * Slash Day and Slash Night are built on the Catppuccin Latte and Mocha palettes © 2021 Catppuccin,
+ * MIT license (notice in @hackcove/themes/NOTICE). Tailwind's build drops the credit comment from
+ * the theme files, so it is repeated here.
  */
 
 html {

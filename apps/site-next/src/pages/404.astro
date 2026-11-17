@@ -1,11 +1,15 @@
 ---
-// The live app's not-found body, shared rather than copied.
+// The live app's not-found body, shared rather than copied, on the shell in the suite's section. The
+// shell's main is full width (for a hero's ground), so the body sits in the kit's Container.
+import { Container } from "@hackcove/ui-react";
 import { NotFoundPage } from "../../../site/src/components/not-found";
-import Base from "#next/layouts/Base.astro";
+import Slash from "#next/layouts/Slash.astro";
 ---
 
-<Base title="Page not found">
-  <main>
-    <NotFoundPage />
-  </main>
-</Base>
+<Slash section="suite" title="Page not found">
+  <div class="hero-ground">
+    <Container>
+      <NotFoundPage />
+    </Container>
+  </div>
+</Slash>
