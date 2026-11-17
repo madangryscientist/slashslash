@@ -225,7 +225,10 @@ describe("the home after the tool cards", () => {
   test("with no JavaScript every drawing is finished: nothing is held in a start frame", () => {
     // The start frame is only ever drawn under `.motion`, which only the head script sets, so a page
     // with no script shows every drawing's base style: the finished drawing.
-    const files = globSync("illustrations/*.css", { cwd: SRC });
+    // A drawing with no start frame (the flags grid on /developers only replays while lit) has nothing to check.
+    const files = globSync("illustrations/*.css", { cwd: SRC }).filter((file) =>
+      readFileSync(resolve(SRC, file), "utf8").includes(":not(.played)"),
+    );
     expect(files).toContain("illustrations/pipeline.css");
     for (const file of files) {
       const css = readFileSync(resolve(SRC, file), "utf8");
@@ -242,7 +245,8 @@ describe("the home after the tool cards", () => {
 
 describe("the home's sections' sources", () => {
   test("import nothing from the live app's components", () => {
-    const files = globSync("**/*.{ts,tsx,astro}", { cwd: SRC });
+    // Tests may read a live component to compare against it; the rule is for the pages' code.
+    const files = globSync("**/*.{ts,tsx,astro}", { cwd: SRC }).filter((file) => !/\.test\.tsx?$/.test(file));
     const hits = files.filter((file) =>
       /from\s+["'][^"']*(apps\/site\/src\/components|#\/components)\//.test(readFileSync(resolve(SRC, file), "utf8")),
     );

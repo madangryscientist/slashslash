@@ -1,0 +1,27 @@
+/*
+ * The combination grid (combinations.tsx), on the theme's own variables only, so it follows Slash Day
+ * and Slash Night. The base style is the finished drawing: what a reader with no script or with reduced
+ * motion sees. While its wrapper is lit (in view), the eleven cells light up one after another.
+ */
+.combos {
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: auto;
+}
+.combo-off {
+  fill: var(--hc-line);
+}
+.combo-on {
+  fill: var(--hc-accent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lit .combo-on {
+    animation: combo-cell-on 0.5s both;
+  }
+  @keyframes combo-cell-on {
+    from {
+      fill: var(--hc-line);
+    }
+  }
+}
