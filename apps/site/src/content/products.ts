@@ -24,7 +24,7 @@ export const PRODUCTS: readonly Product[] = [
     question: "Does the page look different?",
     summary: [
       "It compares screenshots from before and after a change and points out what really changed.",
-      "Small visual changes are easy to miss by eye. This tool spots them and tells real changes apart from harmless noise, so a redesign doesn't ship by accident.",
+      "Small visual changes are easy to miss by eye. This tool spots them and tells real changes apart from tiny differences nobody would notice, so a redesign doesn't ship by accident.",
     ],
   },
   {
@@ -56,14 +56,14 @@ export const PRODUCTS: readonly Product[] = [
     question: "Why did the tests time out?",
     summary: [
       "It queues builds and tests on one machine, so a test fails because of the code, not because everything ran at once.",
-      "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when it fits in the room the machine has left. A release you can install is planned.",
+      "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when your computer has capacity for it. A release you can install is planned.",
     ],
     page: "/taskslash",
   },
   {
     name: "BundleSlash",
     stage: "planned",
-    question: "Did the app get heavier to load?",
+    question: "Does the app take longer to load?",
     summary: [
       "It measures how much code customers have to download after a change.",
       "It would compare the JavaScript bundles of two commits locally, before CI does, for Bun, Vite and webpack builds.",

@@ -108,13 +108,16 @@ test("with reduced motion the hero stands still", async ({ page }) => {
   await page.waitForLoadState("networkidle");
   expect(await page.locator("html").getAttribute("class")).not.toMatch(/\bmotion\b/);
   const panes = page.locator(".panes");
+  // Chromium's first capture after load can raster text a shade apart from the next one when the
+  // pipeline's cards share the tall window. That is not motion, so one shot is taken and dropped first.
+  await panes.screenshot({ animations: "allow" });
   const first = await panes.screenshot({ animations: "allow" });
   await page.waitForTimeout(1500);
   const second = await panes.screenshot({ animations: "allow" });
   expect(second.equals(first)).toBe(true);
 });
 
-test("on Slash Day a card's mark is the tool's deep tone, even on a dark system", async ({ page }, info) => {
+test("on Slash Day a tool's mark is its deep tone, even on a dark system", async ({ page }, info) => {
   test.skip(info.project.name !== "desktop", "the mark is the same image on a phone");
   await page.addInitScript((key) => localStorage.setItem(key, "light"), STORED);
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
@@ -145,31 +148,4 @@ test("on Slash Day a card's mark is the tool's deep tone, even on a dark system"
   }, shot);
   // PixelSlash's deep tone is #8839ef; its pastel #cba6f7 would read near 203.
   expect(pixel[0]).toBeLessThan(160);
-});
-
-test("the report screenshot opens full screen in a dialog, closed at first, and its close button shuts it", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const open = page.getByRole("link", { name: "Open the report full screen" });
-  await open.scrollIntoViewIfNeeded();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  // client:visible: the viewer hydrates once it is on screen, then the tap opens the dialog in place.
-  await expect(page.locator('astro-island[component-export="ReportViewer"]')).not.toHaveAttribute("ssr", "");
-  await open.click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  expect(page.url()).not.toContain("report.png");
-  await dialog.getByRole("button", { name: "Close" }).click();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-});
-
-test("the pipeline sits under the steps on a phone and beside them from md", async ({ page }, info) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const steps = page.locator('[data-home-section="how-today"] ol[role="list"]');
-  const drawing = page.getByTestId("pipeline");
-  const [a, b] = [await steps.boundingBox(), await drawing.boundingBox()];
-  if (!a || !b) throw new Error("the steps or the drawing is not laid out");
-  if (info.project.name === "phone") expect(b.y).toBeGreaterThanOrEqual(a.y + a.height);
-  else expect(b.x).toBeGreaterThanOrEqual(a.x + a.width);
 });

@@ -18,7 +18,7 @@ export const TASKSLASH_INTRO = {
 
 /** The page's description in search results and link previews. */
 export const TASKSLASH_DESCRIPTION =
-  "TaskSlash queues builds and tests on one Linux machine: each job runs in its own systemd scope, is measured, and starts only when it fits in the room the machine has left.";
+  "TaskSlash queues builds and tests on one Linux machine: each job runs in its own systemd scope, is measured, and starts only when your computer has capacity for it.";
 
 export type Feature = {
   title: string;

@@ -1,15 +1,17 @@
-import { Card, CardGrid, Container, Lead, Pill, Stack, Text } from "@hackcove/ui-react";
+import { Card, Container, Lead, ListRow, Pill, Step, Steps, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
-import { HERO } from "#/content/story";
+import { HERO, PIPELINE } from "#/content/story";
+import { HomeSection } from "#/home/sections";
 import { TOOL_CARDS, type ToolCard } from "#/home/tools";
 import { HeroPanes } from "#/illustrations/hero";
 import { CentredHero } from "#/stand-ins/centred-hero";
 
 /*
  * The suite home's first screen, on the kit's parts: the hero (the story's title and lead, over the
- * hand-drawn panes, with no link or button) and a card for every tool the story names. Nothing here runs
- * in the browser; the page adds the Motion island beside it.
+ * hand-drawn panes, with no link or button), then the pipeline: the steps a change goes through, in
+ * order, each with the tools that run there and one sentence on what each does. Nothing here runs in
+ * the browser; the page adds the Motion island beside it.
  */
 
 function HomeHero(): ReactNode {
@@ -20,7 +22,7 @@ function HomeHero(): ReactNode {
           <CentredHero title={HERO.title}>
             <Lead>{HERO.lead}</Lead>
           </CentredHero>
-          {/* The full column, so the panes line up with the tool cards below. */}
+          {/* The full column, so the panes line up with the pipeline below. */}
           <HeroPanes />
         </div>
       </Container>
@@ -28,30 +30,58 @@ function HomeHero(): ReactNode {
   );
 }
 
-/** A tool's card: its mark and name, the question it answers, its stage, and a link to its page here if it has one. */
-function ToolCardView({ tool }: { tool: ToolCard }): ReactNode {
-  const body = (
-    <Stack gap="sm">
-      <h2 className="inline-flex items-center gap-2 text-lg font-semibold">
-        <img src={tool.mark} alt="" width={28} height={28} />
-        {tool.name}
-      </h2>
-      <Text>{tool.question}</Text>
-      <span>
-        <Pill tone={STAGE_TONE[tool.stage]} dot round>
-          {STAGES[tool.stage].label}
-        </Pill>
-      </span>
-    </Stack>
+/** A tool's row: its mark, its name and release stage, and what it does; a link to its page here if it has one. */
+function ToolRow({ tool, divided }: { tool: ToolCard; divided: boolean }): ReactNode {
+  return (
+    // On a linked row the kit puts data-* on the stretched link, not the row, so the name rides a wrapper.
+    <div data-tool={tool.name}>
+      <ListRow
+        divided={divided}
+        {...(tool.href === undefined ? {} : { href: tool.href })}
+        leading={<img src={tool.mark} alt="" width={28} height={28} />}
+        secondary={tool.does}
+      >
+        <span className="inline-flex flex-wrap items-center gap-2">
+          <strong>{tool.name}</strong>
+          <Pill tone={STAGE_TONE[tool.stage]} dot round>
+            {STAGES[tool.stage].label}
+          </Pill>
+        </span>
+      </ListRow>
+    </div>
   );
-  return tool.href === undefined ? (
-    <Card size="lg" data-tool={tool.name}>
-      {body}
-    </Card>
-  ) : (
-    <Card size="lg" href={tool.href} data-tool={tool.name}>
-      {body}
-    </Card>
+}
+
+/** A tool's card by name: every tool in the pipeline has one. */
+function cardFor(name: ToolCard["name"]): ToolCard {
+  const card = TOOL_CARDS.find((tool) => tool.name === name);
+  if (card === undefined) throw new Error(`No tool card for ${name}.`);
+  return card;
+}
+
+/** The pipeline, at #tools: one numbered step per stage, in order, with the tools that run at it. */
+function Pipeline(): ReactNode {
+  return (
+    <HomeSection id="tools" title={PIPELINE.title}>
+      <Text>{PIPELINE.lead}</Text>
+      <Steps>
+        {PIPELINE.stages.map((stage) => (
+          <Step key={stage.name} title={<h3 className="font-semibold">{stage.name}</h3>} data-step={stage.name}>
+            <div className="space-y-4">
+              <Text>{stage.text}</Text>
+              {stage.tools.length === 0 ? null : (
+                <Card flush>
+                  {stage.tools.map((row, index) => (
+                    <ToolRow key={row.tool} tool={cardFor(row.tool)} divided={index > 0} />
+                  ))}
+                </Card>
+              )}
+            </div>
+          </Step>
+        ))}
+      </Steps>
+      <Text>{PIPELINE.next}</Text>
+    </HomeSection>
   );
 }
 
@@ -59,15 +89,7 @@ export function Home(): ReactNode {
   return (
     <>
       <HomeHero />
-      <div id="tools" className="scroll-mt-24 py-16">
-        <Container>
-          <CardGrid columns={3}>
-            {TOOL_CARDS.map((tool) => (
-              <ToolCardView key={tool.name} tool={tool} />
-            ))}
-          </CardGrid>
-        </Container>
-      </div>
+      <Pipeline />
     </>
   );
 }
