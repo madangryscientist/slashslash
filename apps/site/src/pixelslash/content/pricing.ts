@@ -1,40 +1,47 @@
+import type { Claim, FactsProduct } from "#/content/facts";
+
 /*
- * The pricing page's words. PixelSlash costs nothing today and there is no paid plan to buy.
+ * The pricing page's words. Each product claim cites PixelSlash's facts (facts.test.ts); the licence card
+ * shows the facts file's own licence line. PixelSlash costs nothing today and there is no paid plan to buy.
  *
  * TODO(PS-261): Jacobus to review the wording of COMMITMENT before the site is published; it is a
  * promise about what paid hosting will and will not be, so it is his to phrase.
  */
 
 /** The page's one statement, and the sentence under it. */
-export const STATEMENT = "Free, and you can run all of it yourself.";
-export const LEAD =
-  "There is no paid plan to buy. The whole product is in the source-available repository.";
+export const STATEMENT: Claim = {
+  text: "Free, and you can run all of it yourself.",
+  facts: ["pixelslash/self-host-docker", "pixelslash/self-host-cloudflare", "pixelslash/from-source"],
+};
+export const LEAD: Claim = {
+  text: "There is no paid plan to buy. The whole product is in the source-available repository.",
+  facts: ["pixelslash/licence"],
+};
 
 /** The one action the page asks for, and where it goes. */
 export const ACTION = { label: "Self-host it", href: "/self-host" } as const;
 
 /** The one promise about paid hosting: it buys having us run it, never a feature. */
-export const COMMITMENT =
-  "No feature will ever sit behind a paid plan. Paid hosting, when it comes, pays for us running PixelSlash for you; everything it runs is in the source code you can host yourself.";
+export const COMMITMENT: Claim = {
+  text: "No feature will ever sit behind a paid plan. Paid hosting, when it comes, pays for us running PixelSlash for you; everything it runs is in the source code you can host yourself.",
+  facts: ["pixelslash/licence", "pixelslash/self-host-docker", "pixelslash/self-host-cloudflare"],
+};
 
 /** What the licence allows and forbids, in the callout after the facts (PS-386). */
-export const LICENCE_BRIEF =
-  "The CLI, the diff engine and the review app are all in the repository, with nothing held back. You may use, copy and modify it. You may not offer it to others as a hosted or managed service that gives them a substantial set of its features.";
+export const LICENCE_BRIEF: Claim = {
+  text: "The CLI, the diff engine and the review app are all in the repository, with nothing held back. You may use, copy and modify it. You may not offer it to others as a hosted or managed service that gives them a substantial set of its features.",
+  facts: ["pixelslash/licence"],
+};
 
-export const FACTS = [
-  {
-    title: "Free, and source available",
-    icon: "branch",
-    body: "PixelSlash is licensed under the Elastic License 2.0, which is source available, not open source.",
-  },
+/** The cards after the hero: the licence, read from the facts file, then where it runs. */
+export const CARDS = [
+  { title: "Free, and source available", icon: "branch", body: { licence: "pixelslash" as FactsProduct } },
   {
     title: "Self-host all of it",
     icon: "self-host",
-    body: "The review app runs in Docker, on your own Cloudflare account or on your own box. The self-host guide covers each.",
-  },
-  {
-    title: "Paid hosting is planned, not available",
-    icon: "speed",
-    body: "A paid service run by us is planned. It is not on sale: there is nothing to pay.",
+    body: {
+      text: "The review app runs in Docker, on your own Cloudflare account or on your own box. The self-host guide covers each.",
+      facts: ["pixelslash/self-host-docker", "pixelslash/self-host-cloudflare"],
+    } satisfies Claim,
   },
 ] as const;

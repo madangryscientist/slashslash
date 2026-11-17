@@ -1,3 +1,4 @@
+import type { Claim } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
 import type { StageId } from "#/content/stages";
 import { PIPELINE, type StoryTool } from "#/content/story";
@@ -8,7 +9,7 @@ export type ToolCard = {
   name: StoryTool;
   mark: string;
   /** One sentence saying what it does. */
-  does: string;
+  does: Claim;
   stage: StageId;
   /** The tool's home on this site; left out for a tool with no page here. */
   href?: string;

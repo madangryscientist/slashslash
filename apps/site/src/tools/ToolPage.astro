@@ -13,7 +13,7 @@ interface Props {
 const tool = TOOLS[Astro.props.tool];
 ---
 
-<Slash section={tool.key} title={tool.title} description={tool.description}>
+<Slash section={tool.key} title={tool.title.text} description={tool.description.text}>
   <ToolHome tool={tool}>
     <HeroCode slot="heroCode" command={heroCommandOf(tool)} client:visible />
     <TryIt slot="tryIt" steps={tool.tryIt.steps} client:visible />

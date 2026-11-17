@@ -1,8 +1,8 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, test } from "vitest";
-import { PIXELSLASH_FILES } from "../scripts/fetch-sources";
+import { FACTS_PRODUCTS, PIXELSLASH_FILES } from "../scripts/fetch-sources";
 
 const SITE = resolve(import.meta.dirname, "..");
 const SCRIPT = resolve(SITE, "scripts/fetch-sources.ts");
@@ -25,4 +25,16 @@ test("--list prints exactly PIXELSLASH_FILES and touches no fetched folder", () 
   expect(run.status, run.stderr).toBe(0);
   expect(run.stdout).toBe(`${PIXELSLASH_FILES.join("\n")}\n`);
   expect(TOUCHED.map(snapshot)).toEqual(before);
+});
+
+test("facts.sha.json pins every product the site reads facts from, each at a full commit SHA", () => {
+  const pins: Record<string, string> = JSON.parse(readFileSync(resolve(SITE, "facts.sha.json"), "utf8"));
+  expect(Object.keys(pins).toSorted()).toEqual([...FACTS_PRODUCTS].toSorted());
+  for (const product of FACTS_PRODUCTS) expect(pins[product], product).toMatch(/^[0-9a-f]{40}$/);
+});
+
+test("the build fetched each product's FACTS.md into .sources/facts", () => {
+  for (const product of FACTS_PRODUCTS) {
+    expect(existsSync(resolve(SITE, `.sources/facts/${product}.md`)), product).toBe(true);
+  }
 });

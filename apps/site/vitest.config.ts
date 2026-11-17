@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       "#": fileURLToPath(new URL("./src", import.meta.url)),
       "@pixelslash-src": fileURLToPath(new URL("./.sources/pixelslash", import.meta.url)),
+      "@facts": fileURLToPath(new URL("./.sources/facts", import.meta.url)),
     },
   },
   test: {

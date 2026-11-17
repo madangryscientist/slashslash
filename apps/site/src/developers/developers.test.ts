@@ -60,7 +60,7 @@ describe("/developers", () => {
     expect(h1s).toEqual(["For developers"]);
     expect(html).toMatch(/<h1[^>]*id="for-developers"/);
     expect(words).toContain(DEVELOPERS_DESCRIPTION);
-    for (const line of [DEVELOPERS.title, DEVELOPERS.today, DEVELOPERS.next]) expect(words).toContain(line);
+    for (const line of [DEVELOPERS.title, DEVELOPERS.next.text]) expect(words).toContain(line);
   });
 
   test("has no @@ label", () => {
@@ -79,7 +79,7 @@ describe("/developers", () => {
       expect(html).toContain(`id="${step.id}"`);
       for (const line of [step.label, step.title, step.story]) expect(words).toContain(line);
       for (const fit of step.fits) {
-        expect(words).toContain(fit.text);
+        expect(words).toContain(fit.text.text);
         for (const line of fit.output?.lines ?? []) expect(words).toContain(text(line.replace(/^\$ /, "")));
         if (fit.output?.image) expect(html).toContain(`src="${fit.output.image.src}"`);
       }
@@ -110,8 +110,8 @@ describe("/developers", () => {
     for (const [i, product] of PRODUCTS.entries()) {
       const card = text(cards[i] ?? "");
       expect(card).toContain(product.name);
-      expect(card).toContain(product.question);
-      for (const paragraph of product.summary) expect(card).toContain(paragraph);
+      expect(card).toContain(product.question.text);
+      for (const paragraph of product.summary) expect(card).toContain(paragraph.text);
       // The stage's label beside the name and its sentence, in this product's own card.
       expect(cards[i], product.name).toMatch(new RegExp(`data-status-for="${product.name}"[\\s\\S]*?${STAGES[product.stage].label}<`));
       expect(card).toContain(STAGES[product.stage].sentence);

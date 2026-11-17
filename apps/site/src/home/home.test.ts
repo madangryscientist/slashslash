@@ -61,8 +61,8 @@ describe("/", () => {
 
   test("has exactly one h1, the story's hero title", () => {
     const h1s = [...html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((m) => text(m[1] ?? ""));
-    expect(h1s).toEqual([HERO.title]);
-    expect(text(hero)).toContain(HERO.lead);
+    expect(h1s).toEqual([HERO.title.text]);
+    expect(text(hero)).toContain(HERO.lead.text);
   });
 
   test("has no @@ label in the hero", () => {
@@ -98,7 +98,7 @@ describe("/", () => {
       const stage = PRODUCTS.find((product) => product.name === card.name)?.stage ?? "planned";
       expect(tool, card.name).toBeDefined();
       expect(words, card.name).toContain(card.name);
-      expect(words, card.name).toContain(tool?.does);
+      expect(words, card.name).toContain(tool?.does.text);
       expect(words, card.name).toContain(STAGES[stage].label);
       const mark = `/brand/${card.name.toLowerCase()}-mark.svg`;
       expect(card.html, card.name).toContain(`src="${mark}"`);
@@ -111,11 +111,11 @@ describe("/", () => {
     expect(steps.map((step) => step.name)).toEqual(PIPELINE.stages.map((stage) => stage.name));
     PIPELINE.stages.forEach((stage, index) => {
       const chunk = steps[index]?.html ?? "";
-      expect(text(`<x ${chunk}`)).toContain(stage.text);
+      expect(text(`<x ${chunk}`)).toContain(stage.text.text);
       expect(rows(chunk, "data-tool").map((row) => row.name)).toEqual(stage.tools.map((row) => row.tool));
     });
     expect(text(pipeline)).toContain(PIPELINE.lead);
-    expect(text(pipeline)).toContain(PIPELINE.next);
+    expect(text(pipeline)).toContain(PIPELINE.next.text);
   });
 
   test("a card links exactly when its tool has a page here", () => {
@@ -159,7 +159,9 @@ describe("the home's own sources", () => {
 function strings(value: unknown): string[] {
   if (typeof value === "string") return [value];
   if (Array.isArray(value)) return value.flatMap(strings);
-  if (value !== null && typeof value === "object") return Object.values(value).flatMap(strings);
+  // A claim's fact ids and repository paths are citations, not words on the page.
+  if (value !== null && typeof value === "object")
+    return Object.entries(value).flatMap(([key, item]) => (key === "facts" || key === "repo" ? [] : strings(item)));
   return [];
 }
 

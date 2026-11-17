@@ -69,7 +69,7 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
 
   test("has its own canonical address, title and exactly one h1, the promise", () => {
     expect(html).toContain(`<link rel="canonical" href="${SITE_URL}/${tool.key}">`);
-    expect(text(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "")).toBe(`${tool.title} | ${SITE_NAME}`);
+    expect(text(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "")).toBe(`${tool.title.text} | ${SITE_NAME}`);
     const h1s = [...html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((m) => text(m[1] ?? ""));
     expect(h1s).toEqual([promiseOf(tool)]);
   });
@@ -78,10 +78,10 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
     const today = text(between(html, "works-today", "try-it"));
     for (const feature of tool.today) {
       expect(today).toContain(feature.command);
-      expect(today).toContain(feature.text);
+      expect(today).toContain(feature.text.text);
     }
     const tryIt = text(between(html, "try-it", "planned"));
-    expect(tryIt).toContain(tool.tryIt.lead);
+    expect(tryIt).toContain(tool.tryIt.lead.text);
     for (const step of tool.tryIt.steps) {
       expect(tryIt).toContain(step.lead);
       for (const command of step.commands) expect(tryIt).toContain(command);
@@ -97,7 +97,7 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
   test("lists what is planned under the planned heading, after what works today", () => {
     const planned = text(between(html, "planned", "docs"));
     expect(planned).toContain(tool.planned.lead);
-    for (const item of tool.planned.items) expect(planned).toContain(item);
+    for (const item of tool.planned.items) expect(planned).toContain(item.text);
   });
 
   test("links the docs in the tool's repository, and the repository from the hero", () => {

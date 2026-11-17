@@ -1,5 +1,6 @@
 import { AppShell, AppShellBrand, Caption, Cluster, ColourSchemeToggle, Tabs, Text, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
+import { licenceOf } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
 import { LANDING_HEADLINE, PIXELSLASH_SITE_URL, SITE_NAME } from "#/content/site";
 import { TRADEMARK } from "#/pixelslash/content/trademark";
@@ -44,10 +45,14 @@ function productItems(): ReactNode[] {
   });
 }
 
-/** Each licence with the tools under it, in PRODUCTS order: "MIT: TaskSlash". */
+/** Each licence with the tools under it, in PRODUCTS order, in each tool's facts file's words. */
 function licenceItems(): ReactNode[] {
   const byLicence = new Map<string, string[]>();
-  for (const { name, licence } of PRODUCTS) if (licence) byLicence.set(licence, [...(byLicence.get(licence) ?? []), name]);
+  for (const { name, facts } of PRODUCTS) {
+    if (facts === undefined) continue;
+    const licence = licenceOf(facts);
+    byLicence.set(licence, [...(byLicence.get(licence) ?? []), name]);
+  }
   return [...byLicence].map(([licence, names]) => (
     <span data-licence={licence}>
       {`${licence}: ${names.join(", ")}`}

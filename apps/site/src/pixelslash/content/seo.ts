@@ -38,5 +38,5 @@ export function headFor(path: string, title: string, description: string): Head 
 export function pageHead(path: SitePath): Head {
   const page = PAGES.find((item) => item.to === path);
   if (page === undefined) throw new Error(`no page ${path}`);
-  return headFor(path, page.title, page.description);
+  return headFor(path, page.title, page.description?.text ?? "");
 }

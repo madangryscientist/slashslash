@@ -65,10 +65,10 @@ describe("suite story copy", () => {
       "SightSlash",
     ]);
     for (const row of story.PIPELINE.stages.flatMap((stage) => stage.tools)) {
-      expect(sentences(row.does), row.tool).toHaveLength(1);
-      expect(row.does.endsWith("."), row.tool).toBe(true);
-      expect(row.does.includes("?"), row.tool).toBe(false);
-      expect(row.does.startsWith("Will "), row.tool).toBe(planned.has(row.tool));
+      expect(sentences(row.does.text), row.tool).toHaveLength(1);
+      expect(row.does.text.endsWith("."), row.tool).toBe(true);
+      expect(row.does.text.includes("?"), row.tool).toBe(false);
+      expect(row.does.text.startsWith("Will "), row.tool).toBe(planned.has(row.tool));
     }
   });
 
@@ -78,14 +78,14 @@ describe("suite story copy", () => {
       ...PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name),
       "SightSlash" as const,
     ];
-    const alphaSentence = sentenceWith(story.STANDS.stages, "are alphas");
-    const plannedSentence = sentenceWith(story.STANDS.stages, "are planned");
+    const alphaSentence = sentenceWith(story.STANDS.stages.text, "are alphas");
+    const plannedSentence = sentenceWith(story.STANDS.stages.text, "are planned");
     expect(namedIn(alphaSentence).toSorted()).toEqual(alpha.toSorted());
     expect(namedIn(plannedSentence).toSorted()).toEqual(planned.toSorted());
   });
 
   test("the self-host sentence names exactly the SELF_HOSTED tools", () => {
-    const named = namedIn(story.STANDS.selfHost).toSorted();
+    const named = namedIn(story.STANDS.selfHost.text).toSorted();
     expect(named).toEqual([...story.SELF_HOSTED].toSorted());
   });
 });

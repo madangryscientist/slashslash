@@ -29,7 +29,9 @@ import {
   type Value,
   groups,
 } from "#/pixelslash/content/matrix";
+import type { Claim } from "#/content/facts";
 import { REPO_PUBLIC, REPO_URL } from "#/pixelslash/content/links";
+import { Rich } from "#/shell/rich-text";
 
 const BENCH_RESULTS = `${REPO_URL}/blob/main/bench/results/2026-10-20.md`;
 
@@ -144,39 +146,34 @@ function Behind(): ReactNode {
   );
 }
 
-/** The four questions a visitor comes with, in the reading column above the method. */
+/** The four questions a visitor comes with, in the reading column above the method, each citing PixelSlash's facts. */
+export const WHO_FOR: readonly Claim[] = [
+  {
+    text: "PixelSlash is for developers and teams who want visual review of their pages without writing stories or signing up for a service. It is meant to replace a service such as Chromatic, Percy, Argos or Applitools, or Lost Pixel, whose repository is archived and whose makers are sunsetting it.",
+    facts: ["pixelslash/what-it-is"],
+  },
+  {
+    text: "It is free: source available under the Elastic License 2.0, with all of it in the repository and no paid plan to buy.",
+    facts: ["pixelslash/licence"],
+  },
+  {
+    text: "No row below is ours alone, so the difference is the mix: a run is local by default, and the whole review app is source available and can be self-hosted for your own use. Argos is open source, but its docs say self-hosting is not officially supported, and it is run as a managed service. Lost Pixel is local and open source, and is being wound down.",
+    facts: ["pixelslash/local-unless-upload", "pixelslash/licence", "pixelslash/self-host-docker", "pixelslash/self-host-cloudflare"],
+  },
+  {
+    text: `The diff is measured. On the held-out half of ${REPO_PUBLIC ? `[our own benchmark, run 2026-10-20](${BENCH_RESULTS})` : "our own benchmark, run 2026-10-20"}, PixelSlash caught 42 of 45 real changes and wrongly flagged 11 of 36 noise pairs; Argos, on the same pairs, caught 37 and flagged 24. Argos was faster, at a median of 18.0 ms a pair to our 29.3.`,
+    facts: ["pixelslash/perceptual-diff"],
+  },
+];
+
 function WhoFor(): ReactNode {
   return (
     <>
-      <Text>
-        PixelSlash is for developers and teams who want visual review of their pages without writing
-        stories or signing up for a service. It is meant to replace a service such as Chromatic,
-        Percy, Argos or Applitools, or Lost Pixel, whose repository is archived and whose makers are
-        sunsetting it. Today that means running the review server yourself.
-      </Text>
-      <Text>
-        It is free: source available under the Elastic License 2.0, with all of it in the repository
-        and no paid plan to buy. A paid service run by us is planned; it is not on sale.
-      </Text>
-      <Text>
-        No row below is ours alone, so the difference is the mix: a run is local by default, and the
-        whole review app is source available and can be self-hosted for your own use. Argos is open
-        source, but its docs say self-hosting is not officially supported, and it is run as a
-        managed service. Lost Pixel is local and open source, and is being wound down.
-      </Text>
-      <Text>
-        The diff is measured. On the held-out half of{" "}
-        {REPO_PUBLIC ? (
-          <TextLink href={BENCH_RESULTS} external>
-            our own benchmark, run 2026-10-20
-          </TextLink>
-        ) : (
-          "our own benchmark, run 2026-10-20"
-        )}
-        , PixelSlash caught 42 of 45 real changes and wrongly flagged 11 of 36 noise pairs; Argos,
-        on the same pairs, caught 37 and flagged 24. Argos was faster, at a median of 18.0 ms a pair
-        to our 29.3.
-      </Text>
+      {WHO_FOR.map((claim) => (
+        <Text key={claim.text}>
+          <Rich text={claim.text} external={[BENCH_RESULTS]} />
+        </Text>
+      ))}
     </>
   );
 }

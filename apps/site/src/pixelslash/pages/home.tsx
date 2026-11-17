@@ -13,11 +13,14 @@ import {
   Text,
   TextLink,
 } from "@hackcove/ui-react";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
+import type { Claim } from "#/content/facts";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { REPO_PUBLIC, REPO_URL } from "#/pixelslash/content/links";
 import { STAGE } from "#/pixelslash/content/stage";
 import { psHref } from "#/pixelslash/paths";
+import { LicenceLine } from "#/shell/licence-line";
+import { Rich } from "#/shell/rich-text";
 import { SECTIONS } from "#/shell/sections";
 import { SlashDemo } from "#/pixelslash/demo";
 import { CentredHero, CentredRow } from "#/stand-ins/centred-hero";
@@ -29,53 +32,121 @@ import { CentredHero, CentredRow } from "#/stand-ins/centred-hero";
  */
 
 /** The promise: the page's h1. */
-export const PROMISE = "See what your change did to the page.";
+export const PROMISE: Claim = { text: "See what your change did to the page.", facts: ["pixelslash/what-it-is"] };
+
+/** The hero's lead, before the licence line, which is read from the facts file. */
+export const LEAD: Claim = {
+  text: "PixelSlash pixel-diffs Main against Branch and writes a report of what changed. It runs on your machine, for free.",
+  facts: ["pixelslash/what-it-is", "pixelslash/compare-two-urls", "pixelslash/local-unless-upload"],
+};
+
+/** Why it runs in place of a hosted service; the link after it is the compare page. */
+export const IN_PLACE: Claim = {
+  text: "PixelSlash runs in place of a hosted visual-review service such as Chromatic, Percy or Argos. It is a source-available CLI that needs no Storybook and no account, with no paid plan to buy.",
+  facts: ["pixelslash/what-it-is", "pixelslash/licence", "pixelslash/compare-two-urls"],
+};
+
+/** How it installs, and how it runs from a clone. */
+export const INSTALL: { npm: Claim; clone: Claim } = {
+  npm: {
+    text: "It is on npm as `@hackcove/pixelslash`, and the command is `pixelslash`. The CLI runs on [Bun](https://bun.sh), so Bun must be on your PATH; `npx` starts it. PNG mode needs no browser; for URL capture run `install-browser` once per machine.",
+    facts: ["pixelslash/npm-cli", "pixelslash/compare-two-pngs", "pixelslash/compare-two-urls"],
+  },
+  clone: {
+    text: "To run it from a clone instead, `bun install` and then `bun run pixelslash -- …` in a checkout of",
+    facts: ["pixelslash/from-source"],
+  },
+};
+
+/** Where a shot goes. */
+export const LOCAL_CLAIM: Claim = {
+  text: "A page shot leaves the machine only when you ask, and an upload goes only to the server your project names. If a project sets its own AI model, the model gets the three crops of a changed region, never a whole shot.",
+  facts: ["pixelslash/local-unless-upload", "pixelslash/server-ai-explanations"],
+};
 
 /** What the CLI does, each one a section of PixelSlash's docs. */
-const FEATURES = [
+export const FEATURES: readonly {
+  title: string;
+  body: Claim;
+  href: string;
+  icon: NonNullable<ComponentProps<typeof Card>["icon"]>;
+}[] = [
   {
     title: "Two pages, one diff",
-    body: "Shoot Main and Branch with Playwright, or hand it PNGs you already have. It writes a report.html that shows what changed.",
+    body: {
+      text: "Shoot Main and Branch with Playwright, or hand it PNGs you already have. It writes a report.html that shows what changed.",
+      facts: ["pixelslash/compare-two-urls", "pixelslash/compare-two-pngs"],
+    },
     href: "/how-it-works",
     icon: "capture",
   },
   {
     title: "A perceptual diff",
-    body: "Anti-aliasing, faint noise and sub-pixel shifts are told apart from a real change. Our benchmark results are on the How it works page.",
+    body: {
+      text: "Anti-aliasing, faint noise and sub-pixel shifts are told apart from a real change. Our benchmark results are on the How it works page.",
+      facts: ["pixelslash/perceptual-diff"],
+    },
     href: "/how-it-works",
     icon: "diff",
   },
   {
     title: "Many pages",
-    body: "Point it at a file of paths and it compares each page. The compare command diffs two snapshot directories.",
+    body: {
+      text: "Point it at a file of paths and it compares each page. The compare command diffs two snapshot directories.",
+      facts: ["pixelslash/many-pages"],
+    },
     href: "/docs/compare-dirs#comparing-two-snapshot-dirs",
     icon: "baseline",
   },
   {
     title: "Snapshots in CI",
-    body: "Every route is shot in a pinned image. Each shot records what rendered it, so one from a different setup is named as such.",
+    body: {
+      text: "Every route is shot in a pinned image. Each shot records what rendered it, so one from a different setup is named as such.",
+      facts: ["pixelslash/pinned-capture-image"],
+    },
     href: "/docs/capture#snapshot-capture-the-pinned-image",
     icon: "ci",
   },
   {
     title: "A review server",
-    body: "Uploading sends shots to a PixelSlash server you run. It holds the build for a person to review and reports a GitHub check.",
+    body: {
+      text: "Uploading sends shots to a PixelSlash server you run. It holds the build for a person to review and reports a GitHub check.",
+      facts: ["pixelslash/upload-to-review-app", "pixelslash/github-status-and-comment", "pixelslash/self-host-docker"],
+    },
     href: "/docs/upload#uploading-to-a-server",
     icon: "self-host",
   },
   {
     title: "A design-system judge",
-    body: "Each shot can be checked against your component images by a vision model. With no judge installed, it says so and invents nothing.",
+    body: {
+      text: "Each shot can be checked against your component images by a vision model. With no judge installed, it says so and invents nothing.",
+      facts: ["pixelslash/design-system-judge"],
+    },
     href: "/docs/judge",
     icon: "review",
   },
-] as const;
+];
 
-const STEPS = [
-  { title: "Capture", body: "Main and Branch, shot by Playwright once each page has settled." },
-  { title: "Diff", body: "A perceptual diff, clustered into regions you can read." },
-  { title: "Review", body: "A report.html on your machine, or a build on your own server." },
-] as const;
+export const STEPS: readonly { title: string; body: Claim }[] = [
+  {
+    title: "Capture",
+    body: {
+      text: "Main and Branch, shot by Playwright once each page has settled.",
+      facts: ["pixelslash/compare-two-urls", "pixelslash/waits-for-page-to-settle"],
+    },
+  },
+  {
+    title: "Diff",
+    body: { text: "A perceptual diff, clustered into regions you can read.", facts: ["pixelslash/perceptual-diff"] },
+  },
+  {
+    title: "Review",
+    body: {
+      text: "A report.html on your machine, or a build on your own server.",
+      facts: ["pixelslash/compare-two-pngs", "pixelslash/upload-to-review-app", "pixelslash/self-host-docker"],
+    },
+  },
+];
 
 const COMMANDS = [
   "npm i -D @hackcove/pixelslash",
@@ -115,12 +186,10 @@ function Hero(): ReactNode {
       <Container>
         <Stack gap="xl">
           <div className="pt-12 md:pt-16">
-            <CentredHero overline={<Lockup />} title={PROMISE}>
+            <CentredHero overline={<Lockup />} title={PROMISE.text}>
               <StageLine />
-              <Lead>
-                PixelSlash pixel-diffs Main against Branch and writes a report of what changed. It runs on your
-                machine, for free. Source available under the Elastic License 2.0.
-              </Lead>
+              <Lead>{LEAD.text}</Lead>
+              <LicenceLine product="pixelslash" />
               <CentredRow>
                 <Button href={psHref("/self-host")} size="lg">
                   Get started
@@ -142,14 +211,12 @@ function HowItRuns(): ReactNode {
   return (
     <Section size="lg" title="Three steps, all on your machine">
       <Text>
-        PixelSlash runs in place of a hosted visual-review service such as Chromatic, Percy or Argos. It is a
-        source-available CLI that needs no Storybook and no account, with no paid plan to buy.{" "}
-        <TextLink href={psHref("/compare")}>Where it is still behind</TextLink>.
+        {IN_PLACE.text} <TextLink href={psHref("/compare")}>Where it is still behind</TextLink>.
       </Text>
       <Steps size="lg">
         {STEPS.map((step) => (
           <Step key={step.title} title={step.title}>
-            {step.body}
+            {step.body.text}
           </Step>
         ))}
       </Steps>
@@ -163,7 +230,7 @@ function Features(): ReactNode {
       <CardGrid columns={3}>
         {FEATURES.map((feature) => (
           <Card key={feature.title} href={psHref(feature.href)} icon={feature.icon} size="lg" title={feature.title}>
-            {feature.body}
+            {feature.body.text}
           </Card>
         ))}
       </CardGrid>
@@ -177,13 +244,11 @@ function Install(): ReactNode {
       <div className="grid items-start gap-10 lg:grid-cols-[2fr_3fr]">
         <Stack gap="sm">
           <Text>
-            It is on npm as <code>@hackcove/pixelslash</code>, and the command is <code>pixelslash</code>. The CLI
-            runs on <TextLink href="https://bun.sh">Bun</TextLink>, so Bun must be on your PATH; <code>npx</code>{" "}
-            starts it. PNG mode needs no browser; for URL capture run <code>install-browser</code> once per machine.
+            <Rich text={INSTALL.npm.text} />
           </Text>
           <Text>
-            To run it from a clone instead, <code>bun install</code> and then <code>bun run pixelslash -- …</code> in a
-            checkout of {REPO_PUBLIC ? <TextLink href={REPO_URL}>the repository</TextLink> : "the repository"}.
+            <Rich text={INSTALL.clone.text} />{" "}
+            {REPO_PUBLIC ? <TextLink href={REPO_URL}>the repository</TextLink> : "the repository"}.
           </Text>
         </Stack>
         <div className="min-w-0">
@@ -199,7 +264,7 @@ function Local(): ReactNode {
     <Section
       size="lg"
       title="Your pixels stay on your machine."
-      description="A page shot leaves the machine only when you ask, and an upload goes only to the server your project names. If a project sets its own AI model, the model gets the three crops of a changed region, never a whole shot."
+      description={LOCAL_CLAIM.text}
       actions={
         <>
           <Button href={psHref("/how-it-works")}>How it works</Button>

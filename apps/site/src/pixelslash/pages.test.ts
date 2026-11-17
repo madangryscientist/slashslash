@@ -55,7 +55,7 @@ const h1Of = (Page: () => ReactNode): string[] => headings(renderToStaticMarkup(
 
 /** The pages served here: the path the ported content names, the built file and the page's h1. */
 const SERVED: { path: SitePath; file: string; h1: () => string[] }[] = [
-  { path: "/", file: "pixelslash.html", h1: () => [PROMISE] },
+  { path: "/", file: "pixelslash.html", h1: () => [PROMISE.text] },
   { path: "/how-it-works", file: "pixelslash/how-it-works.html", h1: () => h1Of(HowItWorksPage) },
   { path: "/compare", file: "pixelslash/compare.html", h1: () => h1Of(ComparePage) },
   { path: "/pricing", file: "pixelslash/pricing.html", h1: () => h1Of(PricingPage) },
@@ -93,7 +93,7 @@ describe.each(SERVED)("/pixelslash$path", ({ path, file, h1 }) => {
 
   test("its title and description are its entry of the ported pages list", () => {
     expect(decode(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "")).toBe(`${entry?.title} | ${SITE_NAME}`);
-    expect(decode(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "")).toBe(entry?.description);
+    expect(decode(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "")).toBe(entry?.description?.text);
   });
 
   test("has one h1, the page's own", () => {

@@ -2,6 +2,7 @@
  * The tool homes the site builds, each read from its tool's content module: what the page says,
  * in the shape `ToolHome` takes. The pages differ only in this data.
  */
+import type { Claim, FactsProduct } from "#/content/facts";
 import * as flakeslash from "#/content/flakeslash";
 import type { TryStep } from "#/content/flakeslash";
 import { PRODUCTS, type Product } from "#/content/products";
@@ -13,22 +14,25 @@ import { SECTIONS } from "#/shell/sections";
 export type Tool = {
   /** Its section in SECTIONS, which is also the hero's id and the page's path. */
   key: "flakeslash" | "toggleslash" | "taskslash";
+  /** Its facts file, which the page's licence line reads. */
+  facts: FactsProduct;
   /** The page title, and the promise after its colon. */
-  title: string;
-  description: string;
-  lead: string;
+  title: Claim;
+  description: Claim;
+  lead: Claim;
   repo: string;
-  today: readonly { title: string; command: string; text: string }[];
+  today: readonly { title: string; command: string; text: Claim }[];
   /** The try-it heading: what the reader tries it on. */
   tryOn: string;
-  tryIt: { lead: string; steps: readonly TryStep[] };
-  planned: { lead: string; items: readonly string[] };
+  tryIt: { lead: Claim; steps: readonly TryStep[] };
+  planned: { lead: string; items: readonly Claim[] };
   links: readonly { label: string; href: string }[];
 };
 
 export const TOOLS = {
   flakeslash: {
     key: "flakeslash",
+    facts: "flakeslash",
     title: flakeslash.FLAKESLASH_TITLE,
     description: flakeslash.FLAKESLASH_DESCRIPTION,
     lead: flakeslash.FLAKESLASH_INTRO.lead,
@@ -44,6 +48,7 @@ export const TOOLS = {
   },
   toggleslash: {
     key: "toggleslash",
+    facts: "toggleslash",
     title: toggleslash.TOGGLESLASH_TITLE,
     description: toggleslash.TOGGLESLASH_DESCRIPTION,
     lead: toggleslash.TOGGLESLASH_INTRO.lead,
@@ -59,6 +64,7 @@ export const TOOLS = {
   },
   taskslash: {
     key: "taskslash",
+    facts: "taskslash",
     title: taskslash.TASKSLASH_TITLE,
     description: taskslash.TASKSLASH_DESCRIPTION,
     lead: taskslash.TASKSLASH_INTRO.lead,
@@ -76,7 +82,7 @@ export const TOOLS = {
 
 /** The promise, the hero's h1: the title after its colon, opening with a capital. */
 export function promiseOf(tool: Tool): string {
-  const promise = tool.title.split(": ")[1] ?? tool.title;
+  const promise = tool.title.text.split(": ")[1] ?? tool.title.text;
   return promise.charAt(0).toUpperCase() + promise.slice(1);
 }
 

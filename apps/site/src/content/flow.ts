@@ -1,4 +1,8 @@
-/** One feature's trip from ticket to cleanup, and where each tool would plug in. Plain data. */
+/**
+ * One feature's trip from ticket to cleanup, and where each tool would plug in. Plain data. What each tool
+ * does at a stop is a Claim citing its facts (facts.test.ts).
+ */
+import type { Claim } from "#/content/facts";
 import type { Product } from "#/content/products";
 import type { StageId } from "#/content/stages";
 import { psAsset } from "#/pixelslash/paths";
@@ -18,7 +22,7 @@ type Fit = {
   tool: Product["name"];
   /** The stage of the tool this fit is for, from the shared `STAGES` table. */
   stage: StageId;
-  text: string;
+  text: Claim;
   output?: Output;
 };
 
@@ -43,7 +47,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "ToggleSlash",
         stage: "alpha",
-        text: "The flag starts off everywhere, and the audit trail begins before any code exists.",
+        text: {
+          text: "The flag starts off everywhere, and the audit trail begins before any code exists.",
+          facts: ["toggleslash/cli", "toggleslash/audit-trail"],
+        },
         output: {
           kind: "real",
           title: CHECKOUT,
@@ -68,7 +75,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "ToggleSlash",
         stage: "alpha",
-        text: "The app reads the flag with the TypeScript SDK.",
+        text: {
+          text: "The app reads the flag with the TypeScript SDK.",
+          facts: ["toggleslash/typescript-server-sdk"],
+        },
         output: {
           kind: "real",
           title: "a small script reading the flag through the SDK, flag off",
@@ -82,7 +92,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "PixelSlash",
         stage: "alpha",
-        text: "Comparing Main and Branch shows a change elsewhere on the page before others see it.",
+        text: {
+          text: "Comparing Main and Branch shows a change elsewhere on the page before others see it.",
+          facts: ["pixelslash/compare-two-urls"],
+        },
         output: {
           kind: "real",
           title: "a toy checkout page, flag off against flag on; path shortened",
@@ -97,7 +110,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "TaskSlash",
         stage: "alpha",
-        text: "The developer's builds and tests queue with everything else on the machine and start only when they fit, so a test that times out does so because of the code.",
+        text: {
+          text: "The developer's builds and tests queue with everything else on the machine and start only when they fit, so a test that times out does so because of the code.",
+          facts: ["taskslash/run-command", "taskslash/admission-by-capacity"],
+        },
       },
     ],
   },
@@ -111,7 +127,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "PixelSlash",
         stage: "alpha",
-        text: "With a review server you run and a GitHub App, a pull request check stays pending until a person accepts or rejects the change. The build waits only if CI waits for that verdict.",
+        text: {
+          text: "With a review server you run and a GitHub App, a pull request check stays pending until a person accepts or rejects the change. The build waits only if CI waits for that verdict.",
+          facts: ["pixelslash/upload-to-review-app", "pixelslash/github-status-and-comment", "pixelslash/block-ci-on-review", "pixelslash/self-host-docker"],
+        },
         output: {
           kind: "quoted",
           title: "the review server guide, trimmed; exit code 5 means still waiting",
@@ -134,7 +153,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "PixelSlash",
         stage: "alpha",
-        text: "A comparison alone exits 0 however many pixels changed, so the guide adds a script to fail the job.",
+        text: {
+          text: "A comparison alone exits 0 however many pixels changed, so the guide adds a script to fail the job.",
+          facts: ["pixelslash/exit-codes"],
+        },
         output: {
           kind: "quoted",
           title: "the GitHub Actions guide, from its tested failing run",
@@ -150,12 +172,7 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "BundleSlash",
         stage: "planned",
-        text: "It would report how much the flagged code added to the bundle.",
-      },
-      {
-        tool: "FlakeSlash",
-        stage: "alpha",
-        text: "It would report whether a failure happens only with the flag on.",
+        text: { text: "It would report how much the flagged code added to the bundle.", planned: "BundleSlash" },
       },
     ],
   },
@@ -168,7 +185,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "PixelSlash",
         stage: "alpha",
-        text: "The report shows Main, Branch and the Diff side by side. The review server lets a reviewer accept the change or reject it with a reason.",
+        text: {
+          text: "The report shows Main, Branch and the Diff side by side. The review server lets a reviewer accept the change or reject it.",
+          facts: ["pixelslash/compare-two-pngs", "pixelslash/upload-to-review-app", "pixelslash/review-app-keyboard"],
+        },
         output: {
           kind: "quoted",
           title: "the review app's compare view of one change",
@@ -191,7 +211,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "ToggleSlash",
         stage: "alpha",
-        text: "The flag can be switched from the dashboard or the command line. Each change enters the audit trail, and daily counts show how often each variation is served, never who received it.",
+        text: {
+          text: "The flag can be switched from the dashboard or the command line. Each change enters the audit trail, and daily counts show how often each variation is served, never who received it.",
+          facts: ["toggleslash/dashboard", "toggleslash/cli", "toggleslash/audit-trail", "toggleslash/usage-counts"],
+        },
         output: {
           kind: "real",
           title: CHECKOUT,
@@ -216,7 +239,10 @@ export const FLOW: readonly FlowStep[] = [
       {
         tool: "ToggleSlash",
         stage: "alpha",
-        text: "A person can use the audit trail and counts to decide whether to remove the flag. The tool does not recommend removal yet.",
+        text: {
+          text: "A person can use the audit trail and counts to decide whether to remove the flag. The tool does not recommend removal.",
+          facts: ["toggleslash/audit-trail", "toggleslash/usage-counts", "toggleslash/flag-lifecycle"],
+        },
         output: {
           kind: "real",
           title: "a test project minutes old, so both variations show; columns and rows trimmed to fit",

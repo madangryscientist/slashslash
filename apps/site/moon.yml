@@ -3,13 +3,15 @@ $schema: "../../.moon/cache/schemas/project.json"
 # The tools live in node_modules/.bin, which moon does not put on PATH, so `bun run` finds them.
 # Only fetch-sources and build set their own `inputs`; every other task keeps the default `**/*` of the project.
 tasks:
-  # The PixelSlash files the /pixelslash pages read, at the commit pinned in pixelslash.sha. The pin
-  # is a tracked file, so a new commit there re-runs this and everything after it.
+  # The PixelSlash files the /pixelslash pages read, at the commit pinned in pixelslash.sha, and each
+  # product's FACTS.md at the commit pinned in facts.sha.json. The pins are
+  # tracked files, so a new commit there re-runs this and everything after it.
   fetch-sources:
     command: "bun scripts/fetch-sources.ts"
     inputs:
       - "scripts/fetch-sources.ts"
       - "pixelslash.sha"
+      - "facts.sha.json"
       # The override, so trying another commit through moon is never a stale cache hit.
       - "$PIXELSLASH_SHA"
     outputs:

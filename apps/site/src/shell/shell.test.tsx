@@ -1,6 +1,7 @@
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
+import { FACTS, licenceOf } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
 import { renderToStaticMarkup } from "react-dom/server";
 import { SECTIONS, markFor } from "#/shell/sections";
@@ -55,10 +56,17 @@ describe("the shell on the 404 page", () => {
     ]);
   });
 
-  test("the footer names each tool's own licence: TaskSlash is MIT, the others Elastic License 2.0", () => {
+  test("the footer names each tool's own licence in its facts file's words: TaskSlash is MIT, the others Elastic License 2.0", () => {
     const footer = elements(page(), "footer")[0] ?? "";
     const licences = [...footer.matchAll(/data-licence="[^"]*">([\s\S]*?)<\/span>/g)].map((m) => text(m[1] ?? ""));
-    expect(licences).toEqual(["Elastic License 2.0: PixelSlash, ToggleSlash, FlakeSlash", "MIT: TaskSlash"]);
+    expect(licences).toEqual([
+      `${licenceOf("pixelslash")}: PixelSlash, ToggleSlash, FlakeSlash`,
+      `${licenceOf("taskslash")}: TaskSlash`,
+    ]);
+    expect(FACTS.toggleslash.licence).toBe(FACTS.pixelslash.licence);
+    expect(FACTS.flakeslash.licence).toBe(FACTS.pixelslash.licence);
+    expect(FACTS.pixelslash.licence).toContain("Elastic License 2.0");
+    expect(FACTS.taskslash.licence).toContain("MIT");
   });
 
   test("the footer names every product", () => {

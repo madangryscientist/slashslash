@@ -5,6 +5,9 @@
  * the built site serves them under /pixelslash/. Both folders are gitignored. A failed download exits
  * non-zero naming the path and the commit.
  *
+ * It also downloads each product's FACTS.md, at the commit facts.sha.json pins for that product, into
+ * .sources/facts/<product>.md. The site's tests check every product claim against these files.
+ *
  * `--list` prints PIXELSLASH_FILES, one per line, and exits without fetching or deleting anything. The
  * pin bot (.github/workflows/pixelslash-pin.yml) reads it to decide whether a PixelSlash change matters.
  */
@@ -22,9 +25,16 @@ export const PIXELSLASH_FILES = [
   "docs/capabilities/data.json",
 ] as const;
 
-const REPO = "madangryscientist/pixelslash";
+/** The products whose FACTS.md the site reads, each by its repository name. */
+export const FACTS_PRODUCTS = ["pixelslash", "toggleslash", "flakeslash", "taskslash"] as const;
+export type FactsProduct = (typeof FACTS_PRODUCTS)[number];
+
+const OWNER = "madangryscientist";
+const REPO = `${OWNER}/pixelslash`;
 const SITE = resolve(import.meta.dirname, "..");
 const SOURCES = resolve(SITE, ".sources/pixelslash");
+const FACTS = resolve(SITE, ".sources/facts");
+const FACTS_PATH = "FACTS.md";
 const PUBLIC = resolve(SITE, "public/pixelslash");
 const PUBLIC_PREFIX = "apps/site/public/";
 
@@ -38,8 +48,22 @@ function pinnedSha(): string {
   return sha;
 }
 
-async function download(sha: string, path: string): Promise<Uint8Array> {
-  const url = `https://raw.githubusercontent.com/${REPO}/${sha}/${path}`;
+/** Each product's facts pin from facts.sha.json, every one a full commit SHA. */
+function factsPins(): Record<FactsProduct, string> {
+  const pins: Record<string, unknown> = JSON.parse(readFileSync(resolve(SITE, "facts.sha.json"), "utf8"));
+  const out = {} as Record<FactsProduct, string>;
+  for (const product of FACTS_PRODUCTS) {
+    const sha = pins[product];
+    if (typeof sha !== "string" || !/^[0-9a-f]{40}$/.test(sha)) {
+      throw new Error(`facts.sha.json: ${product} is not a full commit SHA: "${String(sha)}"`);
+    }
+    out[product] = sha;
+  }
+  return out;
+}
+
+async function download(sha: string, path: string, repo = REPO, name = "PixelSlash"): Promise<Uint8Array> {
+  const url = `https://raw.githubusercontent.com/${repo}/${sha}/${path}`;
   let response: Response;
   let body: ArrayBuffer;
   try {
@@ -48,17 +72,24 @@ async function download(sha: string, path: string): Promise<Uint8Array> {
     body = await response.arrayBuffer();
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
-    throw new Error(`could not fetch ${path} at PixelSlash ${sha}: ${reason}`);
+    throw new Error(`could not fetch ${path} at ${name} ${sha}: ${reason}`);
   }
   return new Uint8Array(body);
 }
 
 async function main(): Promise<void> {
   const sha = pinnedSha();
+  const pins = factsPins();
   const bodies = await Promise.all(PIXELSLASH_FILES.map((path) => download(sha, path)));
+  const facts = await Promise.all(
+    FACTS_PRODUCTS.map((product) => download(pins[product], FACTS_PATH, `${OWNER}/${product}`, product)),
+  );
   // Written only once every file has arrived, so a failure leaves no half-updated folder behind.
   rmSync(SOURCES, { recursive: true, force: true });
   rmSync(PUBLIC, { recursive: true, force: true });
+  rmSync(FACTS, { recursive: true, force: true });
+  mkdirSync(FACTS, { recursive: true });
+  FACTS_PRODUCTS.forEach((product, i) => writeFileSync(resolve(FACTS, `${product}.md`), facts[i] ?? new Uint8Array()));
   PIXELSLASH_FILES.forEach((path, i) => {
     const target = resolve(SOURCES, path);
     mkdirSync(dirname(target), { recursive: true });
@@ -70,6 +101,7 @@ async function main(): Promise<void> {
     }
   });
   console.log(`fetched ${PIXELSLASH_FILES.length} PixelSlash files at ${sha}`);
+  for (const product of FACTS_PRODUCTS) console.log(`fetched ${product} ${FACTS_PATH} at ${pins[product]}`);
 }
 
 // Run only as a script, so a test can import PIXELSLASH_FILES without a fetch.

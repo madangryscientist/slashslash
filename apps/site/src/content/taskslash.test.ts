@@ -22,19 +22,20 @@ describe("the /taskslash content", () => {
   });
 
   test("says plainly that it needs Linux and a systemd user session to measure", () => {
-    expect(TRY_IT.lead).toMatch(/Linux/);
-    expect(TRY_IT.lead).toMatch(/systemd user session/);
+    expect(TRY_IT.lead.text).toMatch(/Linux/);
+    expect(TRY_IT.lead.text).toMatch(/systemd user session/);
   });
 
   test("its PRODUCTS entry is the approved line, word for word", () => {
-    expect(PRODUCTS.find((product) => product.name === "TaskSlash")).toEqual({
+    const entry = PRODUCTS.find((product) => product.name === "TaskSlash");
+    expect({ ...entry, question: entry?.question.text, summary: entry?.summary.map((claim) => claim.text) }).toEqual({
       name: "TaskSlash",
       stage: "alpha",
-      licence: "MIT",
+      facts: "taskslash",
       question: "Why did the tests time out?",
       summary: [
         "It queues builds and tests on one machine, so a test fails because of the code, not because everything ran at once.",
-        "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when your computer has capacity for it. A release you can install is planned.",
+        "It is being built now. Its source is public under the MIT license. Today it is a daemon and a command line for Linux that run each job in its own systemd scope, measure what it cost, and start a job only when your computer has capacity for it. There is no release you can install yet: you build it from source with cargo.",
       ],
       page: "/taskslash",
     });
