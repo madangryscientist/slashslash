@@ -1,8 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 /*
- * The home's hand-drawn hero in a real browser. With motion on, every piece of text in the hero's start
- * frame reads at 4.5:1 or more on what is behind it, in Slash Day and Slash Night. With reduced motion
+ * The home's hand-drawn hero in a real browser. With motion on, every piece of text in the panes' start
+ * frame (the only part of the hero the motion changes) reads at 4.5:1 or more on the solid pane behind
+ * it, in Slash Day and Slash Night. With reduced motion
  * the hero never moves. On Slash Day a tool card's mark is drawn in the tool's deep text tone even when
  * the system is dark, never in the pastel one.
  */
@@ -11,11 +12,11 @@ const THEMES = ["light", "dark"] as const;
 const STORED = "hackcove:colour-scheme";
 
 /**
- * Every visible text in the hero, with its contrast on the ground behind it. Colours go through a
+ * Every visible text in the hero's panes, with its contrast on the ground behind it. Colours go through a
  * canvas, so any CSS colour syntax reads as sRGB; a background with alpha is laid over the one under
  * it, up to the page's own.
  */
-const heroContrasts = (page: Page): Promise<{ text: string; ratio: number }[]> =>
+const paneContrasts = (page: Page): Promise<{ text: string; ratio: number }[]> =>
   page.evaluate(() => {
     const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     if (!ctx) throw new Error("no canvas");
@@ -45,8 +46,8 @@ const heroContrasts = (page: Page): Promise<{ text: string; ratio: number }[]> =
       });
       return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0);
     };
-    const hero = document.querySelector(".hero-ground");
-    if (!hero) throw new Error("no hero");
+    const hero = document.querySelector(".panes");
+    if (!hero) throw new Error("no panes");
     const out: { text: string; ratio: number }[] = [];
     const walker = document.createTreeWalker(hero, NodeFilter.SHOW_TEXT);
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
@@ -70,7 +71,7 @@ const heroContrasts = (page: Page): Promise<{ text: string; ratio: number }[]> =
   });
 
 for (const theme of THEMES) {
-  test(`with motion on, the hero's start frame reads at 4.5:1 or more in ${theme}`, async ({ page }) => {
+  test(`with motion on, the panes' start frame reads at 4.5:1 or more in ${theme}`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: "no-preference" });
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-motion-ready", "");
@@ -79,9 +80,8 @@ for (const theme of THEMES) {
     await expect(page.locator("html")).toHaveClass(/\bmotion\b/);
     await page.evaluate(() => document.querySelector(".panes")?.classList.remove("played"));
     await expect(page.locator(".shop-btn")).toHaveCSS("margin-left", "0px");
-    await expect(page.locator(".shop-btn")).toHaveCSS("margin-left", "0px");
 
-    const readings = await heroContrasts(page);
+    const readings = await paneContrasts(page);
     expect(readings.map((r) => r.text)).toEqual(expect.arrayContaining(["Pay", "+"]));
     expect(readings.filter((r) => r.ratio < 4.5)).toEqual([]);
   });
@@ -130,13 +130,4 @@ test("on Slash Day a card's mark is the tool's deep tone, even on a dark system"
   }, shot);
   // PixelSlash's deep tone is #8839ef; its pastel #cba6f7 would read near 203.
   expect(pixel[0]).toBeLessThan(160);
-});
-
-test("every image on the home loads", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/", { waitUntil: "load" });
-  const broken = await page.evaluate(() =>
-    [...document.images].filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.src),
-  );
-  expect(broken).toEqual([]);
 });

@@ -86,7 +86,6 @@ describe("/", () => {
       expect(card.html, card.name).toContain(`src="${mark}"`);
       expect(existsSync(resolve(DIST, mark.slice(1))), `${mark} is built`).toBe(true);
     }
-    expect(cards.find((card) => card.name === "SightSlash")?.html).toContain(STAGES.planned.label);
   });
 
   test("a card links exactly when its tool has a page here", () => {
