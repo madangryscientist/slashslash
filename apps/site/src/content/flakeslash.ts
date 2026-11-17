@@ -4,8 +4,8 @@
  * docs/product.md for what is planned. Nothing is fetched at build time, so a change in that repo
  * changes this file by hand.
  *
- * Commands stay free of `<`, `>`, `&` and quotes, so a test can find each one in the built page's
- * text with no entity decoding.
+ * Commands stay free of `&` and quotes. The one placeholder, `<your key>`, stands where a reader puts
+ * their own key; a test decodes the page's `&lt;` and `&gt;` before it looks for a command.
  */
 
 export const FLAKESLASH_REPO_URL = "https://github.com/madangryscientist/flakeslash";
@@ -63,14 +63,24 @@ export const WORKS_TODAY: readonly Feature[] = [
   },
 ];
 
+export type TryStep = { lead: string; commands: readonly string[] };
+
 /** How to try it today, from a clone. It is not published on npm. */
-export const TRY_IT = {
-  lead: "FlakeSlash is not published on npm yet. Run it from a clone, with Bun. It reads a GitHub access key from the GITHUB_TOKEN variable.",
-  commands: [
-    "git clone https://github.com/madangryscientist/flakeslash",
-    "cd flakeslash",
-    "bun install",
-    "GITHUB_TOKEN=... bun run flakeslash scan owner/repo",
+export const TRY_IT: { lead: string; steps: readonly TryStep[] } = {
+  lead: "FlakeSlash is not published on npm yet. Run it from a clone, with Bun.",
+  steps: [
+    {
+      lead: "Clone it and install:",
+      commands: ["git clone https://github.com/madangryscientist/flakeslash", "cd flakeslash", "bun install"],
+    },
+    {
+      lead: "Give it a GitHub access key that can read your repo. Put your own key where it says <your key>:",
+      commands: ["export GITHUB_TOKEN=<your key>"],
+    },
+    {
+      lead: "Then scan the repo:",
+      commands: ["bun run flakeslash scan owner/repo"],
+    },
   ],
 };
 

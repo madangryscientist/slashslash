@@ -1,0 +1,21 @@
+---
+// A tool's home on the shell, in its own section: ToolHome from the tool's data, with the two copy
+// blocks hydrated when they scroll into view. The hero and the sections set their own width, so it
+// sits in the shell's full-width main.
+import Slash from "#next/layouts/Slash.astro";
+import { HeroCode, ToolHome, TryIt } from "#next/tools/tool-home";
+import { heroCommandOf, TOOLS } from "#next/tools/tools";
+
+interface Props {
+  tool: keyof typeof TOOLS;
+}
+
+const tool = TOOLS[Astro.props.tool];
+---
+
+<Slash section={tool.key} title={tool.title} description={tool.description}>
+  <ToolHome tool={tool}>
+    <HeroCode slot="heroCode" command={heroCommandOf(tool)} client:visible />
+    <TryIt slot="tryIt" steps={tool.tryIt.steps} client:visible />
+  </ToolHome>
+</Slash>

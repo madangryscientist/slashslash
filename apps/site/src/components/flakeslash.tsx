@@ -42,11 +42,16 @@ export function FlakeSlashToday(): ReactNode {
 export function FlakeSlashTry(): ReactNode {
   return (
     <Section id="try-it" hunk="try it" title="Try it on your own repo" lead={TRY_IT.lead}>
-      <div className="try-lines">
-        {TRY_IT.commands.map((command) => (
-          <CopyLine key={command} text={command} />
-        ))}
-      </div>
+      {TRY_IT.steps.map((step) => (
+        <div className="try-step" key={step.lead}>
+          <p>{step.lead}</p>
+          <div className="try-lines">
+            {step.commands.map((command) => (
+              <CopyLine key={command} text={command} />
+            ))}
+          </div>
+        </div>
+      ))}
     </Section>
   );
 }
