@@ -106,7 +106,7 @@ export function Shell({
     // Marks the Home tab for the stylesheet, which hides it from md to lg without naming its address.
     ...(page.to === "/" ? { "data-home": "" } : {}),
     // A docs page (`/docs/upload`) keeps Docs marked in the nav.
-    active: page.to === pathname || (page.to !== "/" && pathname.startsWith(`${page.to}/`)),
+    selected: page.to === pathname || (page.to !== "/" && pathname.startsWith(`${page.to}/`)),
   }));
   return (
     <AppShell

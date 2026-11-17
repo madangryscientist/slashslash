@@ -183,6 +183,20 @@ describe("every PixelSlash page", () => {
     }
   });
 
+  test("the site nav marks the page's own link as the current page, and no other link", () => {
+    for (const { path, file } of SERVED) {
+      const here = path === "/" ? "/pixelslash" : `/pixelslash${path}`;
+      const navs = [...read(file).matchAll(/<nav\b[^>]*data-testid="site-nav"[^>]*>([\s\S]*?)<\/nav>/g)];
+      expect(navs, file).not.toHaveLength(0);
+      for (const [, body] of navs) {
+        const links = [...(body ?? "").matchAll(/<a\b([^>]*)>/g)].map((m) => m[1] ?? "");
+        const current = links.filter((attrs) => /\saria-current="page"/.test(attrs));
+        expect(current, file).toHaveLength(1);
+        expect(current[0], file).toContain(`href="${here}"`);
+      }
+    }
+  });
+
   test("loads no script: the two small layout scripts are inline and import nothing, React included", () => {
     for (const page of pixelslashPages()) {
       const html = read(page);
