@@ -8,7 +8,7 @@ import { PAGES } from "../../site/src/content/pages.ts";
  * Every page this app has built so far, plus one unknown path, in each theme, on a desktop and a phone:
  * it answers its status and loads, never scrolls sideways on the phone, passes axe, and makes no
  * request off the site. The unknown path keeps the loop from ever being empty. The suite home, the
- * PixelSlash home and pricing and the FlakeSlash home also leave a full-page shot in each theme and
+ * PixelSlash home and pricing, the FlakeSlash home and /developers also leave a full-page shot in each theme and
  * viewport, for a person to look at.
  */
 
@@ -20,6 +20,7 @@ const FLIP_SHOTS: Partial<Record<string, string>> = {
   "/pixelslash": "pixelslash-home",
   "/pixelslash/pricing": "pixelslash-pricing",
   "/flakeslash": "flakeslash-home",
+  "/developers": "developers",
 };
 const UNKNOWN = "/no-such-page";
 
