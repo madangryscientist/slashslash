@@ -30,6 +30,8 @@ function read(file: string): string {
 function text(html: string): string {
   return html
     .replace(/<(script|style|template)[\s\S]*?<\/\1>/g, " ")
+    // A closing inline tag leaves no space: "in CI</a>)." reads "in CI).".
+    .replace(/<\/(a|span|code|strong|em)>/g, "")
     .replace(/<[^>]+>/g, " ")
     .replaceAll("&#39;", "'")
     .replaceAll("&#x27;", "'")
@@ -38,8 +40,6 @@ function text(html: string): string {
     .replaceAll("&gt;", ">")
     .replaceAll("&amp;", "&")
     .replace(/\s+/g, " ")
-    // A tag ending just before punctuation (a link closing a sentence) leaves no space in the page.
-    .replace(/ (?=[.,;:)])/g, "")
     .trim();
 }
 

@@ -41,7 +41,7 @@ function Checkout({ after = false }: { after?: boolean }): ReactNode {
         <span className="shop-btn">Pay</span>
         {after ? (
           <svg className="shop-ring" viewBox="0 0 120 40" preserveAspectRatio="none">
-            <path pathLength={1} d="M62 3C24 2 4 9 4 20s24 18 56 18 56-6 56-18S96 2 53 5" />
+            <path pathLength={1} d="M64 3C30 2 8 2 4 8C1 13 1 27 4 32C8 38 30 38 60 38S112 38 116 32C119 27 119 13 116 8C112 2 90 2 52 5" />
           </svg>
         ) : null}
       </span>

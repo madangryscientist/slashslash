@@ -153,7 +153,8 @@
   /*
    * Stretched to the button's box, so the stroke scales with it: the viewBox is about the ring's usual
    * shape (3:1), which keeps the line near 2.5px all round. No non-scaling-stroke: with it, pathLength
-   * no longer matches the drawn path, and the dash covered only part of the ring.
+   * no longer matches the drawn path, and the dash covered only part of the ring. The path is a loose
+   * rounded box, not an ellipse: an ellipse this close to the button cuts through its corners.
    */
   stroke-width: 1.6;
   stroke-linecap: round;

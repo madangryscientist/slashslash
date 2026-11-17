@@ -98,6 +98,9 @@ export function OneReport(): ReactNode {
   );
 }
 
+/** The stage line either side of the words that link to the CI walkthrough. */
+const [stagesBefore, stagesAfter] = STANDS.stages.split(STANDS.tryLink.text);
+
 /** Where it stands: the stage lines, a stage Pill per tool, and the report screenshot (the children). */
 export function Stands({ children }: { children?: ReactNode }): ReactNode {
   return (
@@ -105,9 +108,9 @@ export function Stands({ children }: { children?: ReactNode }): ReactNode {
       <div className="grid gap-10 md:grid-cols-2 md:items-start">
         <div className="space-y-4">
           <Text>
-            {STANDS.stages.slice(0, STANDS.stages.indexOf(STANDS.tryLink.text))}
+            {stagesBefore}
             <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
-            {STANDS.stages.slice(STANDS.stages.indexOf(STANDS.tryLink.text) + STANDS.tryLink.text.length)}
+            {stagesAfter}
           </Text>
           <ul className="flex flex-wrap gap-x-6 gap-y-3">
             {TOOL_CARDS.map((tool) => (
