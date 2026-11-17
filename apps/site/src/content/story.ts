@@ -136,7 +136,7 @@ export const STANDS = {
 export const DEVELOPERS = {
   title: "Built for working with agents",
   today:
-    "Your agents open pull requests all day. Slash gives each one a check that answers the questions a careful reviewer would have asked: what the page looks like, what switched on, whether the tests mean it, why they timed out, what it weighs, and how each component holds up in every state. Run it in CI today.",
+    "Your agents open pull requests all day. Slash gives each one a check that answers the questions a careful reviewer would have asked: what the page looks like, what switched on, whether the tests mean it, what it weighs, and how each component holds up in every state. Run it in CI today.",
   next: "Next, point your agent at it and let it fix its own change first.",
 } as const;
 

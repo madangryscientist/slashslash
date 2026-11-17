@@ -1,6 +1,7 @@
 /**
  * The /taskslash page, as plain data so a test can check it. Written by hand from taskslash a59d7fa:
- * README.md, kept beside this file as taskslash-readme.md so a test can check every command against it.
+ * README.md, kept beside this file as taskslash-readme.md so a test can check every command against it, and
+ * scripts/install-service.ts for what the install step does (it cargo installs the binary into ~/.cargo/bin).
  * Nothing is fetched at build time, so a change in that repo changes this file, and that copy, by hand.
  *
  * Commands stay free of `&` and quotes, and each is written exactly as the README writes it.
@@ -12,7 +13,7 @@ export const TASKSLASH_TITLE = "TaskSlash: admission control for builds and test
 
 export const TASKSLASH_INTRO = {
   title: "TaskSlash",
-  lead: "Several builds, tests and browser runs started at once, by you or by coding agents in several worktrees, overload a machine until tests time out for reasons that have nothing to do with the code. TaskSlash puts a small daemon in front of them: each command asks it for a slot, and it keeps the queue and the record of what ran. Its source is public under the MIT license. It runs on Linux, built from a clone: there is no release to install yet.",
+  lead: "Several builds, tests and browser runs started at once, by you or by coding agents in several worktrees, overload a machine until tests time out for reasons that have nothing to do with the code. TaskSlash puts a small daemon in front of them: each command asks it for a slot, and it keeps the queue and the record of what ran. Its source is public under the MIT license. It is built for Linux, from a clone: there is no release to install yet.",
 };
 
 /** The page's description in search results and link previews. */
@@ -84,14 +85,14 @@ export type TryStep = { lead: string; commands: readonly string[] };
 
 /** How to try it today, from a clone: the README's Develop and install sections in short. */
 export const TRY_IT: { lead: string; steps: readonly TryStep[] } = {
-  lead: "There is no release to install yet, so build it from a clone. It needs Linux, Bun and rustup. Jobs are measured only under a systemd user session; without one they still run, unmeasured.",
+  lead: "There is no release to install yet, so build it from a clone, on Linux, with Bun and rustup. Jobs are measured only under a systemd user session; without one they still run, unmeasured.",
   steps: [
     {
       lead: "Clone it, install the Rust toolchain it pins, and install:",
       commands: [`git clone ${TASKSLASH_REPO_URL}`, "cd taskslash", "rustup toolchain install", "bun install"],
     },
     {
-      lead: "Build it and install the daemon as a systemd user unit. The same command upgrades it after you pull a new main.",
+      lead: "Install the daemon as a systemd user unit. The script builds the taskslash command into ~/.cargo/bin first, and the same command upgrades it after you pull a new main.",
       commands: ["bun scripts/install-service.ts"],
     },
     {

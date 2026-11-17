@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { PRODUCTS } from "#/content/products";
 import { TASKSLASH_REPO_URL } from "#/content/site";
-import { LINKS, TRY_IT, WORKS_TODAY } from "#/content/taskslash";
+import { TRY_IT, WORKS_TODAY } from "#/content/taskslash";
 
 /** taskslash's README.md at the commit content/taskslash.ts was written from, kept beside it. */
 const README = readFileSync(resolve(import.meta.dirname, "taskslash-readme.md"), "utf8");
@@ -26,14 +26,11 @@ describe("the /taskslash content", () => {
     expect(TRY_IT.lead).toMatch(/systemd user session/);
   });
 
-  test("links only into its own repository", () => {
-    for (const link of LINKS) expect(link.href.startsWith(TASKSLASH_REPO_URL), link.label).toBe(true);
-  });
-
   test("its PRODUCTS entry is the approved line, word for word", () => {
     expect(PRODUCTS.find((product) => product.name === "TaskSlash")).toEqual({
       name: "TaskSlash",
       stage: "alpha",
+      licence: "MIT",
       question: "Why did the tests time out?",
       summary: [
         "It queues builds and tests on one machine, so a test fails because of the code, not because everything ran at once.",

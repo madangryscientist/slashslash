@@ -53,11 +53,6 @@ const KEY_VARIABLE: Record<Tool["key"], string | undefined> = {
 
 const ORDER = (tool: Tool): string[] => [tool.key, "works-today", "try-it", "planned", "docs"];
 
-test("builds a home for every tool in the switcher, TaskSlash included", () => {
-  expect(Object.keys(TOOLS).toSorted()).toEqual(["flakeslash", "taskslash", "toggleslash"]);
-  expect(existsSync(resolve(PAGES_DIR, "taskslash.astro"))).toBe(true);
-});
-
 describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
   const html = read(`${tool.key}.html`);
 

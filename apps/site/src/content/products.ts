@@ -12,12 +12,15 @@ export type Product = {
   summary: string[];
   /** The tool's own page on this site, linked from its entry on /developers. */
   page?: string;
+  /** The licence its source is public under; left out for a tool with no source yet. The footer lists these. */
+  licence?: "Elastic License 2.0" | "MIT";
 };
 
 export const PRODUCTS: readonly Product[] = [
   {
     name: "PixelSlash",
     stage: "alpha",
+    licence: "Elastic License 2.0",
     question: "Does the page look different?",
     summary: [
       "It compares screenshots from before and after a change and points out what really changed.",
@@ -27,6 +30,7 @@ export const PRODUCTS: readonly Product[] = [
   {
     name: "ToggleSlash",
     stage: "alpha",
+    licence: "Elastic License 2.0",
     question: "Which features are switched on, and for whom?",
     summary: [
       "It keeps track of feature switches, so you know what turning one on will do.",
@@ -37,6 +41,7 @@ export const PRODUCTS: readonly Product[] = [
   {
     name: "FlakeSlash",
     stage: "alpha",
+    licence: "Elastic License 2.0",
     question: "Can the test results be trusted?",
     summary: [
       "It spots automated checks that pass and fail at random, so a failure means something.",
@@ -47,6 +52,7 @@ export const PRODUCTS: readonly Product[] = [
   {
     name: "TaskSlash",
     stage: "alpha",
+    licence: "MIT",
     question: "Why did the tests time out?",
     summary: [
       "It queues builds and tests on one machine, so a test fails because of the code, not because everything ran at once.",
