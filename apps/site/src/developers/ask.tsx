@@ -1,8 +1,8 @@
-import { Callout, Text } from "@hackcove/ui-react";
+import { Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
-import { CONTACT_LINE } from "#/content/site";
 import { DEVELOPER_QUESTIONS } from "#/developers/questions";
 import { DevSection } from "#/developers/section";
+import { ContactLine } from "#/shell/contact-line";
 
 /** The ask: the developer questions, then how to answer. */
 export function Ask(): ReactNode {
@@ -15,7 +15,7 @@ export function Ask(): ReactNode {
           </li>
         ))}
       </ol>
-      <Callout tone="info">{CONTACT_LINE}</Callout>
+      <ContactLine />
     </DevSection>
   );
 }

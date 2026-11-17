@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { FLOW } from "#/content/flow";
 import { PRODUCTS } from "#/content/products";
-import { CONTACT_LINE, DEVELOPERS_DESCRIPTION, DEVELOPERS_TITLE, SITE_NAME } from "#/content/site";
+import { CONTACT, DEVELOPERS_DESCRIPTION, DEVELOPERS_TITLE, SITE_NAME } from "#/content/site";
 import { STAGES } from "#/content/stages";
 import { DEVELOPERS } from "#/content/story";
 import { DEVELOPER_QUESTIONS } from "#/developers/questions";
@@ -98,7 +98,9 @@ describe("/developers", () => {
     expect(words).toContain("FS_TIMEOUT");
     expect(words).toContain("The combination problem");
     for (const question of DEVELOPER_QUESTIONS) expect(words).toContain(question);
-    expect(words).toContain(CONTACT_LINE);
+    expect(words).toContain(CONTACT.lead.trim());
+    expect(words).toContain(CONTACT.link);
+    expect(html).toContain(`href="${CONTACT.href}"`);
   });
 
   test("gives every tool a card with every paragraph of its summary", () => {

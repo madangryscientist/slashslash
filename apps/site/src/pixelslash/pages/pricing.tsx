@@ -1,7 +1,7 @@
 import {
   Button,
   Callout,
-  Caption,
+  Text,
   Card,
   CardGrid,
   Cluster,
@@ -67,9 +67,9 @@ export function PricingPage(): ReactNode {
           ) : null}
         </Stack>
       </Callout>
-      <Caption>
+      <Text>
         Questions? Write to <TextLink href={`mailto:${CONTACT}`}>{CONTACT}</TextLink>.
-      </Caption>
+      </Text>
     </Stack>
   );
 }

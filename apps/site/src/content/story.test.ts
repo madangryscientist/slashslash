@@ -54,15 +54,13 @@ describe("suite story copy", () => {
     expect(story.REPORT.rows).toHaveLength(story.STORY_TOOLS.length);
   });
 
-  test("the stage sentences name exactly the alpha tools (bar PixelSlash) and exactly the planned tools", () => {
-    const alpha = PRODUCTS.filter((p) => p.stage === "alpha" && p.name !== "PixelSlash").map(
-      (p) => p.name,
-    );
+  test("the stage sentences name exactly the alpha tools and exactly the planned tools", () => {
+    const alpha = PRODUCTS.filter((p) => p.stage === "alpha").map((p) => p.name);
     const planned = [
       ...PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name),
       "SightSlash" as const,
     ];
-    const alphaSentence = sentenceWith(story.STANDS.stages, "are in alpha");
+    const alphaSentence = sentenceWith(story.STANDS.stages, "are alphas");
     const plannedSentence = sentenceWith(story.STANDS.stages, "are planned");
     expect(namedIn(alphaSentence).toSorted()).toEqual(alpha.toSorted());
     expect(namedIn(plannedSentence).toSorted()).toEqual(planned.toSorted());

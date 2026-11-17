@@ -1,4 +1,4 @@
-import { Caption, Code } from "@hackcove/ui-react";
+import { Code, Text } from "@hackcove/ui-react";
 import type { CSSProperties, ReactNode } from "react";
 import hero from "@pixelslash-src/apps/site/src/content/hero.json";
 import { psAsset } from "#/pixelslash/paths";
@@ -101,11 +101,11 @@ export function SlashDemo(): ReactNode {
         <span className="ps-dot" />
         <span>{CHANGES.length} regions</span>
       </div>
-      <Caption as="figcaption" align="center">
+      <Text as="figcaption" align="center">
         A real run, not a mock-up: <Code>pixelslash --live --local</Code> on a billing page at {hero.width}×
         {hero.height}. It found {hero.changedPixels} changed pixels in {CHANGES.length} regions: the price, the
         button, the storage bar and its label.
-      </Caption>
+      </Text>
     </figure>
   );
 }

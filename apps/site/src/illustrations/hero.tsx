@@ -2,69 +2,75 @@ import type { CSSProperties, ReactNode } from "react";
 import { HERO } from "#/content/landing";
 
 /*
- * The suite home's hand-drawn hero, redrawn on the theme's variables
- * (hero.css). Two panes: the edited lines the team reviewed, and the checkout customers see. With
- * motion on, the checkout gains tax (asked for), and its button also moves and recolours (not asked
- * for), circled. With no script or reduced motion, it is simply the finished drawing.
+ * The suite home's hand-drawn hero, on the theme's variables (hero.css). Three steps, in order: the
+ * checkout Before, The change (two plain lines of pseudo code), and the same checkout After. After the
+ * change the checkout has its tax line, as asked, and its Pay button has also moved and turned the new
+ * lines' colour, which nobody asked for, so it is circled. With motion on, the change lights up, then
+ * the After checkout gains its tax, then its button moves, then the ring draws. With no script or
+ * reduced motion, it is simply the finished drawing.
  */
-
-/** Abstract edited lines: widths only, no real code. The fourth is the edit the team reviewed. */
-const LINES: readonly { width: number; indent: number; edit?: true }[] = [
-  { width: 46, indent: 0 },
-  { width: 62, indent: 1 },
-  { width: 38, indent: 1 },
-  { width: 70, indent: 1, edit: true },
-  { width: 30, indent: 1 },
-  { width: 22, indent: 0 },
-];
 
 function Bar({ width }: { width: number }): ReactNode {
   return <i className="bar" style={{ "--w": `${width}%` } as CSSProperties} />;
 }
 
+/** One checkout. Before and After are the same drawing, so they line up row for row. */
+function Checkout({ after = false }: { after?: boolean }): ReactNode {
+  return (
+    <div className={after ? "shop is-after" : "shop"}>
+      <span className="shop-head">
+        <Bar width={40} />
+      </span>
+      <span className="shop-row">
+        <span>Subtotal</span>
+        <Bar width={30} />
+      </span>
+      {after ? (
+        <span className="shop-row shop-tax">
+          <span>
+            Tax <span className="shop-tag">{HERO.asked}</span>
+          </span>
+          <Bar width={18} />
+        </span>
+      ) : null}
+      <span className="shop-row shop-total">
+        <span>Total</span>
+        <Bar width={34} />
+      </span>
+      <span className="shop-pay">
+        <span className="shop-btn">Pay</span>
+        {after ? (
+          <svg className="shop-ring" viewBox="0 0 120 40" preserveAspectRatio="none">
+            <path pathLength={1} d="M64 3C30 2 8 2 4 8C1 13 1 27 4 32C8 38 30 38 60 38S112 38 116 32C119 27 119 13 116 8C112 2 90 2 52 5" />
+          </svg>
+        ) : null}
+      </span>
+      {after ? <span className="shop-note">{HERO.notAsked}</span> : null}
+    </div>
+  );
+}
+
 export function HeroPanes(): ReactNode {
   return (
     <div className="panes" data-play="" data-testid="hero-panes" role="img" aria-label={HERO.description}>
-      <figure className="pane">
-        <figcaption className="pane-cap">{HERO.reviewed}</figcaption>
+      <figure className="pane" aria-hidden="true">
+        <figcaption className="pane-cap">{HERO.before}</figcaption>
+        <Checkout />
+      </figure>
+      <figure className="pane" aria-hidden="true">
+        <figcaption className="pane-cap">{HERO.change}</figcaption>
         <div className="code">
-          {LINES.map((line, i) => (
-            <span
-              className={line.edit ? "code-line is-edit" : "code-line"}
-              key={i}
-              style={{ "--indent": line.indent } as CSSProperties}
-            >
-              <span className="code-sign">{line.edit ? "+" : ""}</span>
-              <Bar width={line.width} />
+          {HERO.codeLines.map((line) => (
+            <span className="code-line" key={line}>
+              <span className="code-sign">+</span>
+              <span>{line}</span>
             </span>
           ))}
         </div>
       </figure>
-      <figure className="pane">
-        <figcaption className="pane-cap">{HERO.seen}</figcaption>
-        <div className="shop">
-          <span className="shop-head">
-            <Bar width={40} />
-          </span>
-          <span className="shop-row">
-            <span>Subtotal</span>
-            <Bar width={30} />
-          </span>
-          <span className="shop-row shop-tax">
-            <span>Tax</span>
-            <Bar width={18} />
-          </span>
-          <span className="shop-row shop-total">
-            <span>Total</span>
-            <Bar width={34} />
-          </span>
-          <span className="shop-pay">
-            <span className="shop-btn">Pay</span>
-            <svg className="shop-ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
-              <path pathLength={1} d="M52 3C20 2 3 9 3 20s20 18 47 18 47-6 47-18S80 2 44 5" />
-            </svg>
-          </span>
-        </div>
+      <figure className="pane pane-after" aria-hidden="true">
+        <figcaption className="pane-cap">{HERO.after}</figcaption>
+        <Checkout after />
       </figure>
     </div>
   );

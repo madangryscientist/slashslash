@@ -29,7 +29,7 @@ export function ReportViewer(): ReactNode {
         <span className="block aspect-[2560/1600]">
           <Image src={SRC} alt={STANDS.reportAlt} aspect="natural" />
         </span>
-        <span className="text-sm font-semibold underline-offset-4 group-hover:underline">{STANDS.reportOpen}</span>
+        <span className="font-semibold underline-offset-4 group-hover:underline">{STANDS.reportOpen}</span>
       </a>
       {open ? (
         <Lightbox label={STANDS.reportAlt} closeLabel={STANDS.reportClose} onClose={() => setOpen(false)}>

@@ -1,9 +1,9 @@
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
-import { STANDS as LANDING_STANDS } from "#/content/landing";
+import { HERO as HERO_DRAWING, STANDS as LANDING_STANDS } from "#/content/landing";
 import { PRODUCTS } from "#/content/products";
-import { CONTACT_LINE } from "#/content/site";
+import { CONTACT } from "#/content/site";
 import { STAGES } from "#/content/stages";
 import { GAPS, HERO, REPORT, STANDS, STEPS_TODAY, STORY_TOOLS, VIEW, VIEW_QUESTIONS } from "#/content/story";
 import { TOOL_CARDS } from "#/home/tools";
@@ -30,6 +30,8 @@ function read(file: string): string {
 function text(html: string): string {
   return html
     .replace(/<(script|style|template)[\s\S]*?<\/\1>/g, " ")
+    // A closing inline tag leaves no space: "in CI</a>)." reads "in CI).".
+    .replace(/<\/(a|span|code|strong|em)>/g, "")
     .replace(/<[^>]+>/g, " ")
     .replaceAll("&#39;", "'")
     .replaceAll("&#x27;", "'")
@@ -65,6 +67,23 @@ describe("/", () => {
 
   test("has no @@ label in the hero", () => {
     expect(hero).not.toContain("@@");
+  });
+
+  test("the hero draws three steps in order: Before, the change word for word, and After", () => {
+    const panes = hero.slice(hero.indexOf('data-testid="hero-panes"'));
+    const captions = [...panes.matchAll(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/g)].map((m) => text(m[1] ?? ""));
+    expect(captions).toEqual([HERO_DRAWING.before, HERO_DRAWING.change, HERO_DRAWING.after]);
+    const words = text(panes);
+    for (const line of HERO_DRAWING.codeLines) expect(words).toContain(`+ ${line}`);
+    expect(words).toContain(HERO_DRAWING.asked);
+    expect(words).toContain(HERO_DRAWING.notAsked);
+    const after = panes.slice(panes.indexOf("pane-after"));
+    for (const part of ["shop-tax", "shop-ring", "shop-note"]) expect(after, part).toContain(part);
+  });
+
+  test("the hero drawing is one image, described by its description", () => {
+    const label = hero.match(/role="img" aria-label="([^"]*)"/)?.[1];
+    expect(label && text(label)).toBe(HERO_DRAWING.description);
   });
 
   test("the hero has no link and no button", () => {
@@ -160,7 +179,8 @@ describe("the home after the tool cards", () => {
 
   test("carries every string of the story's sections", () => {
     const words = text(afterTools);
-    for (const line of strings([STEPS_TODAY, GAPS, REPORT, STANDS, VIEW_QUESTIONS])) {
+    // A string that starts with "/" is a link's address, not words on the page.
+    for (const line of strings([STEPS_TODAY, GAPS, REPORT, STANDS, VIEW_QUESTIONS]).filter((line) => !line.startsWith("/"))) {
       expect(words, line).toContain(line);
     }
   });
@@ -181,14 +201,8 @@ describe("the home after the tool cards", () => {
     });
   });
 
-  test("has one report row per question, in order, each with its question and why", () => {
-    const found = rows(section("report"), "data-report");
-    expect(found.map((row) => row.name)).toEqual(REPORT.rows.map((row) => row.tool));
-    found.forEach((row, index) => {
-      const words = text(`<x ${row.html}`);
-      expect(words).toContain(REPORT.rows[index]?.question);
-      expect(words).toContain(REPORT.rows[index]?.why);
-    });
+  test("the report section does not list the tool questions again: the cards above carry them", () => {
+    expect(section("report")).not.toContain("data-report=");
   });
 
   test("gives every tool the story names one stage Pill, SightSlash planned", () => {
@@ -206,6 +220,7 @@ describe("the home after the tool cards", () => {
     const stands = section("stands");
     expect(stands).toContain('href="/pixelslash/report.png"');
     expect(text(stands)).toContain(LANDING_STANDS.reportOpen);
+    expect(stands).toContain(`href="${STANDS.tryLink.href}"`);
     expect(existsSync(resolve(DIST, "pixelslash/report.png"))).toBe(true);
     expect(existsSync(resolve(DIST, "report.png"))).toBe(false);
   });
@@ -217,7 +232,9 @@ describe("the home after the tool cards", () => {
     const list = ask.match(/<ol[^>]*>([\s\S]*?)<\/ol>/)?.[1] ?? "";
     const items = [...list.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((m) => text(m[1] ?? ""));
     expect(items).toEqual([...VIEW_QUESTIONS]);
-    expect(text(ask)).toContain(CONTACT_LINE);
+    expect(text(ask)).toContain(CONTACT.lead.trim());
+    expect(text(ask)).toContain(CONTACT.link);
+    expect(ask).toContain(`href="${CONTACT.href}"`);
   });
 
   test("with no JavaScript every drawing is finished: nothing is held in a start frame", () => {

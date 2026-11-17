@@ -20,8 +20,16 @@ export const DEVELOPERS_TITLE = `${SITE_NAME}: for developers`;
 /** The site's own address with no trailing slash, for the share image's absolute URL. */
 export const SITE_URL = "https://slashslash.build";
 
-/** Where a reader gets in touch, as shown at the end of the page. Never an email address or a phone number. */
-export const CONTACT_LINE = "Reply to whoever sent you this link.";
+/**
+ * Where a reader gets in touch, as shown at the end of the page: the sender of the link, or an issue on
+ * the site's public repo for a reader nobody sent. Never an email address or a phone number.
+ */
+export const CONTACT = {
+  lead: "Reply to whoever sent you this link, or ",
+  link: "open an issue on GitHub",
+  href: "https://github.com/madangryscientist/slashslash/issues",
+  end: ".",
+} as const;
 
 export const PIXELSLASH_REPO_URL = "https://github.com/madangryscientist/pixelslash";
 export const PIXELSLASH_SITE_URL = "https://pixelslash.dev";

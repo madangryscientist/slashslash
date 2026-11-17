@@ -20,9 +20,8 @@ function HomeHero(): ReactNode {
           <CentredHero title={HERO.title}>
             <Lead>{HERO.lead}</Lead>
           </CentredHero>
-          <div className="mx-auto max-w-4xl">
-            <HeroPanes />
-          </div>
+          {/* The full column, so the panes line up with the tool cards below. */}
+          <HeroPanes />
         </div>
       </Container>
     </section>

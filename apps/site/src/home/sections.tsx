@@ -1,9 +1,9 @@
-import { Callout, Card, Container, ListRow, Pill, Section, Step, Steps, Text } from "@hackcove/ui-react";
+import { Card, Container, ListRow, Pill, Section, Step, Steps, Text, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
-import { CONTACT_LINE } from "#/content/site";
 import { GAPS, REPORT, STANDS, STEPS_TODAY, VIEW, VIEW_QUESTIONS, type StoryTool } from "#/content/story";
 import { TOOL_CARDS } from "#/home/tools";
+import { ContactLine } from "#/shell/contact-line";
 import { Pipeline } from "#/illustrations/pipeline";
 
 /*
@@ -92,28 +92,14 @@ export function OneReport(): ReactNode {
   return (
     <HomeSection id="report" title={REPORT.title}>
       <Text>{REPORT.body}</Text>
-      <Card flush>
-        {REPORT.rows.map((row, index) => (
-          <ListRow
-            key={row.tool}
-            divided={index > 0}
-            data-report={row.tool}
-            leading={
-              <span className="inline-block w-32 whitespace-nowrap">
-                <ToolName name={row.tool} />
-              </span>
-            }
-            secondary={row.why}
-          >
-            <span className="font-semibold">{row.question}</span>
-          </ListRow>
-        ))}
-      </Card>
       <Text>{REPORT.next}</Text>
       <Text>{REPORT.close}</Text>
     </HomeSection>
   );
 }
+
+/** The stage line either side of the words that link to the CI walkthrough. */
+const [stagesBefore, stagesAfter] = STANDS.stages.split(STANDS.tryLink.text);
 
 /** Where it stands: the stage lines, a stage Pill per tool, and the report screenshot (the children). */
 export function Stands({ children }: { children?: ReactNode }): ReactNode {
@@ -121,7 +107,11 @@ export function Stands({ children }: { children?: ReactNode }): ReactNode {
     <HomeSection id="stands" title={STANDS.title}>
       <div className="grid gap-10 md:grid-cols-2 md:items-start">
         <div className="space-y-4">
-          <Text>{STANDS.stages}</Text>
+          <Text>
+            {stagesBefore}
+            <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
+            {stagesAfter}
+          </Text>
           <ul className="flex flex-wrap gap-x-6 gap-y-3">
             {TOOL_CARDS.map((tool) => (
               <li key={tool.name} className="inline-flex items-center gap-2" data-stage-for={tool.name}>
@@ -152,7 +142,7 @@ export function YourView(): ReactNode {
           </li>
         ))}
       </ol>
-      <Callout tone="info">{CONTACT_LINE}</Callout>
+      <ContactLine />
     </HomeSection>
   );
 }

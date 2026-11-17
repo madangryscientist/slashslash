@@ -233,9 +233,9 @@ export function ComparePage(): ReactNode {
               </li>
             ))}
           </BulletList>
-          <Caption>
+          <Text>
             Our column was read from the code at {SUMMARY.oursCommit}, audited {SUMMARY.audited}.
-          </Caption>
+          </Text>
         </Section>
       </Stack>
     </Stack>

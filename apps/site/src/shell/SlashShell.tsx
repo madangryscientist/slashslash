@@ -1,4 +1,4 @@
-import { AppShell, AppShellBrand, Caption, Cluster, ColourSchemeToggle, Tabs, TextLink } from "@hackcove/ui-react";
+import { AppShell, AppShellBrand, Caption, Cluster, ColourSchemeToggle, Tabs, Text, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { PRODUCTS } from "#/content/products";
 import { LANDING_HEADLINE, PIXELSLASH_SITE_URL, SITE_NAME } from "#/content/site";
@@ -61,7 +61,7 @@ function Footer(): ReactNode {
       lead={
         <>
           <Lockup />
-          <Caption>{LANDING_HEADLINE}.</Caption>
+          <Text>{LANDING_HEADLINE}.</Text>
         </>
       }
       columns={[
@@ -78,7 +78,7 @@ function Footer(): ReactNode {
             </TextLink>,
           ],
         },
-        { title: "Licence", items: [...licenceItems(), <Caption as="span">{TRADEMARK}</Caption>] },
+        { title: "Licence", items: [...licenceItems(), <Text as="span">{TRADEMARK}</Text>] },
       ]}
     />
   );
