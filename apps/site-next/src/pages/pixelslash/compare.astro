@@ -1,0 +1,17 @@
+---
+// /pixelslash/compare: the PixelSlash comparison on the shell, in the PixelSlash section.
+import { Container } from "@hackcove/ui-react";
+import Slash from "#next/layouts/Slash.astro";
+import { ComparePage } from "#next/pixelslash/pages/compare";
+import { psPage } from "#next/pixelslash/page";
+
+const page = psPage("/compare");
+---
+
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  <div class="py-8">
+    <Container>
+      <ComparePage />
+    </Container>
+  </div>
+</Slash>

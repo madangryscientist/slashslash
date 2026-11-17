@@ -3,6 +3,7 @@
 @import "@hackcove/themes/slash-suite-dark.css";
 @import "./fonts.css";
 @import "./stand-ins/hero-ground.css";
+@import "./pixelslash/demo.css";
 /* Tailwind skips node_modules: scan the design system for the utilities its components use, and this app. */
 @source "../node_modules/@hackcove/ui-react/dist";
 @source "./";
