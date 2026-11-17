@@ -14,13 +14,15 @@ function read(page: string): string {
   return readFileSync(file, "utf8");
 }
 
-/** Visible text only, with the quote escapes React writes undone. The commands carry no `<`, `>` or `&`. */
+/** Visible text only, with the escapes React writes undone. The commands carry no `&`. */
 function visibleText(html: string): string {
   return html
     .replace(/<(script|style)[\s\S]*?<\/\1>/g, " ")
     .replace(/<[^>]+>/g, " ")
     .replaceAll("&#x27;", "'")
     .replaceAll("&quot;", '"')
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
     .replace(/\s+/g, " ");
 }
 
@@ -44,10 +46,16 @@ describe("the /toggleslash page", () => {
     for (const step of TRY_IT.steps) {
       expect(text).toContain(step.lead);
       for (const command of step.commands) {
-        expect(command).not.toMatch(/[<>&"']/);
-        expect(html).toContain(command);
+        expect(command).not.toMatch(/[&"']/);
+        expect(text).toContain(command);
       }
     }
+  });
+
+  test("sets the admin key in its own step, never to a literal placeholder", () => {
+    const commands = TRY_IT.steps.flatMap((step) => step.commands);
+    expect(commands.filter((command) => command.includes("=..."))).toEqual([]);
+    expect(TRY_IT.steps.some((step) => step.commands.join() === "export TOGGLESLASH_TOKEN=<your key>")).toBe(true);
   });
 
   test("keeps the sections in order: what it is, today, try it, planned, docs", () => {

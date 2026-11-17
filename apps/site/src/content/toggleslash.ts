@@ -3,8 +3,8 @@
  * README.md, docs/quickstart.md, docs/self-hosting.md and the CLI commands in packages/cli/src/commands
  * for what works today. Nothing is fetched at build time, so a change in that repo changes this file by hand.
  *
- * Commands stay free of `<`, `>`, `&` and quotes, so a test can find each one in the built page's
- * text with no entity decoding. Prose says "admin key": the variable that holds it appears only as code.
+ * Commands stay free of `&` and quotes. The one placeholder, `<your key>`, stands where a reader puts
+ * their own key; a test decodes the page's `&lt;` and `&gt;` before it looks for a command. Prose says "admin key": the variable that holds it appears only as code.
  */
 
 import { TOGGLESLASH_REPO_URL } from "#/content/site";
@@ -103,10 +103,13 @@ export const TRY_IT: { lead: string; steps: readonly TryStep[] } = {
       ],
     },
     {
-      lead: "In a second terminal in the same clone, give the command line the server and the same admin key, then make a flag and turn it on:",
+      lead: "In a second terminal in the same clone, give the command line the same admin key. Put the key you noted where it says <your key>:",
+      commands: ["export TOGGLESLASH_TOKEN=<your key>"],
+    },
+    {
+      lead: "Point it at the server, then make a flag and turn it on:",
       commands: [
         "export TOGGLESLASH_URL=http://127.0.0.1:8080",
-        "export TOGGLESLASH_TOKEN=...",
         "bun run toggleslash projects create shop --name Shop",
         "bun run toggleslash envs create production --project shop",
         "bun run toggleslash flags create new-checkout --project shop",
