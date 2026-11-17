@@ -2,8 +2,8 @@ import { expect, test, type Page } from "@playwright/test";
 
 /*
  * The home's hand-drawn hero in a real browser. With motion on, every piece of text in the panes' start
- * frame (the only part of the hero the motion changes) reads at 4.5:1 or more on the solid pane behind
- * it, in Slash Day and Slash Night. With reduced motion
+ * frame (the only part of the hero the motion changes) and in its finished drawing reads at 4.5:1 or
+ * more on the solid pane behind it, in Slash Day and Slash Night. With reduced motion
  * the hero never moves. On Slash Day a tool card's mark is drawn in the tool's deep text tone even when
  * the system is dark, never in the pastel one.
  */
@@ -53,7 +53,7 @@ const paneContrasts = (page: Page): Promise<{ text: string; ratio: number }[]> =
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const el = node.parentElement;
       const words = node.textContent?.trim() ?? "";
-      if (!el || words === "" || el.closest("style, script, [aria-hidden='true']")) continue;
+      if (!el || words === "" || el.closest("style, script, svg")) continue;
       const box = el.getBoundingClientRect();
       if (box.width === 0 || box.height === 0) continue;
       let hidden = false;
@@ -79,10 +79,20 @@ for (const theme of THEMES) {
     // when they scroll into view) is kept off.
     await expect(page.locator("html")).toHaveClass(/\bmotion\b/);
     await page.evaluate(() => document.querySelector(".panes")?.classList.remove("played"));
-    await expect(page.locator(".shop-btn")).toHaveCSS("margin-left", "0px");
+    await expect(page.locator(".pane-after .shop-btn")).toHaveCSS("margin-left", "0px");
 
     const readings = await paneContrasts(page);
     expect(readings.map((r) => r.text)).toEqual(expect.arrayContaining(["Pay", "+"]));
+    expect(readings.filter((r) => r.ratio < 4.5)).toEqual([]);
+  });
+
+  test(`the finished hero reads at 4.5:1 or more in ${theme}`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+    await page.goto("/");
+    const readings = await paneContrasts(page);
+    expect(readings.map((r) => r.text)).toEqual(
+      expect.arrayContaining(["Before", "The change", "After", "Tax", "Asked for", "Not asked for", "Pay"]),
+    );
     expect(readings.filter((r) => r.ratio < 4.5)).toEqual([]);
   });
 }

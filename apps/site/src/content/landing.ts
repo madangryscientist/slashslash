@@ -8,11 +8,18 @@ export const HERO = {
   /** The h1, with its full stop. LANDING_HEADLINE in site.ts is the same line without it. */
   title: "See what a change really does, before your customers do.",
   lead: "Software teams check the code they change. Nobody checks what customers will actually see. slashslash closes that gap.",
-  reviewed: "What the team reviewed",
-  seen: "What your customers see",
-  /** The text equivalent of the two panes, for screen readers. */
+  /** The hero drawing's three step captions, left to right (top to bottom on a phone). */
+  before: "Before",
+  change: "The change",
+  after: "After",
+  /** The change itself, in plain pseudo code a visitor who does not write code can read. */
+  codeLines: ["add a Tax line above Total", "colour new lines orange"],
+  /** The labels in the After step: on the tax line, and beside the circled Pay button. */
+  asked: "Asked for",
+  notAsked: "Not asked for",
+  /** The text equivalent of the three steps, for screen readers. */
   description:
-    "An illustration. On the left, a few edited lines of code, one of them highlighted. On the right, a checkout. The total gains a line for tax, as asked. The pay button also moves and changes colour, which nobody asked for, and it is circled.",
+    "An illustration in three steps: a checkout before, a change of two lines (add a Tax line above Total, and colour new lines orange), and the same checkout after. After the change the Tax line is orange, as asked, but the Pay button has also turned orange and moved, which nobody asked for, and it is circled.",
 } as const;
 
 export type Step = {

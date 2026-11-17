@@ -1,7 +1,7 @@
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
-import { STANDS as LANDING_STANDS } from "#/content/landing";
+import { HERO as HERO_DRAWING, STANDS as LANDING_STANDS } from "#/content/landing";
 import { PRODUCTS } from "#/content/products";
 import { CONTACT_LINE } from "#/content/site";
 import { STAGES } from "#/content/stages";
@@ -65,6 +65,23 @@ describe("/", () => {
 
   test("has no @@ label in the hero", () => {
     expect(hero).not.toContain("@@");
+  });
+
+  test("the hero draws three steps in order: Before, the change word for word, and After", () => {
+    const panes = hero.slice(hero.indexOf('data-testid="hero-panes"'));
+    const captions = [...panes.matchAll(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/g)].map((m) => text(m[1] ?? ""));
+    expect(captions).toEqual([HERO_DRAWING.before, HERO_DRAWING.change, HERO_DRAWING.after]);
+    const words = text(panes);
+    for (const line of HERO_DRAWING.codeLines) expect(words).toContain(`+ ${line}`);
+    expect(words).toContain(HERO_DRAWING.asked);
+    expect(words).toContain(HERO_DRAWING.notAsked);
+    const after = panes.slice(panes.indexOf("pane-after"));
+    for (const part of ["shop-tax", "shop-ring", "shop-note"]) expect(after, part).toContain(part);
+  });
+
+  test("the hero drawing is one image, described by its description", () => {
+    const label = hero.match(/role="img" aria-label="([^"]*)"/)?.[1];
+    expect(label && text(label)).toBe(HERO_DRAWING.description);
   });
 
   test("the hero has no link and no button", () => {
