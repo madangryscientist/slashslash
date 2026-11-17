@@ -1,0 +1,163 @@
+/*
+ * The pipeline drawing (pipeline.tsx), on the theme's own variables only, so it follows Slash Day and
+ * Slash Night. A column at every width: the rail down the left, a dot per step, its label beside it,
+ * and the change card under the last label. Every rule outside the motion block is the finished drawing:
+ * what a reader with no script or with reduced motion sees. The start frame lives in the motion block.
+ *
+ * Text and its ground, each a pair the theme holds at 4.5:1 or more in both schemes: labels and the
+ * customer in --hc-ink, the change card in --hc-accent, all on --hc-surface or the page.
+ */
+.pipe-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pipe-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  grid-template-rows: 2.75rem auto;
+  column-gap: 0.75rem;
+  padding-bottom: 1.25rem;
+}
+/* The rail: a line from this dot to the next, and the lit part of it drawn over. */
+.pipe-step::before,
+.pipe-step::after {
+  content: "";
+  position: absolute;
+  top: 1.375rem;
+  bottom: -1.375rem;
+  left: calc(1.375rem - 1px);
+  width: 2px;
+  background: var(--hc-accent);
+  transform-origin: top;
+}
+.pipe-step::before {
+  background: var(--hc-line);
+}
+.pipe-step:last-child::before,
+.pipe-step:last-child::after {
+  display: none;
+}
+.pipe-dot {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--hc-accent);
+  background: var(--hc-surface);
+  border: 2px solid var(--hc-accent);
+  border-radius: 999px;
+}
+.pipe-icon,
+.pipe-card svg,
+.pipe-customer svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pipe-icon {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+.pipe-label {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--hc-ink);
+}
+.pipe-slot {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.pipe-card,
+.pipe-customer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  background: var(--hc-surface);
+}
+.pipe-card {
+  color: var(--hc-accent);
+  border: 1.5px solid var(--hc-accent);
+}
+.pipe-customer {
+  color: var(--hc-ink);
+  border: 1.5px solid var(--hc-mute);
+  border-radius: 999px;
+}
+.pipe-card svg,
+.pipe-customer svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The start frame and the one-time play, only for a reader who allows motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .motion .pipe-step:not(.played) .pipe-dot {
+    color: var(--hc-mute);
+    border-color: var(--hc-line);
+    transform: scale(0.85);
+  }
+  .motion .pipe-step:not(.played) :is(.pipe-label, .pipe-slot) {
+    opacity: 0;
+  }
+  .motion .pipe-step:not(.played)::after {
+    transform: scaleY(0);
+  }
+  .pipe-step.played .pipe-dot {
+    animation: pipe-dot-on 0.4s ease-out both;
+  }
+  .pipe-step.played::after {
+    animation: pipe-rail-on 0.8s 0.3s linear both;
+  }
+  .pipe-step.played :is(.pipe-label, .pipe-slot) {
+    animation: pipe-fade-up 0.5s 0.15s ease-out both;
+  }
+  .pipe-step.played .pipe-customer {
+    animation: pipe-pop 0.5s 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  }
+  @keyframes pipe-dot-on {
+    from {
+      color: var(--hc-mute);
+      border-color: var(--hc-line);
+      transform: scale(0.85);
+    }
+  }
+  @keyframes pipe-rail-on {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  @keyframes pipe-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  @keyframes pipe-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+  }
+}

@@ -16,7 +16,7 @@ const THEMES = ["light", "dark"] as const;
 
 /** The pages whose full-page shot is kept for the flip review, by path, with the shot's name. */
 const FLIP_SHOTS: Partial<Record<string, string>> = {
-  "/": "home",
+  "/": "home-full",
   "/pixelslash": "pixelslash-home",
   "/pixelslash/pricing": "pixelslash-pricing",
   "/flakeslash": "flakeslash-home",
