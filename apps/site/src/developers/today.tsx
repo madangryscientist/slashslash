@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { PIXELSLASH_COMMAND, PIXELSLASH_NPM_URL, PIXELSLASH_REPO_URL, PIXELSLASH_SITE_URL } from "#/content/site";
 import type { Claim } from "#/content/facts";
 import { DevSection } from "#/developers/section";
-import { LicenceLine } from "#/shell/licence-line";
 import { Rich } from "#/shell/rich-text";
 
 /* How to run PixelSlash today, each command in a kit CodeBlock with a copy button. The page hydrates this when it scrolls into view. */
@@ -34,14 +33,20 @@ function Command({ text }: { text: string }): ReactNode {
   return <CodeBlock label="bash" language="bash" lines={[text]} copy />;
 }
 
-export function Today(): ReactNode {
+/**
+ * `licence` is PixelSlash's licence line, read from its facts file by the page and passed in, so this island's
+ * browser bundle does not carry the facts files.
+ */
+export function Today({ licence }: { licence: string }): ReactNode {
   return (
     <DevSection
       id="today"
       title={TODAY.title.text}
       lead={TODAY.lead.text}
     >
-      <LicenceLine product="pixelslash" />
+      <Text tone="muted">
+        <span data-licence-line="pixelslash">{licence}</span>
+      </Text>
       <Steps>
         <Step title={<SubsectionHeading>From two existing screenshots</SubsectionHeading>}>
           <div className="space-y-3">

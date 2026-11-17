@@ -110,8 +110,8 @@ export const FEATURES: readonly {
   {
     title: "A review server",
     body: {
-      text: "Uploading sends shots to a PixelSlash server you run. It holds the build for a person to review and reports a GitHub check.",
-      facts: ["pixelslash/upload-to-review-app", "pixelslash/github-status-and-comment", "pixelslash/self-host-docker"],
+      text: "Uploading sends shots to a PixelSlash server. It holds the build for a person to review and reports a GitHub check.",
+      facts: ["pixelslash/upload-to-review-app", "pixelslash/github-status-and-comment"],
     },
     href: "/docs/upload#uploading-to-a-server",
     icon: "self-host",

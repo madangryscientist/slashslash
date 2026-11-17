@@ -28,8 +28,8 @@ export const HOW_IT_WORKS: {
       facts: ["pixelslash/what-it-is", "pixelslash/compare-two-urls"],
     },
     {
-      text: `It replaces a hosted visual-review service such as Chromatic, Percy or Argos: the run above on your machine or CI runner, and the review on a server you run. [The comparison](${psHref("/compare")}) lists where it is still behind.`,
-      facts: ["pixelslash/compare-two-urls", "pixelslash/upload-to-review-app", "pixelslash/self-host-docker"],
+      text: `It replaces a hosted visual-review service such as Chromatic, Percy or Argos: the run above on your machine or CI runner, and the review on a server. [The comparison](${psHref("/compare")}) lists where it is still behind.`,
+      facts: ["pixelslash/compare-two-urls", "pixelslash/upload-to-review-app", "pixelslash/hosted-review-app"],
     },
     {
       text: "It is free: source available under the Elastic License 2.0, with all of it in the repository and no paid plan to buy.",
@@ -75,12 +75,11 @@ export const HOW_IT_WORKS: {
     facts: ["pixelslash/exit-codes"],
   },
   upload: {
-    text: "pixelslash upload sends the shots to a PixelSlash review server you run. It diffs them against the default branch, holds the build for review and reports a GitHub check, and pixelslash status --wait blocks CI until someone accepts or rejects it.",
+    text: "pixelslash upload sends the shots to a PixelSlash review server. It diffs them against the default branch, holds the build for review and reports a GitHub check, and pixelslash status --wait blocks CI until someone accepts or rejects it.",
     facts: [
       "pixelslash/upload-to-review-app",
       "pixelslash/github-status-and-comment",
       "pixelslash/block-ci-on-review",
-      "pixelslash/self-host-docker",
     ],
   },
 };

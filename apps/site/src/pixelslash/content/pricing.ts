@@ -3,9 +3,6 @@ import type { Claim, FactsProduct } from "#/content/facts";
 /*
  * The pricing page's words. Each product claim cites PixelSlash's facts (facts.test.ts); the licence card
  * shows the facts file's own licence line. PixelSlash costs nothing today and there is no paid plan to buy.
- *
- * TODO(PS-261): Jacobus to review the wording of COMMITMENT before the site is published; it is a
- * promise about what paid hosting will and will not be, so it is his to phrase.
  */
 
 /** The page's one statement, and the sentence under it. */
@@ -21,7 +18,7 @@ export const LEAD: Claim = {
 /** The one action the page asks for, and where it goes. */
 export const ACTION = { label: "Self-host it", href: "/self-host" } as const;
 
-/** The one promise about paid hosting: it buys having us run it, never a feature. */
+/** The one promise about paying: no feature sits behind a paid plan. */
 export const COMMITMENT: Claim = {
   text: "No feature will ever sit behind a paid plan.",
   facts: ["pixelslash/licence"],

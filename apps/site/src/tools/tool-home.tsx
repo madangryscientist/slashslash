@@ -6,7 +6,6 @@ import {
   CardGrid,
   Cluster,
   Code,
-  CodeBlock,
   Container,
   Lead,
   Pill,
@@ -19,7 +18,6 @@ import { STAGES, STAGE_TONE } from "#/content/stages";
 import { LicenceLine } from "#/shell/licence-line";
 import { SECTIONS } from "#/shell/sections";
 import { CentredHero, CentredRow } from "#/stand-ins/centred-hero";
-import type { TryStep } from "#/content/flakeslash";
 import { promiseOf, stageOf, type Tool } from "#/tools/tools";
 
 /*
@@ -53,25 +51,6 @@ function StageLine({ tool }: { tool: Tool }): ReactNode {
         {sentence}
       </Text>
     </p>
-  );
-}
-
-/** The hero's command, with a copy button. */
-export function HeroCode({ command }: { command: string }): ReactNode {
-  return <CodeBlock label="bash" language="bash" overflow="wrap" lines={[command]} copy />;
-}
-
-/** Each try-it step: its lead line and its commands in one block with a copy button. */
-export function TryIt({ steps }: { steps: readonly TryStep[] }): ReactNode {
-  return (
-    <Stack gap="lg">
-      {steps.map((step) => (
-        <Stack key={step.lead} gap="sm">
-          <Text>{step.lead}</Text>
-          <CodeBlock label="bash" language="bash" overflow="wrap" lines={[...step.commands]} copy />
-        </Stack>
-      ))}
-    </Stack>
   );
 }
 
