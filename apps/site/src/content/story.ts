@@ -29,10 +29,10 @@ export const VIEW = {
 } as const;
 
 /** A step a change goes through, in the order most teams run them. */
-export type StageName = "Written" | "Built and tested" | "Reviewed" | "Released";
+type StageName = "Written" | "Built and tested" | "Reviewed" | "Released";
 
 /** A step of the pipeline: its name, what happens there, and the tools that run there. */
-export type PipelineStage = {
+type PipelineStage = {
   name: StageName;
   text: string;
   tools: readonly { tool: StoryTool; does: string }[];
