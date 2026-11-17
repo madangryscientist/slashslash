@@ -149,19 +149,3 @@ test("on Slash Day a tool's mark is its deep tone, even on a dark system", async
   // PixelSlash's deep tone is #8839ef; its pastel #cba6f7 would read near 203.
   expect(pixel[0]).toBeLessThan(160);
 });
-
-test("the report screenshot opens full screen in a dialog, closed at first, and its close button shuts it", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const open = page.getByRole("link", { name: "Open the report full screen" });
-  await open.scrollIntoViewIfNeeded();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  // client:visible: the viewer hydrates once it is on screen, then the tap opens the dialog in place.
-  await expect(page.locator('astro-island[component-export="ReportViewer"]')).not.toHaveAttribute("ssr", "");
-  await open.click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  expect(page.url()).not.toContain("report.png");
-  await dialog.getByRole("button", { name: "Close" }).click();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-});

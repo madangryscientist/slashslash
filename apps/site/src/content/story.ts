@@ -20,7 +20,7 @@ const listNames = (names: readonly string[]): string =>
 
 export const HERO = {
   title: "Your agents ship fast. Slash shows what each change really does, before it ships.",
-  lead: "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash gives every change a plain report of what it will do, before your customers find out.",
+  lead: "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash adds a tool at each step a change goes through, from the build to the release, so what a change really does shows up before your customers find it.",
 } as const;
 
 /** The title of the ask at the end of the home, where the questions are. */
@@ -57,7 +57,7 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
       tools: [
         {
           tool: "TaskSlash",
-          does: "Queues builds and tests on one machine and starts each only when there is room, so a test fails because of the code, not because everything ran at once.",
+          does: "Queues builds and tests and starts each only when there is room, on one machine today and on your CI runners next, so a test fails because of the code, not because everything ran at once.",
         },
         {
           tool: "FlakeSlash",
@@ -100,7 +100,7 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
 export const STANDS = {
   title: "Where it stands",
   stages:
-    "PixelSlash, ToggleSlash, FlakeSlash and TaskSlash are alphas: try them and see what they do (start with how it works in CI). Expect the screens to change a lot, and expect bugs, which get fixed as they turn up. Between alpha versions, what the tools have stored (approvals, history, settings) may be reset. Your code and your customers' data are never touched. BundleSlash and SightSlash are planned.",
+    "TaskSlash, FlakeSlash, PixelSlash and ToggleSlash are alphas: try them and see what they do (start with how it works in CI). Expect the screens to change a lot, and expect bugs, which get fixed as they turn up. Between alpha versions, what the tools have stored (approvals, history, settings) may be reset. Your code and your customers' data are never touched. BundleSlash and SightSlash are planned.",
   /** The words in `stages` that link to the CI walkthrough. */
   tryLink: { text: "how it works in CI", href: "/developers" },
   selfHost: `${listNames(SELF_HOSTED)} run on your own server from one install, today on Proxmox or Kubernetes.`,

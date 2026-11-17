@@ -5,8 +5,7 @@ import { ContactLine } from "#/shell/contact-line";
 
 /*
  * The rest of the suite home, after the pipeline: where it stands, and the ask. Each is a kit Section
- * whose title is an h2. Nothing here runs in the browser; "Where it stands" takes the report viewer
- * island as its children.
+ * whose title is an h2. Nothing here runs in the browser.
  */
 
 /** One home section: the kit's Section in the page's column, its title an h2. */
@@ -25,22 +24,17 @@ export function HomeSection({ id, title, children }: { id: string; title: string
 /** The stage line either side of the words that link to the CI walkthrough. */
 const [stagesBefore, stagesAfter] = STANDS.stages.split(STANDS.tryLink.text);
 
-/** Where it stands: the stage lines and the report screenshot (the children). */
-export function Stands({ children }: { children?: ReactNode }): ReactNode {
+/** Where it stands: what is built, what is planned, and where it runs. */
+export function Stands(): ReactNode {
   return (
     <HomeSection id="stands" title={STANDS.title}>
-      <div className="grid gap-10 md:grid-cols-2 md:items-start">
-        <div className="space-y-4">
-          <Text>
-            {stagesBefore}
-            <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
-            {stagesAfter}
-          </Text>
-          <Text>{STANDS.selfHost}</Text>
-          <Text>{STANDS.hosted}</Text>
-        </div>
-        <div>{children}</div>
-      </div>
+      <Text>
+        {stagesBefore}
+        <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
+        {stagesAfter}
+      </Text>
+      <Text>{STANDS.selfHost}</Text>
+      <Text>{STANDS.hosted}</Text>
     </HomeSection>
   );
 }

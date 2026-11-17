@@ -21,10 +21,3 @@ export const HERO = {
   description:
     "An illustration in three steps: a checkout before, a change of two lines (add a Tax line above Total, and colour new lines orange), and the same checkout after. After the change the Tax line is orange, as asked, but the Pay button has also turned orange and moved, which nobody asked for, and it is circled.",
 } as const;
-
-export const STANDS = {
-  reportAlt:
-    "PixelSlash's review app for one change: a card on Main and the same card on Branch side by side, with the changed area outlined in red and a yellow bar on Branch.",
-  reportOpen: "Open the report full screen",
-  reportClose: "Close",
-} as const;

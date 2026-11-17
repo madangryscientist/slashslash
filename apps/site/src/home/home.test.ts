@@ -1,7 +1,7 @@
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
-import { HERO as HERO_DRAWING, STANDS as LANDING_STANDS } from "#/content/landing";
+import { HERO as HERO_DRAWING } from "#/content/landing";
 import { PRODUCTS } from "#/content/products";
 import { CONTACT } from "#/content/site";
 import { STAGES } from "#/content/stages";
@@ -138,11 +138,11 @@ describe("/", () => {
     expect(text(html)).not.toMatch(/\b(two|three|four|five|six|\d+)\s+(slash\s+)?(tools|questions)\b/i);
   });
 
-  test("hydrates only the report viewer, when it comes into view, and the motion island", () => {
+  test("hydrates only the motion island", () => {
     const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]*)"[^>]*client="([^"]*)"/g)].map(
       (m) => `${m[1]}:${m[2]}`,
     );
-    expect(islands).toEqual(["ReportViewer:visible", "Motion:load"]);
+    expect(islands).toEqual(["Motion:load"]);
   });
 });
 
@@ -200,13 +200,10 @@ describe("the home from the pipeline on", () => {
     expect(afterTools).not.toContain("@@");
   });
 
-  test("links the report screenshot to the fetched PixelSlash image, which is built, and no tracked copy is left", () => {
+  test("links the CI walkthrough and shows no PixelSlash report screenshot", () => {
     const stands = section("stands");
-    expect(stands).toContain('href="/pixelslash/report.png"');
-    expect(text(stands)).toContain(LANDING_STANDS.reportOpen);
     expect(stands).toContain(`href="${STANDS.tryLink.href}"`);
-    expect(existsSync(resolve(DIST, "pixelslash/report.png"))).toBe(true);
-    expect(existsSync(resolve(DIST, "report.png"))).toBe(false);
+    expect(html).not.toContain("report.png");
   });
 
   test("puts the ask at #your-view: the questions in order as a numbered list, and the contact line", () => {

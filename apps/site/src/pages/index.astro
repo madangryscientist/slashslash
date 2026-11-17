@@ -1,10 +1,9 @@
 ---
 // The suite home, on the shell in the suite's section: the hero and the pipeline of tools, then where it
-// stands and the ask. The hero's motion guard runs before first paint; the Motion island and the
-// report viewer are the only things on the page that hydrate.
+// stands and the ask. The hero's motion guard runs before first paint; the Motion island is the only
+// thing on the page that hydrates.
 import { HERO } from "#/content/story";
 import { Home } from "#/home/home";
-import { ReportViewer } from "#/home/report-viewer";
 import { Stands, YourView } from "#/home/sections";
 import { Motion, MOTION_SCRIPT } from "#/illustrations/motion";
 import Slash from "#/layouts/Slash.astro";
@@ -13,9 +12,7 @@ import Slash from "#/layouts/Slash.astro";
 <Slash section="suite" title={HERO.title} description={HERO.lead}>
   <script is:inline slot="head" set:html={MOTION_SCRIPT} />
   <Home />
-  <Stands>
-    <ReportViewer client:visible />
-  </Stands>
+  <Stands />
   <YourView />
   <Motion client:load />
 </Slash>
