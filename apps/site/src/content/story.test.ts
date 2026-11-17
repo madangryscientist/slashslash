@@ -66,6 +66,10 @@ describe("suite story copy", () => {
     expect(namedIn(plannedSentence).toSorted()).toEqual(planned.toSorted());
   });
 
+  test("the stage line holds the words its CI link wraps", () => {
+    expect(story.STANDS.stages).toContain(story.STANDS.tryLink.text);
+  });
+
   test("the self-host sentence names exactly the SELF_HOSTED tools", () => {
     const named = namedIn(story.STANDS.selfHost).toSorted();
     expect(named).toEqual([...story.SELF_HOSTED].toSorted());

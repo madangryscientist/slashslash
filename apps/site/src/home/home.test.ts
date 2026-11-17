@@ -38,6 +38,8 @@ function text(html: string): string {
     .replaceAll("&gt;", ">")
     .replaceAll("&amp;", "&")
     .replace(/\s+/g, " ")
+    // A tag ending just before punctuation (a link closing a sentence) leaves no space in the page.
+    .replace(/ (?=[.,;:)])/g, "")
     .trim();
 }
 
@@ -177,7 +179,8 @@ describe("the home after the tool cards", () => {
 
   test("carries every string of the story's sections", () => {
     const words = text(afterTools);
-    for (const line of strings([STEPS_TODAY, GAPS, REPORT, STANDS, VIEW_QUESTIONS])) {
+    // A string that starts with "/" is a link's address, not words on the page.
+    for (const line of strings([STEPS_TODAY, GAPS, REPORT, STANDS, VIEW_QUESTIONS]).filter((line) => !line.startsWith("/"))) {
       expect(words, line).toContain(line);
     }
   });
@@ -217,6 +220,7 @@ describe("the home after the tool cards", () => {
     const stands = section("stands");
     expect(stands).toContain('href="/pixelslash/report.png"');
     expect(text(stands)).toContain(LANDING_STANDS.reportOpen);
+    expect(stands).toContain(`href="${STANDS.tryLink.href}"`);
     expect(existsSync(resolve(DIST, "pixelslash/report.png"))).toBe(true);
     expect(existsSync(resolve(DIST, "report.png"))).toBe(false);
   });

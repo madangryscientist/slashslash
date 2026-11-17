@@ -1,4 +1,4 @@
-import { Card, Container, ListRow, Pill, Section, Step, Steps, Text } from "@hackcove/ui-react";
+import { Card, Container, ListRow, Pill, Section, Step, Steps, Text, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { GAPS, REPORT, STANDS, STEPS_TODAY, VIEW, VIEW_QUESTIONS, type StoryTool } from "#/content/story";
@@ -104,7 +104,11 @@ export function Stands({ children }: { children?: ReactNode }): ReactNode {
     <HomeSection id="stands" title={STANDS.title}>
       <div className="grid gap-10 md:grid-cols-2 md:items-start">
         <div className="space-y-4">
-          <Text>{STANDS.stages}</Text>
+          <Text>
+            {STANDS.stages.slice(0, STANDS.stages.indexOf(STANDS.tryLink.text))}
+            <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
+            {STANDS.stages.slice(STANDS.stages.indexOf(STANDS.tryLink.text) + STANDS.tryLink.text.length)}
+          </Text>
           <ul className="flex flex-wrap gap-x-6 gap-y-3">
             {TOOL_CARDS.map((tool) => (
               <li key={tool.name} className="inline-flex items-center gap-2" data-stage-for={tool.name}>

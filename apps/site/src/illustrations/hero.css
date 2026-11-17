@@ -33,7 +33,7 @@
 .pane-cap {
   margin: 0 0 1rem;
   font-family: var(--font-mono);
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--hc-mute);
 }
@@ -48,7 +48,7 @@
   display: grid;
   gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.4;
   color: var(--hc-ink);
 }
@@ -66,7 +66,7 @@
 }
 .shop {
   display: grid;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   color: var(--hc-mute);
 }
 .shop-head {
@@ -127,14 +127,14 @@
   margin-left: 0.4rem;
   padding: 0 0.3rem;
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   border: 1px solid currentColor;
   border-radius: 3px;
 }
 .shop-note {
   margin-top: 0.25rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 700;
   text-align: right;
   text-wrap: balance;
@@ -150,12 +150,14 @@
   overflow: visible;
   fill: none;
   stroke: var(--hc-cat-7);
-  stroke-width: 2.5;
+  /*
+   * Stretched to the button's box, so the stroke scales with it: the viewBox is about the ring's usual
+   * shape (3:1), which keeps the line near 2.5px all round. No non-scaling-stroke: with it, pathLength
+   * no longer matches the drawn path, and the dash covered only part of the ring.
+   */
+  stroke-width: 1.6;
   stroke-linecap: round;
   stroke-dasharray: 1 1;
-}
-.shop-ring path {
-  vector-effect: non-scaling-stroke;
 }
 
 /*

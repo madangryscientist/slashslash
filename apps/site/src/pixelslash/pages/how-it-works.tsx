@@ -1,6 +1,5 @@
 import {
   Text,
-  Caption,
   CodeBlock,
   Image,
   ProseLayout,
@@ -73,11 +72,11 @@ export function HowItWorksPage(): ReactNode {
           width="full"
         />
         {/* The numbers below come from apps/site/src/content/report.json in PixelSlash at the pinned commit (not fetched here); re-read them when the pin moves. */}
-        <Caption>
+        <Text>
           A real run, not a mock-up: the repository's own fixtures/pages/live.html against
           local.html, shot in Chromium at 1280×720. It printed 19033 changed pixels and one changed
           region.
-        </Caption>
+        </Text>
         <CodeBlock language="bash" label="bash" copy>
           {[
             "bun run pixelslash -- --live http://localhost:4391/live.html \\",

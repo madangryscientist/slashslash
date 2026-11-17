@@ -16,7 +16,7 @@ export const HERO = {
   codeLines: ["add a Tax line above Total", "colour new lines orange"],
   /** The labels in the After step: on the tax line, and beside the circled Pay button. */
   asked: "Asked for",
-  notAsked: "Not asked for: the Pay button also turned orange",
+  notAsked: "Not asked for: the Pay button also turned orange and moved",
   /** The text equivalent of the three steps, for screen readers. */
   description:
     "An illustration in three steps: a checkout before, a change of two lines (add a Tax line above Total, and colour new lines orange), and the same checkout after. After the change the Tax line is orange, as asked, but the Pay button has also turned orange and moved, which nobody asked for, and it is circled.",

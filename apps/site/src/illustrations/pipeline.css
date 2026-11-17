@@ -71,7 +71,7 @@
   grid-row: 1;
   align-self: center;
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--hc-ink);
 }
@@ -90,7 +90,7 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.55rem;
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
   background: var(--hc-surface);
