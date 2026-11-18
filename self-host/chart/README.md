@@ -111,7 +111,7 @@ Secret too.
   before either tool migrates (see "Backup, restore and rollback" in `self-host/README.md`).
 - Rollback (untested): the same `helm upgrade` with `--version <previous>` (not `helm rollback`,
   which would also put back the old `startupSeconds`, while the older image backs the volume up
-  again). If `slashslash-0` stays on the new version, `kubectl delete pod slashslash-0 -n
+  again). Charts 0.1.0 and 0.1.1 are at `oci://ghcr.io/madangryscientist/charts/slashslash`. If `slashslash-0` stays on the new version, `kubectl delete pod slashslash-0 -n
   slashslash`. Then find the backup taken before the upgrade with `kubectl exec -n slashslash
   slashslash-0 -- ls /data/backups` and `slashslash restore /data/backups/<that file>`.
 - Backup: `kubectl exec -n slashslash slashslash-0 -- slashslash backup`, then copy it out with

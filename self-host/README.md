@@ -91,6 +91,9 @@ The image is published at `ghcr.io/slashsuite/slashslash`:
 | `edge` | The newest build of main, tested but not released |
 | `0.1.0-edge.<sha7>` | One build of main |
 
+Releases up to 0.1.1 were published before the move to slashsuite and stay at
+`ghcr.io/madangryscientist/slashslash` (their charts at `oci://ghcr.io/madangryscientist/charts`).
+
 To pin a release, put its tag in place of `latest` in the `docker run` above. An upgrade is
 `docker pull` of the new tag, then `docker rm -f slashslash` and the same `docker run`: everything
 lives on the volume, and the first start of the new version backs the volume up before either tool
@@ -196,6 +199,7 @@ before the upgrade:
 ```sh
 docker rm -f slashslash
 docker run -d --name slashslash ... ghcr.io/slashsuite/slashslash:<previous version>
+# 0.1.0 and 0.1.1 are at ghcr.io/madangryscientist/slashslash:<previous version>
 docker exec slashslash ls /data/backups
 docker exec slashslash slashslash restore /data/backups/upgrade-<UTC time>-<previous version>.tgz
 ```
