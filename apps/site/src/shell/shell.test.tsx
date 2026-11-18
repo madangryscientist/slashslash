@@ -76,8 +76,8 @@ describe("the shell on the 404 page", () => {
     const footer = elements(page(), "footer")[0] ?? "";
     const caption = (name: string): boolean => new RegExp(`${name}\\s*Planned`).test(text(footer));
     for (const product of PRODUCTS) expect(caption(product.name), product.name).toBe(product.stage === "planned");
-    expect(text(footer)).toContain("UISlash");
-    expect(caption("BundleSlash")).toBe(true);
+    expect(links(footer).map((link) => link.text)).not.toContain("UISlash");
+    expect(footer).toContain(`src="${markFor("UISlash")}"`);
   });
 
   test("the head script names the suite's dark scope", () => {
