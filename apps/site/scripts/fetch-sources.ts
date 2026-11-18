@@ -26,7 +26,7 @@ export const PIXELSLASH_FILES = [
 ] as const;
 
 /** The products whose FACTS.md the site reads, each by its repository name. */
-export const FACTS_PRODUCTS = ["pixelslash", "toggleslash", "flakeslash", "taskslash", "uislash"] as const;
+export const FACTS_PRODUCTS = ["pixelslash", "toggleslash", "flakeslash", "taskslash", "uislash", "omnislash"] as const;
 export type FactsProduct = (typeof FACTS_PRODUCTS)[number];
 
 /** The repository each product's FACTS.md comes from, as owner/repo. */
@@ -36,6 +36,7 @@ const FACTS_REPOS: Record<FactsProduct, string> = {
   flakeslash: "madangryscientist/flakeslash",
   taskslash: "madangryscientist/taskslash",
   uislash: "slashsuite/uislash",
+  omnislash: "slashsuite/omnislash",
 };
 const REPO = FACTS_REPOS.pixelslash;
 const SITE = resolve(import.meta.dirname, "..");
