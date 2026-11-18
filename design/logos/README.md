@@ -1,7 +1,7 @@
 # Logos
 
 The suite's logo drafts, generated from code so every mark can be rebuilt. The site ships **Direction C, glyph and cut**:
-its seven marks and fourteen lockups are written to `apps/site/public/brand/` and committed there.
+its eight marks and sixteen lockups are written to `apps/site/public/brand/` and committed there.
 
 ## Regenerate
 
@@ -29,8 +29,8 @@ and one that will not fit is set smaller (the run says which), never cut.
 
 ## What it writes
 
-- `apps/site/public/brand/<slug>-mark.svg` and `<slug>-lockup-{light,dark}.svg` for the seven Direction C tools
-  (slash, pixelslash, flakeslash, toggleslash, bundleslash, taskslash, sightslash). Tracked in git.
+- `apps/site/public/brand/<slug>-mark.svg` and `<slug>-lockup-{light,dark}.svg` for the eight Direction C tools
+  (slash, pixelslash, flakeslash, toggleslash, bundleslash, taskslash, sightslash, uislash). Tracked in git.
 - `apps/site/public/og/<slug>.svg` and `<slug>.png`: one 1200x630 share card per page, from the list in
   `apps/site/src/content/og.ts`. Tracked in git; the layout's head names the PNG.
 - `design/logos/out/` (gitignored): all three directions (`a-cut`, `b-pixel`, `c-glyph`) and the review boards in

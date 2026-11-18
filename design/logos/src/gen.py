@@ -3,7 +3,8 @@
 Run from the repo root:
   uvx --with brotli==1.2.1 --with uharfbuzz==0.57.0 --from fonttools==4.68.0 python design/logos/src/gen.py
 Writes SVGs under ../out (gitignored): a-cut, b-pixel, c-glyph, and a board per direction under ../out/boards.
-Direction C is the one the suite ships: its seven marks and fourteen lockups also go to apps/site/public/brand/ (tracked).
+Direction C is the one the suite ships: its eight marks and sixteen lockups (slash, pixelslash, flakeslash, toggleslash,
+bundleslash, taskslash, sightslash, uislash) also go to apps/site/public/brand/ (tracked).
 
 With `--og <file>` (or `--og -` for stdin) it also writes one share card per page, from the JSON list that
 og-pages.ts prints, to apps/site/public/og/<slug>.svg (tracked); og-png.ts then rasterises them.
@@ -40,11 +41,13 @@ ACCENT = {
     # SightSlash (Jacobus, 2026-11-15: Catppuccin pink). Latte pink #ea76cb is 2.3:1 on the Latte ground, so the
     # light fill is darkened to #c8399a (4.1:1) and its text tone to #b8338a (4.8:1).
     "sight": {"light": "#c8399a", "text": "#b8338a", "dark": "#f5c2e7"},
+    # UISlash (Jacobus, 2026-11-18: teal, picked over lavender and lime). Its text tone measures 4.7:1 on #eef2f9.
+    "ui": {"light": "#13838a", "text": "#0e777c", "dark": "#94e2d5"},
 }
 TOOLS = ["pixel", "flake", "toggle", "bundle"]
-# TaskSlash and SightSlash (Jacobus, 2026-11-15) are drawn in Direction C only, the direction he picked.
-C_TOOLS = [*TOOLS, "task", "sight"]
-NAME = {"suite": "slashslash", "pixel": "PixelSlash", "flake": "FlakeSlash", "toggle": "ToggleSlash", "bundle": "BundleSlash", "task": "TaskSlash", "sight": "SightSlash"}
+# TaskSlash and SightSlash (Jacobus, 2026-11-15) and UISlash (2026-11-18) are drawn in Direction C only, the direction he picked.
+C_TOOLS = [*TOOLS, "task", "sight", "ui"]
+NAME = {"suite": "slashslash", "pixel": "PixelSlash", "flake": "FlakeSlash", "toggle": "ToggleSlash", "bundle": "BundleSlash", "task": "TaskSlash", "sight": "SightSlash", "ui": "UISlash"}
 TILE = "#181825"  # Mocha mantle: the pixel tiles carry their own ground in both themes
 
 
@@ -273,6 +276,12 @@ def c_mark(tool, uid):
         )
     elif tool == "sight":  # a component frame with a pupil inside, cut by the slash
         shape = '<rect x="10" y="16" width="80" height="68" rx="12" fill="none" stroke="#fff" stroke-width="10"/><circle cx="50" cy="50" r="15"/>'
+    elif tool == "ui":  # a page wireframe: a window with its top bar filled, a sidebar and a content block inside
+        shape = (
+            '<rect x="10" y="12" width="80" height="76" rx="14" fill="none" stroke="#fff" stroke-width="10"/>'
+            '<rect x="10" y="12" width="80" height="28" rx="14"/><rect x="10" y="26" width="80" height="14"/>'
+            '<rect x="21" y="50" width="13" height="28" rx="3"/><rect x="53" y="50" width="26" height="28" rx="3"/>'
+        )
     return (
         f'<mask id="m{uid}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">'
         f'<g fill="#fff">{shape}</g>{cuts}</mask>'
@@ -282,7 +291,7 @@ def c_mark(tool, uid):
 
 def c_word(tool):
     """JetBrains Mono 700: the first half in ink, `slash` in the tool's text tone (class `t`); the suite adds `.build`."""
-    first = {"suite": "slash", "pixel": "pixel", "flake": "flake", "toggle": "toggle", "bundle": "bundle", "task": "task", "sight": "sight"}[tool]
+    first = {"suite": "slash", "pixel": "pixel", "flake": "flake", "toggle": "toggle", "bundle": "bundle", "task": "task", "sight": "sight", "ui": "ui"}[tool]
     d1, w1 = text_path(first, face="mono", axes=(("wght", 700),), size=60, x=122, y=70)
     d2, w2 = text_path("slash", face="mono", axes=(("wght", 700),), size=60, x=122 + w1, y=70)
     body = f'<path class="i" d="{d1}"/><path class="t" d="{d2}"/>'
@@ -377,17 +386,18 @@ def files_for(d, tool, th):
 
 def board(d):
     title, why = DIRS[d]
-    W, H = 1600, 1140
+    tools = C_TOOLS if d == "c-glyph" else TOOLS
+    # Each lockup row past six tools makes the board one row taller.
+    W, H = 1600, 1140 + 92 * max(0, len(tools) - 6)
     parts = [f'<rect width="{W}" height="{H}" fill="#dce0e8"/>',
              f'<text x="40" y="58" font-family="sans-serif" font-size="30" font-weight="700" fill="#4c4f69">{title}</text>',
              f'<text x="40" y="92" font-family="sans-serif" font-size="18" fill="#5c5f77">{why}</text>']
     for col, th in enumerate(("light", "dark")):
         ox = 40 + col * 770
         t = THEME[th]
-        parts.append(f'<rect x="{ox}" y="120" width="750" height="990" rx="16" fill="{t["bg"]}"/>')
+        parts.append(f'<rect x="{ox}" y="120" width="750" height="{H - 150}" rx="16" fill="{t["bg"]}"/>')
         parts.append(f'<text x="{ox + 30}" y="160" font-family="sans-serif" font-size="15" fill="{t["mute"]}">{th}</text>')
         y = 190
-        tools = C_TOOLS if d == "c-glyph" else TOOLS
         sizes = (32, 20, 16) if len(tools) > 5 else (40, 24, 16) if len(tools) > 4 else (64, 32, 16)
         for tool in ["suite", *tools]:
             lock, mark = files_for(d, tool, th)
@@ -409,8 +419,8 @@ def board(d):
             for size in sizes:
                 m, mw = embed(mark, x, y + (sizes[0] - size), size, th)
                 parts.append(m)
-                x += mw + 6
-            x += 14
+                x += mw + (6 if len(tools) < 7 else 2)
+            x += 14 if len(tools) < 7 else 6
         # a browser tab with the favicon
         y += 100
         parts.append(f'<rect x="{ox + 30}" y="{y}" width="300" height="40" rx="8" fill="{t["panel"]}" stroke="{t["rule"]}"/>')
