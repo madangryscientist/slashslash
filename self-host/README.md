@@ -7,7 +7,7 @@ docker run -d --name slashslash --restart unless-stopped \
   -p 3000:3000 -p 8080:8080 \
   -e GITHUB_CLIENT_ID=<id> -e GITHUB_CLIENT_SECRET=<secret> \
   -v slashslash-data:/data \
-  ghcr.io/madangryscientist/slashslash:latest
+  ghcr.io/slashsuite/slashslash:latest
 ```
 
 - PixelSlash is on `http://<your server>:3000`, ToggleSlash on `http://<your server>:8080`.
@@ -33,7 +33,7 @@ On Kubernetes it is one `helm install` (or one `kubectl apply`): see [`chart/`](
 Run this in the Proxmox host's shell, as root:
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/slashsuite/slashslash/main/self-host/proxmox/install.sh)"
 ```
 
 It asks for what it needs, makes one unprivileged Debian 13 container with Docker in it (2 cores,
@@ -64,7 +64,7 @@ a command line. `DRY_RUN=1` prints every command that would change something and
 The other modes take arguments after the line's `_`:
 
 ```sh
-url=https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh
+url=https://raw.githubusercontent.com/slashsuite/slashslash/main/self-host/proxmox/install.sh
 bash -c "$(curl -fsSL $url)" _ --upgrade <CTID> [VERSION]  # pull VERSION (default latest), recreate on the same data
 bash -c "$(curl -fsSL $url)" _ --uninstall <CTID>          # remove the container, keep the data
 bash -c "$(curl -fsSL $url)" _ --uninstall <CTID> --purge  # remove the container and its data volume
@@ -82,7 +82,7 @@ works.
 
 ## Versions
 
-The image is published at `ghcr.io/madangryscientist/slashslash`:
+The image is published at `ghcr.io/slashsuite/slashslash`:
 
 | Tag | What it is |
 | --- | --- |
@@ -90,6 +90,9 @@ The image is published at `ghcr.io/madangryscientist/slashslash`:
 | `0.1.0` (any `X.Y.Z`) | That release. Pin this to choose when you upgrade |
 | `edge` | The newest build of main, tested but not released |
 | `0.1.0-edge.<sha7>` | One build of main |
+
+Releases up to 0.1.1 were published before the move to slashsuite and stay at
+`ghcr.io/madangryscientist/slashslash` (their charts at `oci://ghcr.io/madangryscientist/charts`).
 
 To pin a release, put its tag in place of `latest` in the `docker run` above. An upgrade is
 `docker pull` of the new tag, then `docker rm -f slashslash` and the same `docker run`: everything
@@ -195,7 +198,8 @@ before the upgrade:
 
 ```sh
 docker rm -f slashslash
-docker run -d --name slashslash ... ghcr.io/madangryscientist/slashslash:<previous version>
+docker run -d --name slashslash ... ghcr.io/slashsuite/slashslash:<previous version>
+# 0.1.0 and 0.1.1 are at ghcr.io/madangryscientist/slashslash:<previous version>
 docker exec slashslash ls /data/backups
 docker exec slashslash slashslash restore /data/backups/upgrade-<UTC time>-<previous version>.tgz
 ```
@@ -283,7 +287,7 @@ to the new one), then tag a release (below) when you want it published as `:late
    that on main.
 2. Tag that commit `self-host-vX.Y.Z` and push the tag. CI checks the tag matches `VERSION`, builds,
    runs the smoke, pushes `:X.Y.Z` and `:latest`, then pushes the chart to
-   `oci://ghcr.io/madangryscientist/charts`.
+   `oci://ghcr.io/slashsuite/charts`.
 
 The first push from CI creates each package (the image, the chart) private. Its owner makes it
 public once, under the package's settings on github.com (Change visibility); GitHub's API cannot

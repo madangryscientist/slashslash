@@ -88,7 +88,7 @@ ENV HOME=/home/app \
 
 LABEL org.opencontainers.image.title="slashslash" \
       org.opencontainers.image.description="PixelSlash and ToggleSlash in one image" \
-      org.opencontainers.image.source="https://github.com/madangryscientist/slashslash" \
+      org.opencontainers.image.source="https://github.com/slashsuite/slashslash" \
       org.opencontainers.image.licenses="MIT AND Elastic-2.0 AND Apache-2.0 AND ISC AND LGPL-2.1-only" \
       org.opencontainers.image.version="${SLASHSLASH_VERSION}" \
       build.slashslash.pixelslash.revision="${PIXELSLASH_REVISION}" \

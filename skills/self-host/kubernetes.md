@@ -27,10 +27,10 @@ Then one of:
 
 ```sh
 # with Helm
-helm install slashslash oci://ghcr.io/madangryscientist/charts/slashslash -n slashslash \
+helm install slashslash oci://ghcr.io/slashsuite/charts/slashslash -n slashslash \
   --set existingSecret=slashslash-github
 # without Helm: the chart rendered with its defaults
-kubectl apply -f https://raw.githubusercontent.com/madangryscientist/slashslash/self-host-v<version>/self-host/chart/slashslash.yaml
+kubectl apply -f https://raw.githubusercontent.com/slashsuite/slashslash/self-host-v<version>/self-host/chart/slashslash.yaml
 ```
 
 For access from outside: `kubectl port-forward -n slashslash svc/slashslash 3000:3000 8080:8080`,
@@ -48,7 +48,7 @@ is Ready. The first start can take two minutes.
 
 ## Upgrade and remove
 
-- Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash
+- Upgrade: `helm upgrade slashslash oci://ghcr.io/slashsuite/charts/slashslash
   -n slashslash --reset-then-reuse-values --version <new>` (or apply the newer rendered file). The
   old pod stops first, and the new version writes its upgrade backup before the tools start. On a
   large volume, raise `startupSeconds` first. Rollback is in the chart README, and untested.

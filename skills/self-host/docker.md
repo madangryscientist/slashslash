@@ -28,7 +28,7 @@ docker run -d --name slashslash --restart unless-stopped \
   -p 3000:3000 -p 8080:8080 \
   --env-file /etc/slashslash/.env \
   -v slashslash-data:/data \
-  ghcr.io/madangryscientist/slashslash:<version>
+  ghcr.io/slashsuite/slashslash:<version>
 ```
 
 ## Install with Compose
@@ -36,7 +36,7 @@ docker run -d --name slashslash --restart unless-stopped \
 ```yaml
 services:
   slashslash:
-    image: ghcr.io/madangryscientist/slashslash:<version>
+    image: ghcr.io/slashsuite/slashslash:<version>
     restart: unless-stopped
     ports: ["3000:3000", "8080:8080"]
     env_file: /etc/slashslash/.env
