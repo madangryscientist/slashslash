@@ -20,12 +20,13 @@ const listNames = (names: readonly string[]): string =>
     ? names.join(" and ")
     : `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 
-/** What each of the four built tools is, for the claims about the suite as a whole. */
+/** What each of the built tools is, for the claims about the suite as a whole. */
 const SUITE: readonly [FactId, ...FactId[]] = [
   "taskslash/what-it-is",
   "flakeslash/what-it-is",
   "pixelslash/what-it-is",
   "toggleslash/what-it-is",
+  "uislash/what-it-is",
 ];
 
 export const HERO: { title: Claim; lead: Claim } = {
@@ -34,7 +35,7 @@ export const HERO: { title: Claim; lead: Claim } = {
     facts: SUITE,
   },
   lead: {
-    text: "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash adds a tool at each step a change goes through, from the build to the release, so what a change really does shows up before your customers find it.",
+    text: "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash adds a tool at each step a change goes through, from the first line written to the release, so what a change really does shows up before your customers find it.",
     facts: SUITE,
   },
 };
@@ -65,10 +66,18 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
     {
       name: "Written",
       text: {
-        text: "An agent writes the change in minutes, and often touches more than a person would. Slash does not write code: it checks what the code does at each step after this one.",
+        text: "An agent writes the change in minutes, often touching more than a person would, and here it gets ready parts to build the screens from. Slash still does not write the code: it hands over the parts, then checks what the code does at each step after this one.",
         facts: SUITE,
       },
-      tools: [],
+      tools: [
+        {
+          tool: "UISlash",
+          does: {
+            text: "UISlash hands an agent React components that take props alone and accept no className or style, which leaves it no way to style a page off the design.",
+            facts: ["uislash/what-it-is", "uislash/react-components", "uislash/no-styling-escape"],
+          },
+        },
+      ],
     },
     {
       name: "Built and tested",
@@ -154,7 +163,7 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
 export const STANDS: { title: string; stages: Claim; tryLink: { text: string; href: string }; selfHost: Claim } = {
   title: "Where it stands",
   stages: {
-    text: "TaskSlash, FlakeSlash, PixelSlash and ToggleSlash are alphas: try them and see what they do (start with how it works in CI). Expect the screens to change a lot, and expect bugs, which get fixed as they turn up. Between alpha versions, what the tools have stored (approvals, history, settings) may be reset. Your code and your customers' data are never touched. BundleSlash and SightSlash are planned.",
+    text: "UISlash, TaskSlash, FlakeSlash, PixelSlash and ToggleSlash are alphas: try them and see what they do (start with how it works in CI). Expect the screens to change a lot, and expect bugs, which get fixed as they turn up. Between alpha versions, what the tools have stored (approvals, history, settings) may be reset. Your code and your customers' data are never touched. BundleSlash and SightSlash are planned.",
     facts: SUITE,
   },
   /** The words in `stages` that link to the CI walkthrough. */

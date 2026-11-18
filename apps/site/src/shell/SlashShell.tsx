@@ -28,19 +28,20 @@ function Lockup(): ReactNode {
   );
 }
 
-/** Every product with its mark: a tool with a page links there, a planned one is named only. */
+/** Every product with its mark: a tool with a page links there, a planned one says so, any other is named only. */
 function productItems(): ReactNode[] {
   return PRODUCTS.map((product) => {
     const key = product.name.toLowerCase();
     const home = key in SECTIONS ? SECTIONS[key as SectionKey].home : product.page;
     const name = <Marked mark={markFor(product.name)}>{product.name}</Marked>;
-    if (product.stage === "planned" || home === undefined)
+    if (product.stage === "planned")
       return (
         <Cluster as="span" gap="xs">
           {name}
           <Caption as="span">Planned</Caption>
         </Cluster>
       );
+    if (home === undefined) return name;
     return <TextLink href={home}>{name}</TextLink>;
   });
 }

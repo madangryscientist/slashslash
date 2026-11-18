@@ -7,7 +7,7 @@ import type { Claim, FactsProduct } from "#/content/facts";
 import type { StageId } from "#/content/stages";
 
 export type Product = {
-  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash" | "TaskSlash";
+  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash" | "TaskSlash" | "UISlash";
   /** The release stage, from the shared `STAGES` table. */
   stage: StageId;
   /** The one question it answers about a CI run. */
@@ -114,6 +114,34 @@ export const PRODUCTS: readonly Product[] = [
       },
     ],
     page: "/taskslash",
+  },
+  {
+    name: "UISlash",
+    stage: "alpha",
+    facts: "uislash",
+    question: { text: "Can the agent build the UI without writing its own CSS?", facts: ["uislash/what-it-is"] },
+    summary: [
+      {
+        text: "React components (@hackcove/ui-react) and seven themes (@hackcove/themes: four light, three dark, one CSS file each), and a site is built from them with props alone because no exported component accepts className or style.",
+        facts: [
+          "uislash/what-it-is",
+          "uislash/react-components",
+          "uislash/themes-package",
+          "uislash/seven-themes",
+          "uislash/no-styling-escape",
+        ],
+      },
+      {
+        text: "Early (every package at 0.x) and MIT licensed. Every theme is tested against WCAG AA contrast, a reusable GitHub workflow runs a rule check that fails the pull request plus an advisory model review, and the docs and an llms.txt for agents are at hack-cove.com/ui/.",
+        facts: [
+          "uislash/what-it-is",
+          "uislash/licence",
+          "uislash/contrast-checked",
+          "uislash/ui-review-workflow",
+          "uislash/component-docs",
+        ],
+      },
+    ],
   },
   {
     name: "BundleSlash",
