@@ -23,7 +23,7 @@ Read only; change nothing yet.
 Dry run first: it prints every command that would change something and changes nothing.
 
 ```sh
-url=https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh
+url=https://raw.githubusercontent.com/slashsuite/slashslash/main/self-host/proxmox/install.sh
 DRY_RUN=1 CTID=<id> IP=<ip/prefix> GATEWAY=<gw> DATA_PATH=<dir> GITHUB_CLIENT_ID=x GITHUB_CLIENT_SECRET=x \
   bash -c "$(curl -fsSL $url)"
 ```
@@ -36,7 +36,7 @@ own terminal**. On the host, the script asks for anything missing itself: the li
 stdin, so no process list shows them:
 
 ```sh
-url=https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh
+url=https://raw.githubusercontent.com/slashsuite/slashslash/main/self-host/proxmox/install.sh
 read -r CLIENT_ID; read -rs CLIENT_SECRET
 printf '%s\n%s\n' "$CLIENT_ID" "$CLIENT_SECRET" | ssh root@<host> '
   read -r GITHUB_CLIENT_ID; read -r GITHUB_CLIENT_SECRET; export GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET
@@ -55,7 +55,7 @@ configs: the new container's section is the only change, and `storage.cfg` is id
 ## Upgrade and remove
 
 ```sh
-url=https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh
+url=https://raw.githubusercontent.com/slashsuite/slashslash/main/self-host/proxmox/install.sh
 bash -c "$(curl -fsSL $url)" _ --upgrade <id> [VERSION]     # default latest; prints old and new version and the upgrade backup
 bash -c "$(curl -fsSL $url)" _ --uninstall <id> [--purge]
 ```

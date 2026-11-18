@@ -5,7 +5,7 @@ description: Walk someone through running their own Slash tools instance (PixelS
 
 # Self-host the Slash tools
 
-One image, `ghcr.io/madangryscientist/slashslash`, runs both tools: PixelSlash on port 3000,
+One image, `ghcr.io/slashsuite/slashslash`, runs both tools: PixelSlash on port 3000,
 ToggleSlash on 8080, everything on one volume at `/data`, as UID 1654, never root.
 `self-host/README.md` is the source for its settings, data layout, backups and versions; read the
 parts a step names instead of guessing.

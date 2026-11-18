@@ -72,7 +72,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: slashslash
-          image: "ghcr.io/madangryscientist/slashslash:0.1.1"
+          image: "ghcr.io/slashsuite/slashslash:0.1.1"
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:

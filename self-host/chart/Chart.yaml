@@ -6,6 +6,6 @@ type: application
 version: 0.1.1
 appVersion: "0.1.1"
 kubeVersion: ">=1.25.0-0"
-home: https://github.com/madangryscientist/slashslash
+home: https://github.com/slashsuite/slashslash
 sources:
-  - https://github.com/madangryscientist/slashslash/tree/main/self-host
+  - https://github.com/slashsuite/slashslash/tree/main/self-host

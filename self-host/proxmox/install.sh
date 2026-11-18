@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The Slash tools in one Proxmox LXC: run once in the Proxmox host's shell, as root.
 #
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/madangryscientist/slashslash/main/self-host/proxmox/install.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/slashsuite/slashslash/main/self-host/proxmox/install.sh)"
 #
 # It makes one unprivileged Debian 13 container with Docker in it, runs the slashslash image there
 # on a data mount of its own, waits for it to be healthy and prints both addresses. It touches no
@@ -16,7 +16,7 @@
 # change something and runs only the read-only checks.
 set -euo pipefail
 
-IMAGE="ghcr.io/madangryscientist/slashslash"
+IMAGE="ghcr.io/slashsuite/slashslash"
 TAG="slashslash"
 MOUNT="/var/lib/slashslash"
 # The image runs as UID 1654. In an unprivileged CT that is host UID 101654.

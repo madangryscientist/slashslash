@@ -3,7 +3,7 @@
  *
  *   bun self-host/chart.ts            # every check below; fails on the first that does not pass
  *   bun self-host/chart.ts --write    # re-render chart/slashslash.yaml, then check
- *   bun self-host/chart.ts publish    # package and push to oci://ghcr.io/madangryscientist/charts
+ *   bun self-host/chart.ts publish    # package and push to oci://ghcr.io/slashsuite/charts
  *
  * The checks: Chart.yaml's version and appVersion equal self-host/VERSION; `helm lint`; `helm
  * template` with the defaults and with every optional part on; `kubeconform -strict` on both; the
@@ -160,7 +160,7 @@ async function main(): Promise<void> {
     const out = mkdtempSync(join(process.env["TMPDIR"] || tmpdir(), "slashslash-chart-"));
     run([helm, "registry", "login", "ghcr.io", "--username", process.env["GITHUB_ACTOR"]!, "--password-stdin"], process.env["GH_TOKEN"]);
     run([helm, "package", CHART, "--destination", out]);
-    console.log(run([helm, "push", join(out, `slashslash-${version}.tgz`), "oci://ghcr.io/madangryscientist/charts"]));
+    console.log(run([helm, "push", join(out, `slashslash-${version}.tgz`), "oci://ghcr.io/slashsuite/charts"]));
     return;
   }
 

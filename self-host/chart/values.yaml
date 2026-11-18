@@ -1,7 +1,7 @@
 # Every value is described in README.md.
 
 image:
-  repository: ghcr.io/madangryscientist/slashslash
+  repository: ghcr.io/slashsuite/slashslash
   # Empty means the chart's appVersion.
   tag: ""
   pullPolicy: IfNotPresent

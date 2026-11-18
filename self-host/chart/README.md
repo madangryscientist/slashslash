@@ -21,7 +21,7 @@ kubectl create secret generic slashslash-github -n slashslash --from-env-file=/d
 Then install the chart:
 
 ```sh
-helm install slashslash oci://ghcr.io/madangryscientist/charts/slashslash \
+helm install slashslash oci://ghcr.io/slashsuite/charts/slashslash \
   -n slashslash --set existingSecret=slashslash-github
 kubectl rollout status statefulset/slashslash -n slashslash
 ```
@@ -29,7 +29,7 @@ kubectl rollout status statefulset/slashslash -n slashslash
 Without Helm, apply the rendered manifest instead (it expects the same namespace and Secret):
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/madangryscientist/slashslash/self-host-v<version>/self-host/chart/slashslash.yaml
+kubectl apply -f https://raw.githubusercontent.com/slashsuite/slashslash/self-host-v<version>/self-host/chart/slashslash.yaml
 ```
 
 `<version>` is a release (see "Versions" in `self-host/README.md`), so the file names an image that
@@ -65,7 +65,7 @@ kubectl exec -n slashslash slashslash-0 -- slashslash secret toggleslash-admin-t
 
 | Value | Default | What |
 | --- | --- | --- |
-| `image.repository` | `ghcr.io/madangryscientist/slashslash` | The image |
+| `image.repository` | `ghcr.io/slashsuite/slashslash` | The image |
 | `image.tag` | the chart's `appVersion` | The image tag |
 | `image.pullPolicy` | `IfNotPresent` | |
 | `github.clientId`, `github.clientSecret` | none | PixelSlash's GitHub sign-in, put into a Secret the chart makes. Required unless `existingSecret` is set |
@@ -106,7 +106,7 @@ Secret too.
 
 ## Upgrade, backup and remove
 
-- Upgrade: `helm upgrade slashslash oci://ghcr.io/madangryscientist/charts/slashslash
+- Upgrade: `helm upgrade slashslash oci://ghcr.io/slashsuite/charts/slashslash
   -n slashslash --reset-then-reuse-values --version <new>`. The new version backs the volume up
   before either tool migrates (see "Backup, restore and rollback" in `self-host/README.md`).
 - Rollback (untested): the same `helm upgrade` with `--version <previous>` (not `helm rollback`,
@@ -147,4 +147,4 @@ bun self-host/chart.ts --write      # re-render slashslash.yaml after changing t
 
 The chart's `version` and `appVersion` are `self-host/VERSION`; the check fails when they drift. A
 release tag (see "Releasing" in `self-host/README.md`) pushes the chart to
-`oci://ghcr.io/madangryscientist/charts` after the image.
+`oci://ghcr.io/slashsuite/charts` after the image.

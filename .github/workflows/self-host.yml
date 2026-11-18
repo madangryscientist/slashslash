@@ -4,11 +4,11 @@ name: Self-host image
 # file. Each product image takes minutes to build, so it is kept in the Actions cache under its pin
 # and rebuilt only when that pin moves.
 #
-# The image the smoke passed is then pushed to ghcr.io/madangryscientist/slashslash, from the same
+# The image the smoke passed is then pushed to ghcr.io/slashsuite/slashslash, from the same
 # job, so what is published is exactly what was tested. A pull request pushes nothing. A push to
 # main pushes `:edge` and `:<VERSION>-edge.<sha7>`. A tag `self-host-vX.Y.Z` (X.Y.Z must be
 # self-host/VERSION, checked before anything is built) pushes `:X.Y.Z` and `:latest`, and then the
-# Helm chart in self-host/chart to oci://ghcr.io/madangryscientist/charts. Main pushes no chart.
+# Helm chart in self-host/chart to oci://ghcr.io/slashsuite/charts. Main pushes no chart.
 on:
   pull_request:
     paths:
@@ -110,6 +110,7 @@ jobs:
           SMOKE_VERSION: ${{ steps.version.outputs.version }}
           # Every run, so every pin bump and every release is checked against an install the
           # released image made (smoke.ts, upgradeFrom).
+          # Still the old owner: nothing is released under slashsuite until its first self-host tag.
           SMOKE_UPGRADE_FROM: ghcr.io/madangryscientist/slashslash:latest
       # Only after the smoke passed (a failed step skips these), and never on a pull request.
       - name: Log in to ghcr
@@ -122,8 +123,8 @@ jobs:
         shell: bash
         run: |
           for t in ${{ steps.version.outputs.tags }}; do
-            docker tag slashslash:smoke "ghcr.io/madangryscientist/slashslash:$t"
-            docker push "ghcr.io/madangryscientist/slashslash:$t"
+            docker tag slashslash:smoke "ghcr.io/slashsuite/slashslash:$t"
+            docker push "ghcr.io/slashsuite/slashslash:$t"
           done
       # Only on a release tag, after the tested image is pushed.
       - name: Push the Helm chart

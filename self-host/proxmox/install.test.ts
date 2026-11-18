@@ -167,9 +167,9 @@ describe("install", () => {
     expect(r.out).not.toContain("chown 1654:1654");
     expect(r.out).toContain("apt-get install -y -qq docker.io");
     expect(r.out).toContain("/etc/slashslash/.env' < (GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)");
-    expect(r.out).toContain("docker pull -q ghcr.io/madangryscientist/slashslash:0.1.0");
+    expect(r.out).toContain("docker pull -q ghcr.io/slashsuite/slashslash:0.1.0");
     expect(r.out).toContain(
-      "docker run -d --name slashslash --restart unless-stopped -p 3000:3000 -p 8080:8080 --env-file /etc/slashslash/.env -v /var/lib/slashslash:/data ghcr.io/madangryscientist/slashslash:0.1.0",
+      "docker run -d --name slashslash --restart unless-stopped -p 3000:3000 -p 8080:8080 --env-file /etc/slashslash/.env -v /var/lib/slashslash:/data ghcr.io/slashsuite/slashslash:0.1.0",
     );
     expect(r.out).toContain("PixelSlash:  http://192.168.0.40:3000");
     expect(r.out).toContain("ToggleSlash: http://192.168.0.40:8080");
@@ -242,10 +242,10 @@ describe("upgrade", () => {
     expect(r.code).toBe(0);
     expect(r.calls).toBe("");
     expect(r.out).toContain("== upgrade 140 from 0.1.0 to 0.1.1");
-    expect(r.out).toContain("docker pull -q ghcr.io/madangryscientist/slashslash:0.1.1");
+    expect(r.out).toContain("docker pull -q ghcr.io/slashsuite/slashslash:0.1.1");
     expect(r.out).toContain("docker rm -f slashslash");
     expect(r.out).toContain(
-      "--env-file /etc/slashslash/.env -v /var/lib/slashslash:/data ghcr.io/madangryscientist/slashslash:0.1.1",
+      "--env-file /etc/slashslash/.env -v /var/lib/slashslash:/data ghcr.io/slashsuite/slashslash:0.1.1",
     );
     expect(r.out).toContain("+ pct set 140 --description");
     expect(r.out).toContain("upgrade backup: upgrade-20261115T100000Z-0.1.0.tgz");
