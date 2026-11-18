@@ -132,6 +132,11 @@ describe("the facts files", () => {
     }
   });
 
+  test("UISlash's facts resolve by id: its What it is paragraph and a Where it runs fact", () => {
+    expect(factKind("uislash/what-it-is")).toBe("what");
+    expect(factKind("uislash/tested-in-chromium")).toBe("where");
+  });
+
   test("a file of another shape fails, naming the product and the line", () => {
     const good = readFileSync(resolve(SITE, ".sources/facts/taskslash.md"), "utf8");
     expect(() => parseFacts("taskslash", good.replace("## Planned", "## Later"))).toThrow(
