@@ -8,6 +8,7 @@
  * A file of any other shape fails the build, naming the product and the line.
  */
 import flakeslashSource from "@facts/flakeslash.md?raw";
+import omnislashSource from "@facts/omnislash.md?raw";
 import pixelslashSource from "@facts/pixelslash.md?raw";
 import taskslashSource from "@facts/taskslash.md?raw";
 import toggleslashSource from "@facts/toggleslash.md?raw";
@@ -121,6 +122,7 @@ export const FACTS: Readonly<Record<FactsProduct, Facts>> = {
   flakeslash: parseFacts("flakeslash", flakeslashSource),
   taskslash: parseFacts("taskslash", taskslashSource),
   uislash: parseFacts("uislash", uislashSource),
+  omnislash: parseFacts("omnislash", omnislashSource),
 };
 
 /** Where a fact sits in its file, or undefined when its product's file has no such id. */
