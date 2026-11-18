@@ -41,7 +41,7 @@ ACCENT = {
     # SightSlash (Jacobus, 2026-11-15: Catppuccin pink). Latte pink #ea76cb is 2.3:1 on the Latte ground, so the
     # light fill is darkened to #c8399a (4.1:1) and its text tone to #b8338a (4.8:1).
     "sight": {"light": "#c8399a", "text": "#b8338a", "dark": "#f5c2e7"},
-    # UISlash (Jacobus, 2026-11-18: teal, picked over lavender and lime). Its text tone measures 4.5:1 on #eef2f9.
+    # UISlash (Jacobus, 2026-11-18: teal, picked over lavender and lime). Its text tone measures 4.7:1 on #eef2f9.
     "ui": {"light": "#13838a", "text": "#0e777c", "dark": "#94e2d5"},
 }
 TOOLS = ["pixel", "flake", "toggle", "bundle"]
