@@ -56,12 +56,12 @@ describe("the shell on the 404 page", () => {
     ]);
   });
 
-  test("the footer names each tool's own licence in its facts file's words: TaskSlash is MIT, the others Elastic License 2.0", () => {
+  test("the footer names each tool's own licence in its facts file's words: TaskSlash and UISlash are MIT, the others Elastic License 2.0", () => {
     const footer = elements(page(), "footer")[0] ?? "";
     const licences = [...footer.matchAll(/data-licence="[^"]*">([\s\S]*?)<\/span>/g)].map((m) => text(m[1] ?? ""));
     expect(licences).toEqual([
       `${licenceOf("pixelslash")}: PixelSlash, ToggleSlash, FlakeSlash`,
-      `${licenceOf("taskslash")}: TaskSlash`,
+      `${licenceOf("taskslash")}: TaskSlash, UISlash`,
     ]);
   });
 
@@ -70,6 +70,14 @@ describe("the shell on the 404 page", () => {
     expect(footers).toHaveLength(1);
     const words = text(footers[0] ?? "");
     for (const product of PRODUCTS) expect(words).toContain(product.name);
+  });
+
+  test("only a planned tool carries the Planned caption: a built tool with no page here is named alone", () => {
+    const footer = elements(page(), "footer")[0] ?? "";
+    const caption = (name: string): boolean => new RegExp(`${name}\\s*Planned`).test(text(footer));
+    for (const product of PRODUCTS) expect(caption(product.name), product.name).toBe(product.stage === "planned");
+    expect(links(footer).map((link) => link.text)).not.toContain("UISlash");
+    expect(footer).toContain(`src="${markFor("UISlash")}"`);
   });
 
   test("the head script names the suite's dark scope", () => {
