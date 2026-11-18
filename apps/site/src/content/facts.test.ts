@@ -141,6 +141,8 @@ describe("the facts files", () => {
     expect(factKind("omnislash/what-it-is")).toBe("what");
     expect(factKind("omnislash/item-tracking")).toBe("today");
     expect(factKind("omnislash/checkout-linux")).toBe("where");
+    expect(factKind("omnislash/drilled-ticket-gate")).toBe("today");
+    expect(factKind("omnislash/team-server")).toBe("planned");
   });
 
   test("a file of another shape fails, naming the product and the line", () => {
