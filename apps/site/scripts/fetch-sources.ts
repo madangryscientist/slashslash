@@ -26,11 +26,18 @@ export const PIXELSLASH_FILES = [
 ] as const;
 
 /** The products whose FACTS.md the site reads, each by its repository name. */
-export const FACTS_PRODUCTS = ["pixelslash", "toggleslash", "flakeslash", "taskslash"] as const;
+export const FACTS_PRODUCTS = ["pixelslash", "toggleslash", "flakeslash", "taskslash", "uislash"] as const;
 export type FactsProduct = (typeof FACTS_PRODUCTS)[number];
 
-const OWNER = "madangryscientist";
-const REPO = `${OWNER}/pixelslash`;
+/** The repository each product's FACTS.md comes from, as owner/repo. */
+const FACTS_REPOS: Record<FactsProduct, string> = {
+  pixelslash: "madangryscientist/pixelslash",
+  toggleslash: "madangryscientist/toggleslash",
+  flakeslash: "madangryscientist/flakeslash",
+  taskslash: "madangryscientist/taskslash",
+  uislash: "slashsuite/uislash",
+};
+const REPO = FACTS_REPOS.pixelslash;
 const SITE = resolve(import.meta.dirname, "..");
 const SOURCES = resolve(SITE, ".sources/pixelslash");
 const FACTS = resolve(SITE, ".sources/facts");
@@ -82,7 +89,7 @@ async function main(): Promise<void> {
   const pins = factsPins();
   const bodies = await Promise.all(PIXELSLASH_FILES.map((path) => download(sha, path)));
   const facts = await Promise.all(
-    FACTS_PRODUCTS.map((product) => download(pins[product], FACTS_PATH, `${OWNER}/${product}`, product)),
+    FACTS_PRODUCTS.map((product) => download(pins[product], FACTS_PATH, FACTS_REPOS[product], product)),
   );
   // Written only once every file has arrived, so a failure leaves no half-updated folder behind.
   rmSync(SOURCES, { recursive: true, force: true });

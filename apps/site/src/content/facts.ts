@@ -11,6 +11,7 @@ import flakeslashSource from "@facts/flakeslash.md?raw";
 import pixelslashSource from "@facts/pixelslash.md?raw";
 import taskslashSource from "@facts/taskslash.md?raw";
 import toggleslashSource from "@facts/toggleslash.md?raw";
+import uislashSource from "@facts/uislash.md?raw";
 import type { FactsProduct } from "../../scripts/fetch-sources";
 
 export type { FactsProduct };
@@ -119,6 +120,7 @@ export const FACTS: Readonly<Record<FactsProduct, Facts>> = {
   toggleslash: parseFacts("toggleslash", toggleslashSource),
   flakeslash: parseFacts("flakeslash", flakeslashSource),
   taskslash: parseFacts("taskslash", taskslashSource),
+  uislash: parseFacts("uislash", uislashSource),
 };
 
 /** Where a fact sits in its file, or undefined when its product's file has no such id. */
