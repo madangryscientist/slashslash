@@ -27,11 +27,11 @@ export const SITE_URL = "https://slashslash.build";
 export const CONTACT = {
   lead: "Reply to whoever sent you this link, or ",
   link: "open an issue on GitHub",
-  href: "https://github.com/madangryscientist/slashslash/issues",
+  href: "https://github.com/slashsuite/slashslash/issues",
   end: ".",
 } as const;
 
-export const PIXELSLASH_REPO_URL = "https://github.com/madangryscientist/pixelslash";
+export const PIXELSLASH_REPO_URL = "https://github.com/slashsuite/pixelslash";
 export const PIXELSLASH_SITE_URL = "https://pixelslash.dev";
 export const PIXELSLASH_NPM_URL = "https://www.npmjs.com/package/@hackcove/pixelslash";
 export const PIXELSLASH_COMMAND =
@@ -41,7 +41,7 @@ export const PIXELSLASH_COMMAND =
  * The ToggleSlash repository, public under the Elastic License 2.0. /developers links it, and /toggleslash builds its
  * clone command and docs links from it, so it must stay a full URL.
  */
-export const TOGGLESLASH_REPO_URL: string = "https://github.com/madangryscientist/toggleslash";
+export const TOGGLESLASH_REPO_URL: string = "https://github.com/slashsuite/toggleslash";
 
 /** The TaskSlash repository, public under the MIT license. /taskslash builds its clone command and docs links from it. */
-export const TASKSLASH_REPO_URL = "https://github.com/madangryscientist/taskslash";
+export const TASKSLASH_REPO_URL = "https://github.com/slashsuite/taskslash";

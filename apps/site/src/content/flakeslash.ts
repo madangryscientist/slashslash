@@ -10,7 +10,7 @@
 
 import type { Claim } from "#/content/facts";
 
-export const FLAKESLASH_REPO_URL = "https://github.com/madangryscientist/flakeslash";
+export const FLAKESLASH_REPO_URL = "https://github.com/slashsuite/flakeslash";
 const DOCS = `${FLAKESLASH_REPO_URL}/blob/main/docs`;
 
 export const FLAKESLASH_TITLE: Claim = {
@@ -102,7 +102,7 @@ export const TRY_IT: { lead: Claim; steps: readonly TryStep[] } = {
   steps: [
     {
       lead: "Clone it and install:",
-      commands: ["git clone https://github.com/madangryscientist/flakeslash", "cd flakeslash", "bun install"],
+      commands: ["git clone https://github.com/slashsuite/flakeslash", "cd flakeslash", "bun install"],
     },
     {
       lead: "Give it a GitHub access key that can read your repo. Put your own key where it says <your key>:",

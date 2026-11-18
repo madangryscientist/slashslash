@@ -79,7 +79,7 @@ function Footer(): ReactNode {
             <TextLink href={`${PIXELSLASH_SITE_URL}/docs`} external>
               PixelSlash docs
             </TextLink>,
-            <TextLink href="https://github.com/madangryscientist" external>
+            <TextLink href="https://github.com/slashsuite" external>
               Source on GitHub
             </TextLink>,
           ],
