@@ -4,9 +4,15 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
 import data from "@pixelslash-src/docs/capabilities/data.json";
+import securitySource from "@pixelslash-src/SECURITY.md?raw";
+import selfHostSource from "@pixelslash-src/apps/web/SELF-HOST.md?raw";
+import { lexer } from "marked";
 import { SITE_NAME } from "#/content/site";
 import { STAGES } from "#/content/stages";
 import { PAGES, type SitePath } from "#/pixelslash/content/pages";
+import { plainText, TICKET_ID } from "#/pixelslash/doc/doc-text";
+import { docPage, SECURITY_DOC, SELF_HOST_DOC } from "#/pixelslash/doc/docs";
+import type { Doc } from "#/pixelslash/doc/markdown";
 import { STAGE } from "#/pixelslash/content/stage";
 import { LOCAL, PIXELSLASH_DEV } from "#/pixelslash/paths";
 import { ComparePage } from "#/pixelslash/pages/compare";
@@ -16,9 +22,10 @@ import { PricingPage } from "#/pixelslash/pages/pricing";
 import { SECTIONS } from "#/shell/sections";
 
 /*
- * The four PixelSlash pages as the site builds them, read from dist (`bunx moon run site:test`
- * builds first): on the shell in the PixelSlash section, with their own title, address and h1, the
- * fetched images, the compare matrix, links that land, no loaded script and the shell's one stylesheet.
+ * The PixelSlash pages as the site builds them, read from dist (`bunx moon run site:test` builds
+ * first): on the shell in the PixelSlash section, with their own title, address and h1, the fetched
+ * images, the compare matrix, the fetched documents, links that land, no loaded script and the shell's
+ * one stylesheet.
  */
 
 const DIST = resolve(import.meta.dirname, "../../dist");
@@ -32,7 +39,9 @@ function read(page: string): string {
 function decode(text: string): string {
   return text
     .replace(/<[^>]+>/g, "")
-    .replace(/&#39;/g, "'")
+    .replace(/&#(39|x27);/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
@@ -53,19 +62,50 @@ const images = (html: string): string[] => [...html.matchAll(/<img[^>]*\ssrc="(\
 /** The h1 a page must carry: the copied component's own, or the home's promise. */
 const h1Of = (Page: () => ReactNode): string[] => headings(renderToStaticMarkup(createElement(Page)));
 
-/** The pages served here: the path the ported content names, the built file and the page's h1. */
-const SERVED: { path: SitePath; file: string; h1: () => string[] }[] = [
+/** A fetched document's first heading as plain text, read straight from the file. */
+function firstHeading(markdown: string): string {
+  const token = lexer(markdown).find((item) => item.type === "heading");
+  return token?.type === "heading" ? plainText(token.tokens) : "";
+}
+
+/**
+ * The pages served here: the path the ported content names, the built file and the page's h1. A
+ * page rendered from a fetched document also names that document.
+ */
+const SERVED: { path: SitePath; file: string; h1: () => string[]; doc?: Doc }[] = [
   { path: "/", file: "pixelslash.html", h1: () => [PROMISE.text] },
   { path: "/how-it-works", file: "pixelslash/how-it-works.html", h1: () => h1Of(HowItWorksPage) },
   { path: "/compare", file: "pixelslash/compare.html", h1: () => h1Of(ComparePage) },
   { path: "/pricing", file: "pixelslash/pricing.html", h1: () => h1Of(PricingPage) },
+  { path: "/security", file: "pixelslash/security.html", h1: () => [firstHeading(securitySource)], doc: SECURITY_DOC },
+  {
+    path: "/self-host",
+    file: "pixelslash/self-host.html",
+    h1: () => [firstHeading(selfHostSource)],
+    doc: SELF_HOST_DOC,
+  },
 ];
+
+const DOCS = SERVED.flatMap(({ file, doc }) => (doc === undefined ? [] : [{ file, doc }]));
 
 const here = (path: string): string => (path === "/" ? "/pixelslash" : `/pixelslash${path}`);
 
-/** The off-site origins the pages cite: home's link to Bun, and compare's tool sources from data.json. */
+/** Every link written in the fetched documents. */
+const DOC_LINKS = [securitySource, selfHostSource].flatMap((source) =>
+  [...source.matchAll(/\]\((https?:[^)\s]+)\)/g)].map((m) => m[1] ?? ""),
+);
+
+/**
+ * The off-site origins the pages cite: home's link to Bun, compare's tool sources from data.json, and
+ * the links the fetched documents write.
+ */
 const CITED = new Set(
-  ["https://bun.sh", ...data.tools.map((tool) => ("src" in tool ? tool.src : "")), ...Object.values(data.links)]
+  [
+    "https://bun.sh",
+    ...data.tools.map((tool) => ("src" in tool ? tool.src : "")),
+    ...Object.values(data.links),
+    ...DOC_LINKS,
+  ]
     .filter((link) => link.startsWith("https:"))
     .map((link) => new URL(link).origin),
 );
@@ -77,7 +117,7 @@ test("the pages built here are the ones LOCAL names, and no other PixelSlash pag
   );
 });
 
-describe.each(SERVED)("/pixelslash$path", ({ path, file, h1 }) => {
+describe.each(SERVED)("/pixelslash$path", ({ path, file, h1, doc }) => {
   const html = read(file);
   const entry = PAGES.find((page) => page.to === path);
 
@@ -91,9 +131,10 @@ describe.each(SERVED)("/pixelslash$path", ({ path, file, h1 }) => {
     expect(html).toContain(`<link rel="canonical" href="https://slashslash.build${here(path)}">`);
   });
 
-  test("its title and description are its entry of the ported pages list", () => {
-    expect(decode(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "")).toBe(`${entry?.title} | ${SITE_NAME}`);
-    expect(decode(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "")).toBe(entry?.description?.text);
+  test("its title and description are its entry of the ported pages list, or its document's own", () => {
+    const meta = doc === undefined ? { title: entry?.title, description: entry?.description?.text } : docPage(doc);
+    expect(decode(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "")).toBe(`${meta.title} | ${SITE_NAME}`);
+    expect(decode(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "")).toBe(meta.description);
   });
 
   test("has one h1, the page's own", () => {
@@ -102,12 +143,13 @@ describe.each(SERVED)("/pixelslash$path", ({ path, file, h1 }) => {
     expect(headings(html)).toEqual(expected);
   });
 
-  test("the sub-nav marks this page alone as current, and Docs goes to pixelslash.dev", () => {
+  test("the sub-nav marks this page alone as current, if it lists it, and Docs goes to pixelslash.dev", () => {
     const nav = html.match(/<nav\b[^>]*aria-label="PixelSlash"[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? "";
     const links = [...nav.matchAll(/<a\b([^>]*)>/g)].map((m) => m[1] ?? "");
     const current = links.filter((attrs) => /\saria-current="page"/.test(attrs));
-    expect(current).toHaveLength(1);
-    expect(current[0]).toContain(`href="${here(path)}"`);
+    const listed = SECTIONS.pixelslash.pages.some((page) => page.href === here(path));
+    expect(current).toHaveLength(listed ? 1 : 0);
+    if (listed) expect(current[0]).toContain(`href="${here(path)}"`);
     expect(links.some((attrs) => attrs.includes(`href="${PIXELSLASH_DEV}/docs"`))).toBe(true);
   });
 });
@@ -132,6 +174,29 @@ test("the home shows both demo shots and how it works the report, all served fro
       expect(existsSync(resolve(DIST, `.${src}`)), src).toBe(true);
     }
   }
+});
+
+describe.each(DOCS)("$file, rendered from its fetched document", ({ file, doc }) => {
+  const html = read(file);
+
+  test("lists every H2 and H3 on the page as a link to that heading, which is there", () => {
+    const list = html.match(/<nav\b[^>]*aria-label="On this page"[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? "";
+    const hrefs = [...list.matchAll(/\shref="#([^"]+)"/g)].map((m) => m[1] ?? "");
+    const wanted = doc.headings.filter((heading) => heading.depth <= 3).map((heading) => heading.id);
+    expect(wanted.length).toBeGreaterThan(0);
+    expect(hrefs).toEqual(wanted);
+    for (const id of hrefs) expect(html, id).toContain(` id="${id}"`);
+  });
+
+  test("shows the document's words, with no private ticket id", () => {
+    const body = decode(html.match(/<main\b[\s\S]*<\/main>/)?.[0] ?? html);
+    for (const heading of doc.headings) expect(body).toContain(heading.text);
+    expect(body).not.toMatch(TICKET_ID);
+  });
+});
+
+test("SECURITY.md's link to the self-host guide lands on the guide here", () => {
+  expect(read("pixelslash/security.html")).toContain('href="/pixelslash/self-host"');
 });
 
 describe("/pixelslash/compare's matrix", () => {

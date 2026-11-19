@@ -1,0 +1,17 @@
+---
+// /pixelslash/security: PixelSlash's SECURITY.md, fetched at the pinned commit and rendered at build time on the shell.
+import { Container } from "@hackcove/ui-react";
+import Slash from "#/layouts/Slash.astro";
+import { DocPage } from "#/pixelslash/doc/DocPage";
+import { SECURITY_DOC, docPage } from "#/pixelslash/doc/docs";
+
+const page = docPage(SECURITY_DOC);
+---
+
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  <div class="py-8">
+    <Container>
+      <DocPage doc={SECURITY_DOC} />
+    </Container>
+  </div>
+</Slash>

@@ -1,0 +1,224 @@
+import {
+  BulletList,
+  Callout,
+  Code,
+  CodeBlock,
+  type CodeLanguage,
+  Divider,
+  Prose,
+  SectionHeading,
+  Stack,
+  SubsectionHeading,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  TextLink,
+} from "@hackcove/ui-react";
+import { type MarkedToken, type Token, type Tokens, lexer } from "marked";
+import { Fragment, type ReactNode } from "react";
+import { decode, marked, plainText, slugger, stripTicketIds } from "#/pixelslash/doc/doc-text";
+import { resolveHref } from "#/pixelslash/doc/resolve-links";
+
+/*
+ * A PixelSlash repository document (SECURITY.md, apps/web/SELF-HOST.md) rendered as React at build
+ * time, ported from PixelSlash's site. marked lexes it; this file draws the tokens with the design
+ * system's parts, so no HTML string is injected and every link goes through `resolveHref`.
+ */
+
+export type Heading = { depth: number; text: string; id: string };
+
+export type Doc = {
+  /** The repo path of the source, for resolving its relative links. */
+  source: string;
+  /** The document's own `# title`, which the page shows as its heading. */
+  title: string;
+  /** The blocks after the title. */
+  tokens: MarkedToken[];
+  headings: Heading[];
+  ids: WeakMap<Token, string>;
+};
+
+export function parseDoc(markdown: string, source: string): Doc {
+  const all = marked(lexer(stripTicketIds(markdown)));
+  const first = all.find((token) => token.type !== "space");
+  const title = first?.type === "heading" && first.depth === 1 ? plainText(first.tokens) : "";
+  const tokens = title === "" ? all : all.filter((token) => token !== first);
+  const slug = slugger();
+  const headings: Heading[] = [];
+  const ids = new WeakMap<Token, string>();
+  for (const token of tokens) {
+    if (token.type !== "heading") continue;
+    const text = plainText(token.tokens);
+    const id = slug(text);
+    ids.set(token, id);
+    headings.push({ depth: token.depth, text, id });
+  }
+  return { source, title, tokens, headings, ids };
+}
+
+function Inline({ tokens, doc }: { tokens: Token[] | undefined; doc: Doc }): ReactNode {
+  return marked(tokens).map((token, index) => <InlineToken key={index} token={token} doc={doc} />);
+}
+
+function InlineLink({ token, doc }: { token: Tokens.Link; doc: Doc }): ReactNode {
+  const href = resolveHref(token.href, doc.source);
+  return (
+    <TextLink href={href} external={/^https?:/.test(href)}>
+      <Inline tokens={token.tokens} doc={doc} />
+    </TextLink>
+  );
+}
+
+function InlineToken({ token, doc }: { token: MarkedToken; doc: Doc }): ReactNode {
+  switch (token.type) {
+    case "strong":
+      return <strong>{<Inline tokens={token.tokens} doc={doc} />}</strong>;
+    case "em":
+      return <em>{<Inline tokens={token.tokens} doc={doc} />}</em>;
+    case "del":
+      return <del>{<Inline tokens={token.tokens} doc={doc} />}</del>;
+    case "codespan":
+      // A long path in prose would push a phone's page sideways; let it break anywhere.
+      return (
+        <span className="[overflow-wrap:anywhere]">
+          <Code>{decode(token.text)}</Code>
+        </span>
+      );
+    case "link":
+      return <InlineLink token={token} doc={doc} />;
+    case "br":
+      return <br />;
+    case "image":
+      // Neither document has an image; one would stay its alt text.
+      return token.text;
+    default:
+      return inlineText(token, doc);
+  }
+}
+
+/** Text, an escape and inline HTML (`<name>` in prose is literal text). */
+function inlineText(token: MarkedToken, doc: Doc): ReactNode {
+  if (token.type === "text" && token.tokens) return <Inline tokens={token.tokens} doc={doc} />;
+  return "text" in token ? decode(token.text) : null;
+}
+
+const LANGUAGES: readonly CodeLanguage[] = ["tsx", "ts", "json", "bash", "css"];
+
+function isLanguage(name: string): name is CodeLanguage {
+  return LANGUAGES.some((known) => known === name);
+}
+
+function language(lang: string | undefined): CodeLanguage {
+  const name = lang === "sh" || lang === "shell" ? "bash" : (lang ?? "");
+  return isLanguage(name) ? name : "text";
+}
+
+function HeadingBlock({ token, doc }: { token: Tokens.Heading; doc: Doc }): ReactNode {
+  const id = doc.ids.get(token);
+  const children = <Inline tokens={token.tokens} doc={doc} />;
+  // A document with no H2 under its title moves its levels up one, so the outline does not skip one.
+  const lift = Math.max(0, Math.min(...doc.headings.map((heading) => heading.depth)) - 2);
+  const depth = token.depth - lift;
+  if (depth <= 2) return <SectionHeading id={id}>{children}</SectionHeading>;
+  return (
+    <SubsectionHeading as={depth === 3 ? "h3" : "h4"} size={depth === 3 ? "md" : "sm"} id={id}>
+      {children}
+    </SubsectionHeading>
+  );
+}
+
+function ListBlock({ token, doc }: { token: Tokens.List; doc: Doc }): ReactNode {
+  const items = token.items.map((item, index) => (
+    <li key={index}>
+      <Blocks tokens={marked(item.tokens)} doc={doc} />
+    </li>
+  ));
+  if (token.ordered) return <ol className="list-decimal space-y-1 pl-5">{items}</ol>;
+  return <BulletList>{items}</BulletList>;
+}
+
+function TableBlock({ token, doc }: { token: Tokens.Table; doc: Doc }): ReactNode {
+  // The kit's Table needs a name for screen readers; a document's table has none, so its columns name it.
+  const label = token.header.map((cell) => plainText(cell.tokens)).join(", ");
+  return (
+    <Table label={label}>
+      <TableHead>
+        <TableRow>
+          {token.header.map((cell, index) => (
+            <TableHeaderCell key={index}>
+              <Inline tokens={cell.tokens} doc={doc} />
+            </TableHeaderCell>
+          ))}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {token.rows.map((row, rowIndex) => (
+          <TableRow key={rowIndex}>
+            {row.map((cell, index) => (
+              <TableCell key={index}>
+                <Inline tokens={cell.tokens} doc={doc} />
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+type BlockRenderer = (token: MarkedToken, doc: Doc) => ReactNode;
+
+/** One renderer per block type, a map rather than a switch so each stays small. */
+const BLOCKS: Partial<Record<MarkedToken["type"], BlockRenderer>> = {
+  heading: (token, doc) => token.type === "heading" && <HeadingBlock token={token} doc={doc} />,
+  paragraph: (token, doc) =>
+    token.type === "paragraph" && (
+      <p>
+        <Inline tokens={token.tokens} doc={doc} />
+      </p>
+    ),
+  code: (token) =>
+    token.type === "code" && (
+      <CodeBlock
+        language={language(token.lang)}
+        copy
+        {...(token.lang ? { label: token.lang } : {})}
+      >
+        {token.text}
+      </CodeBlock>
+    ),
+  list: (token, doc) => token.type === "list" && <ListBlock token={token} doc={doc} />,
+  table: (token, doc) => token.type === "table" && <TableBlock token={token} doc={doc} />,
+  blockquote: (token, doc) =>
+    token.type === "blockquote" && (
+      <Callout tone="neutral">
+        <Blocks tokens={marked(token.tokens)} doc={doc} />
+      </Callout>
+    ),
+  hr: () => <Divider />,
+  text: (token, doc) => <InlineToken token={token} doc={doc} />,
+};
+
+function Blocks({ tokens, doc }: { tokens: MarkedToken[]; doc: Doc }): ReactNode {
+  return tokens.map((token, index) => {
+    const render = BLOCKS[token.type];
+    return render ? <Fragment key={index}>{render(token, doc)}</Fragment> : null;
+  });
+}
+
+/**
+ * A whole document's body, its blocks a steady gap apart, on the kit's reading scale: the
+ * body, headings and callouts inside a `Prose` take the long-form sizes, so no size is set here.
+ */
+export function DocBody({ doc }: { doc: Doc }): ReactNode {
+  return (
+    <Prose data-doc={doc.source}>
+      <Stack gap="sm">
+        <Blocks tokens={doc.tokens} doc={doc} />
+      </Stack>
+    </Prose>
+  );
+}

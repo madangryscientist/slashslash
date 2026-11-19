@@ -56,7 +56,17 @@ const CARDS: Record<string, { tool: OgTool; headline: string }> = {
   "/toggleslash": { tool: "toggleslash", headline: question("ToggleSlash") },
 };
 
-export const OG_CARDS: readonly OgCard[] = PAGES.map(({ path }) => {
+/**
+ * Pages that wear another page's card instead of their own, by path: the 404 page (not in `PAGES`) the
+ * suite's, and the two PixelSlash documents served here the PixelSlash card.
+ */
+export const WEARS: Readonly<Record<string, string>> = {
+  "/404": "/",
+  "/pixelslash/security": "/pixelslash",
+  "/pixelslash/self-host": "/pixelslash",
+};
+
+export const OG_CARDS: readonly OgCard[] = PAGES.filter(({ path }) => WEARS[path] === undefined).map(({ path }) => {
   const card = CARDS[path];
   if (card === undefined) throw new Error(`No share card for ${path}`);
   return {
@@ -67,9 +77,9 @@ export const OG_CARDS: readonly OgCard[] = PAGES.map(({ path }) => {
   };
 });
 
-/** The card a page wears. The 404 page, which is not in `PAGES`, wears the suite's. */
+/** The card a page wears: its own, or the one `WEARS` names for it. */
 export function ogCardFor(path: string): OgCard {
-  const card = OG_CARDS.find((item) => item.path === (path === "/404" ? "/" : path));
+  const card = OG_CARDS.find((item) => item.path === (WEARS[path] ?? path));
   if (card === undefined) throw new Error(`No share card for ${path}: add it to og.ts`);
   return card;
 }

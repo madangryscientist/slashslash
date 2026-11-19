@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { HERO } from "#/content/landing";
-import { OG_CARDS, ogCardFor } from "#/content/og";
+import { OG_CARDS, WEARS, ogCardFor } from "#/content/og";
 import { PAGES } from "#/content/pages";
 import { PRODUCTS } from "#/content/products";
 import { STATEMENT } from "#/pixelslash/content/pricing";
@@ -8,8 +8,10 @@ import { STATEMENT } from "#/pixelslash/content/pricing";
 const card = (path: string) => OG_CARDS.find((item) => item.path === path);
 
 describe("the share card list", () => {
-  test("has exactly one card per page, in PAGES order", () => {
-    expect(OG_CARDS.map((item) => item.path)).toEqual(PAGES.map((page) => page.path));
+  test("has exactly one card per page that wears its own, in PAGES order", () => {
+    expect(OG_CARDS.map((item) => item.path)).toEqual(
+      PAGES.map((page) => page.path).filter((path) => WEARS[path] === undefined),
+    );
   });
 
   test("gives every card a unique slug made from its path", () => {
@@ -38,6 +40,11 @@ describe("the share card list", () => {
 
   test("gives /omnislash the headline, its page's h1", () => {
     expect(card("/omnislash")).toMatchObject({ tool: "omnislash", headline: "From an idea to a merged change, in one tool." });
+  });
+
+  test("gives the PixelSlash security page and self-host guide the PixelSlash card", () => {
+    expect(ogCardFor("/pixelslash/security")).toBe(card("/pixelslash"));
+    expect(ogCardFor("/pixelslash/self-host")).toBe(card("/pixelslash"));
   });
 
   test("gives the 404 page the suite's card and refuses a page it does not know", () => {
