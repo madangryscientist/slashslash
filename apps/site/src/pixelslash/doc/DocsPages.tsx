@@ -115,7 +115,7 @@ function PrevNext({ slug }: { slug: string }): ReactNode {
  */
 function WithNav({ current, search, children }: { current?: string; search?: ReactNode; children: ReactNode }): ReactNode {
   return (
-    <div className="grid gap-10 lg:grid-cols-[14rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-y-6">
+    <div className="grid gap-10 lg:grid-cols-[18rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-y-6">
       {search === undefined ? null : (
         <div className="min-w-0 lg:col-start-1 lg:row-start-1" data-testid="docs-search-cell">
           {search}
