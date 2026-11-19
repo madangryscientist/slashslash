@@ -1,10 +1,9 @@
 import { existsSync, globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
-import { LISTED_PAGES } from "#/pixelslash/doc/docs-map";
+import { LISTED_PAGES, SELF_HOST_HREF } from "#/pixelslash/doc/docs-map";
 import { DOCS } from "#/pixelslash/doc/resolve-links";
 import type { SearchEntry } from "#/pixelslash/doc/search";
-import { SELF_HOST_HREF } from "#/pixelslash/doc/search-index";
 
 /*
  * The docs search as the build writes it, read from dist (`bunx moon run site:test` builds first): the

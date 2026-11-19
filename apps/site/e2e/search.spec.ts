@@ -29,7 +29,8 @@ test("search finds an exact error message, and the only request it makes is the 
 
   await first.click();
   await page.waitForURL("**/pixelslash/docs/troubleshooting#*");
-  await expect(page.locator(page.url().slice(page.url().indexOf("#")))).toBeVisible();
+  const id = decodeURIComponent(new URL(page.url()).hash.slice(1));
+  await expect(page.locator(`[id="${id}"]`)).toBeVisible();
 });
 
 test("a search for nothing says so", async ({ page }) => {

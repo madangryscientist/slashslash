@@ -1,7 +1,7 @@
 import type { MarkedToken } from "marked";
 import { docFor } from "#/pixelslash/doc/docs-content";
 import { SELF_HOST_DOC } from "#/pixelslash/doc/docs";
-import { EXTRA_NAV, LISTED_PAGES } from "#/pixelslash/doc/docs-map";
+import { EXTRA_NAV, LISTED_PAGES, SELF_HOST_HREF } from "#/pixelslash/doc/docs-map";
 import type { Doc } from "#/pixelslash/doc/markdown";
 import { DOCS } from "#/pixelslash/doc/resolve-links";
 import type { SearchEntry } from "#/pixelslash/doc/search";
@@ -11,9 +11,6 @@ import type { SearchEntry } from "#/pixelslash/doc/search";
  * H2 and H3 headings into entries. Built from the same parsed documents the pages render, so it
  * cannot hold a page the site does not have.
  */
-
-/** The self-host guide's address, as the docs nav links it. */
-export const SELF_HOST_HREF = "/pixelslash/self-host";
 
 /** Real HTML in the docs; a placeholder such as `<n>` in an error message is text and stays. */
 const HTML_TAG = /<\/?(?:br|details|summary|p|div|span|a|kbd|sup|sub|img|table|tr|td|th|code)\b[^>]*>/g;
@@ -63,7 +60,7 @@ export function entriesOf(doc: Doc, base: string, pageTitle: string): SearchEntr
 export function buildSearchIndex(): SearchEntry[] {
   const docs = LISTED_PAGES.flatMap((page) => entriesOf(docFor(page.slug), `${DOCS}/${page.slug}`, page.title));
   const extra = EXTRA_NAV.flatMap((item) =>
-    item.href === SELF_HOST_HREF ? entriesOf(SELF_HOST_DOC, item.href, "Self-host the review app") : [],
+    item.href === SELF_HOST_HREF ? entriesOf(SELF_HOST_DOC, item.href, item.title) : [],
   );
   return [...docs, ...extra];
 }

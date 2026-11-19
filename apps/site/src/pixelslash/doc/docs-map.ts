@@ -297,9 +297,12 @@ export const LISTED_PAGES: readonly DocPageDef[] = DOC_PAGES.filter(
   (page) => page.unlisted !== true,
 );
 
+/** The self-host guide's address: the docs nav links it, and the docs search indexes it. */
+export const SELF_HOST_HREF = "/pixelslash/self-host";
+
 /** Pages of the site that are not docs pages but sit in the docs nav, under the group they belong to. */
 export const EXTRA_NAV: readonly { group: GroupId; title: string; href: string }[] = [
-  { group: "ci", title: "Self-host the review app", href: "/pixelslash/self-host" },
+  { group: "ci", title: "Self-host the review app", href: SELF_HOST_HREF },
 ];
 
 export function findPage(slug: string): DocPageDef | undefined {
