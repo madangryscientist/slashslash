@@ -182,11 +182,8 @@ const BLOCKS: Partial<Record<MarkedToken["type"], BlockRenderer>> = {
     ),
   code: (token) =>
     token.type === "code" && (
-      <CodeBlock
-        language={language(token.lang)}
-        copy
-        {...(token.lang ? { label: token.lang } : {})}
-      >
+      // No `copy`: these pages load no script, so a Copy button would do nothing.
+      <CodeBlock language={language(token.lang)} {...(token.lang ? { label: token.lang } : {})}>
         {token.text}
       </CodeBlock>
     ),

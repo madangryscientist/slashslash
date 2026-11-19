@@ -193,6 +193,10 @@ describe.each(DOCS)("$file, rendered from its fetched document", ({ file, doc })
     for (const heading of doc.headings) expect(body).toContain(heading.text);
     expect(body).not.toMatch(TICKET_ID);
   });
+
+  test("draws no Copy button, which would need a script these pages do not load", () => {
+    expect(html).not.toContain("data-copy-text");
+  });
 });
 
 test("SECURITY.md's link to the self-host guide lands on the guide here", () => {

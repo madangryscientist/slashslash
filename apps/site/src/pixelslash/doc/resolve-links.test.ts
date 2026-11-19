@@ -13,6 +13,7 @@ test("any other repository file goes to GitHub, resolved against the document's 
     "https://github.com/slashsuite/pixelslash/blob/main/apps/web/README.md#self-host-in-5-minutes",
   );
   expect(resolveHref("docs/cli.md", "SECURITY.md")).toBe("https://github.com/slashsuite/pixelslash/blob/main/docs/cli.md");
+  expect(resolveHref("/SECURITY.md", "apps/web/SELF-HOST.md")).toBe("/pixelslash/security");
 });
 
 test("anchors, mail and external links stay as they are", () => {

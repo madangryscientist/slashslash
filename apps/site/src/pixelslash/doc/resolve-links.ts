@@ -29,7 +29,8 @@ function joinRepoPath(sourcePath: string, relative: string): string {
 export function resolveHref(href: string, sourcePath: string): string {
   if (href.startsWith("#") || href.startsWith("mailto:") || /^[a-z]+:\/\//.test(href)) return href;
   const [path = "", anchor] = href.split("#");
-  const repoPath = joinRepoPath(sourcePath, path);
+  // A root-relative link is from the repository's root, as on GitHub.
+  const repoPath = path.startsWith("/") ? joinRepoPath("", path) : joinRepoPath(sourcePath, path);
   const target = SITE_PATHS[repoPath] ?? `${REPO_URL}/blob/main/${repoPath}`;
   return anchor === undefined ? target : `${target}#${anchor}`;
 }

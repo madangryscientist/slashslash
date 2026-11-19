@@ -1,8 +1,9 @@
 import type { Claim } from "#/content/facts";
 
 /**
- * Every page of the PixelSlash site, in nav order. This site serves four of them (paths.ts LOCAL); the rest
- * stay on pixelslash.dev, so only the four served here carry a description, a Claim citing PixelSlash's facts.
+ * Every page of the PixelSlash site, in nav order. This site serves the four marketing pages, each with a
+ * description (a Claim citing PixelSlash's facts), and the security and self-host pages, which take theirs
+ * from their own document (pixelslash/doc/docs.ts). The docs stay on pixelslash.dev.
  */
 type Page = { to: string; label: string; title: string; description?: Claim };
 
