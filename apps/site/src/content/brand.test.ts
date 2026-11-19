@@ -17,6 +17,7 @@ const TOOLS: Record<string, { deep: string; text: string; pastel: string }> = {
   taskslash: { deep: "#1e66f5", text: "#1a5fe6", pastel: "#89b4fa" },
   sightslash: { deep: "#c8399a", text: "#b8338a", pastel: "#f5c2e7" },
   uislash: { deep: "#13838a", text: "#0e777c", pastel: "#94e2d5" },
+  omnislash: { deep: "#7287fd", text: "#3d5afc", pastel: "#b4befe" },
 };
 const INK_LIGHT = "#24273a";
 const INK_DARK = "#e2e8fc";
@@ -88,13 +89,13 @@ function textFiles(dir: string, out: string[] = []): string[] {
 }
 
 describe("the brand files in dist/brand", () => {
-  test("all 24 direction C files are there: eight marks and sixteen lockups", () => {
+  test("all 27 direction C files are there: nine marks and eighteen lockups", () => {
     const names = Object.keys(TOOLS).flatMap((slug) => [
       `${slug}-mark.svg`,
       `${slug}-lockup-light.svg`,
       `${slug}-lockup-dark.svg`,
     ]);
-    expect(names).toHaveLength(24);
+    expect(names).toHaveLength(27);
     for (const name of names) expect(existsSync(join(DIST, "brand", name)), name).toBe(true);
   });
 
@@ -163,10 +164,11 @@ describe("the icon and the header on the built pages", () => {
     }
   });
 
-  test("FlakeSlash, ToggleSlash and TaskSlash use their own tool mark", () => {
+  test("FlakeSlash, ToggleSlash, TaskSlash and OmniSlash use their own tool mark", () => {
     expect(iconOf(read("flakeslash.html"))).toBe("/brand/flakeslash-mark.svg");
     expect(iconOf(read("toggleslash.html"))).toBe("/brand/toggleslash-mark.svg");
     expect(iconOf(read("taskslash.html"))).toBe("/brand/taskslash-mark.svg");
+    expect(iconOf(read("omnislash.html"))).toBe("/brand/omnislash-mark.svg");
   });
 
   test("no page still points at the old logo files or PixelSlash's own favicon", () => {

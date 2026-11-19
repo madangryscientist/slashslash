@@ -33,7 +33,12 @@ describe("the share card list", () => {
     expect(card("/flakeslash")?.headline).toBe(question("FlakeSlash"));
     expect(card("/toggleslash")?.headline).toBe(question("ToggleSlash"));
     expect(card("/taskslash")?.headline).toBe(question("TaskSlash"));
+    expect(card("/omnislash")?.headline).toBe(question("OmniSlash"));
     expect(card("/pixelslash/pricing")?.headline).toBe(STATEMENT.text);
+  });
+
+  test("gives /omnislash the headline, its page's h1", () => {
+    expect(card("/omnislash")).toMatchObject({ tool: "omnislash", headline: "From an idea to a merged change, in one tool." });
   });
 
   test("gives the 404 page the suite's card and refuses a page it does not know", () => {

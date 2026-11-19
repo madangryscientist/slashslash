@@ -91,7 +91,8 @@ export const WORKS_TODAY: readonly Feature[] = [
   },
 ];
 
-export type TryStep = { lead: string; commands: readonly string[] };
+/** A try-it step: its commands in one copy block, after the line that leads into them, where there is one. */
+export type TryStep = { lead?: string; commands: readonly string[] };
 
 /** How to try it today, from a clone. It is not published on npm. */
 export const TRY_IT: { lead: Claim; steps: readonly TryStep[] } = {

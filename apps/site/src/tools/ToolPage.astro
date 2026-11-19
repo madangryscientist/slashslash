@@ -1,5 +1,5 @@
 ---
-// A tool's home on the shell, in its own section: ToolHome from the tool's data, with the two copy
+// A tool's home on the shell, in its own section: ToolHome from the tool's data, with its copy
 // blocks hydrated when they scroll into view. The hero and the sections set their own width, so it
 // sits in the shell's full-width main.
 import Slash from "#/layouts/Slash.astro";
@@ -12,11 +12,12 @@ interface Props {
 }
 
 const tool = TOOLS[Astro.props.tool];
+const heroCommand = heroCommandOf(tool);
 ---
 
 <Slash section={tool.key} title={tool.title.text} description={tool.description.text}>
   <ToolHome tool={tool}>
-    <HeroCode slot="heroCode" command={heroCommandOf(tool)} client:visible />
+    {heroCommand !== undefined && <HeroCode slot="heroCode" command={heroCommand} client:visible />}
     <TryIt slot="tryIt" steps={tool.tryIt.steps} client:visible />
   </ToolHome>
 </Slash>

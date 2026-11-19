@@ -28,7 +28,7 @@ function builtPages(): string[] {
   const pages = globSync("**/*.html", { cwd: CLIENT }).filter(
     (page) => page !== "pixelslash.html" && !page.startsWith("pixelslash/"),
   );
-  expect(pages.toSorted()).toEqual(["404.html", "developers.html", "flakeslash.html", "index.html", "taskslash.html", "toggleslash.html"]);
+  expect(pages.toSorted()).toEqual(["404.html", "developers.html", "flakeslash.html", "index.html", "omnislash.html", "taskslash.html", "toggleslash.html"]);
   return pages.map((page) => readFileSync(resolve(CLIENT, page), "utf8"));
 }
 

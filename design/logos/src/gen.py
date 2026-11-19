@@ -3,8 +3,8 @@
 Run from the repo root:
   uvx --with brotli==1.2.1 --with uharfbuzz==0.57.0 --from fonttools==4.68.0 python design/logos/src/gen.py
 Writes SVGs under ../out (gitignored): a-cut, b-pixel, c-glyph, and a board per direction under ../out/boards.
-Direction C is the one the suite ships: its eight marks and sixteen lockups (slash, pixelslash, flakeslash, toggleslash,
-bundleslash, taskslash, sightslash, uislash) also go to apps/site/public/brand/ (tracked).
+Direction C is the one the suite ships: its nine marks and eighteen lockups (slash, pixelslash, flakeslash, toggleslash,
+bundleslash, taskslash, sightslash, uislash, omnislash) also go to apps/site/public/brand/ (tracked).
 
 With `--og <file>` (or `--og -` for stdin) it also writes one share card per page, from the JSON list that
 og-pages.ts prints, to apps/site/public/og/<slug>.svg (tracked); og-png.ts then rasterises them.
@@ -43,11 +43,15 @@ ACCENT = {
     "sight": {"light": "#c8399a", "text": "#b8338a", "dark": "#f5c2e7"},
     # UISlash (Jacobus, 2026-11-18: teal, picked over lavender and lime). Its text tone measures 4.7:1 on #eef2f9.
     "ui": {"light": "#13838a", "text": "#0e777c", "dark": "#94e2d5"},
+    # OmniSlash (2026-11-19: Catppuccin lavender, which no other tool wears). Lavender #7287fd is 2.8:1 on #eef2f9, so
+    # its text tone is the same hue darkened in HSL until it reaches 4.5:1: #3d5afc, 4.6:1 on #eef2f9 and 4.57:1 on #eff1f5.
+    "omni": {"light": "#7287fd", "text": "#3d5afc", "dark": "#b4befe"},
 }
 TOOLS = ["pixel", "flake", "toggle", "bundle"]
-# TaskSlash and SightSlash (Jacobus, 2026-11-15) and UISlash (2026-11-18) are drawn in Direction C only, the direction he picked.
-C_TOOLS = [*TOOLS, "task", "sight", "ui"]
-NAME = {"suite": "slashslash", "pixel": "PixelSlash", "flake": "FlakeSlash", "toggle": "ToggleSlash", "bundle": "BundleSlash", "task": "TaskSlash", "sight": "SightSlash", "ui": "UISlash"}
+# TaskSlash and SightSlash (Jacobus, 2026-11-15), UISlash (2026-11-18) and OmniSlash (2026-11-19) are drawn in Direction C
+# only, the direction he picked.
+C_TOOLS = [*TOOLS, "task", "sight", "ui", "omni"]
+NAME = {"suite": "slashslash", "pixel": "PixelSlash", "flake": "FlakeSlash", "toggle": "ToggleSlash", "bundle": "BundleSlash", "task": "TaskSlash", "sight": "SightSlash", "ui": "UISlash", "omni": "OmniSlash"}
 TILE = "#181825"  # Mocha mantle: the pixel tiles carry their own ground in both themes
 
 
@@ -282,6 +286,8 @@ def c_mark(tool, uid):
             '<rect x="10" y="12" width="80" height="28" rx="14"/><rect x="10" y="26" width="80" height="14"/>'
             '<rect x="21" y="50" width="13" height="28" rx="3"/><rect x="53" y="50" width="26" height="28" rx="3"/>'
         )
+    elif tool == "omni":  # a ring: a closed loop for the whole cycle, from an idea to a merged change, cut by the slash
+        shape = '<circle cx="50" cy="50" r="34" fill="none" stroke="#fff" stroke-width="16"/>'
     return (
         f'<mask id="m{uid}" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">'
         f'<g fill="#fff">{shape}</g>{cuts}</mask>'
@@ -291,7 +297,7 @@ def c_mark(tool, uid):
 
 def c_word(tool):
     """JetBrains Mono 700: the first half in ink, `slash` in the tool's text tone (class `t`); the suite adds `.build`."""
-    first = {"suite": "slash", "pixel": "pixel", "flake": "flake", "toggle": "toggle", "bundle": "bundle", "task": "task", "sight": "sight", "ui": "ui"}[tool]
+    first = {"suite": "slash", "pixel": "pixel", "flake": "flake", "toggle": "toggle", "bundle": "bundle", "task": "task", "sight": "sight", "ui": "ui", "omni": "omni"}[tool]
     d1, w1 = text_path(first, face="mono", axes=(("wght", 700),), size=60, x=122, y=70)
     d2, w2 = text_path("slash", face="mono", axes=(("wght", 700),), size=60, x=122 + w1, y=70)
     body = f'<path class="i" d="{d1}"/><path class="t" d="{d2}"/>'

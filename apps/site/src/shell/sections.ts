@@ -82,6 +82,15 @@ export const SECTIONS = {
     home: "/taskslash",
     pages: [{ label: "Overview", href: "/taskslash" }],
   },
+  omnislash: {
+    // Becomes slash-omnislash / slash-omnislash-dark when @hackcove/themes ships slash-omnislash.css.
+    day: "slash-suite",
+    night: "slash-suite-dark",
+    mark: markFor("OmniSlash"),
+    name: "OmniSlash",
+    home: "/omnislash",
+    pages: [{ label: "Overview", href: "/omnislash" }],
+  },
 } as const satisfies Record<string, Section>;
 
 export type SectionKey = keyof typeof SECTIONS;

@@ -12,13 +12,13 @@ export function HeroCode({ command }: { command: string }): ReactNode {
   return <CodeBlock label="bash" language="bash" overflow="wrap" lines={[command]} copy />;
 }
 
-/** Each try-it step: its lead line and its commands in one block with a copy button. */
+/** Each try-it step: its lead line, where it has one, and its commands in one block with a copy button. */
 export function TryIt({ steps }: { steps: readonly TryStep[] }): ReactNode {
   return (
     <Stack gap="lg">
       {steps.map((step) => (
-        <Stack key={step.lead} gap="sm">
-          <Text>{step.lead}</Text>
+        <Stack key={step.commands.join("\n")} gap="sm">
+          {step.lead === undefined ? null : <Text>{step.lead}</Text>}
           <CodeBlock label="bash" language="bash" overflow="wrap" lines={[...step.commands]} copy />
         </Stack>
       ))}

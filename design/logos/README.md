@@ -1,7 +1,7 @@
 # Logos
 
 The suite's logo drafts, generated from code so every mark can be rebuilt. The site ships **Direction C, glyph and cut**:
-its eight marks and sixteen lockups are written to `apps/site/public/brand/` and committed there.
+its nine marks and eighteen lockups are written to `apps/site/public/brand/` and committed there.
 
 ## Regenerate
 
@@ -29,8 +29,8 @@ and one that will not fit is set smaller (the run says which), never cut.
 
 ## What it writes
 
-- `apps/site/public/brand/<slug>-mark.svg` and `<slug>-lockup-{light,dark}.svg` for the eight Direction C tools
-  (slash, pixelslash, flakeslash, toggleslash, bundleslash, taskslash, sightslash, uislash). Tracked in git.
+- `apps/site/public/brand/<slug>-mark.svg` and `<slug>-lockup-{light,dark}.svg` for the nine Direction C tools
+  (slash, pixelslash, flakeslash, toggleslash, bundleslash, taskslash, sightslash, uislash, omnislash). Tracked in git.
 - `apps/site/public/og/<slug>.svg` and `<slug>.png`: one 1200x630 share card per page, from the list in
   `apps/site/src/content/og.ts`. Tracked in git; the layout's head names the PNG.
 - `design/logos/out/` (gitignored): all three directions (`a-cut`, `b-pixel`, `c-glyph`) and the review boards in
@@ -41,6 +41,10 @@ and one that will not fit is set smaller (the run says which), never cut.
 - `src/gen.py`: the marks, the lockups, the boards and the colours (`THEME`, `ACCENT`). Each accent has a `light` fill
   (the deep fill, for marks on light), a `text` tone (for links, labels and the wordmark letters on light), and a `dark`
   pastel (for marks and letters on dark).
+  OmniSlash's mark is a ring in Catppuccin lavender (`#7287fd` fill, `#b4befe` on dark). Lavender itself measures
+  2.8:1 on `#eef2f9`, too light for text, so its `text` tone is the same hue darkened in HSL lightness, in 0.5% steps,
+  until it first reaches 4.5:1 on all three light grounds: `#3d5afc`, which measures 4.6:1 on `#eef2f9`, 4.57:1 on
+  `#eff1f5` and 5.16:1 on `#ffffff`. The dark pastel `#b4befe` measures 10.3:1 on `#0d1326` and 10.5:1 on `#11111b`.
 - `src/outline.py`: turns a line of text into path data from the site's own fonts in `apps/site/public/fonts/` (and
   Bricolage Grotesque from `design/logos/fonts/` for the retired direction A boards), so the text is outlines and needs no font.
 - `src/og-pages.ts`: prints the share card list from `og.ts` as JSON, for `gen.py --og -`.
