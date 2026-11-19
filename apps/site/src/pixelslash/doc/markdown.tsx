@@ -5,6 +5,7 @@ import {
   CodeBlock,
   type CodeLanguage,
   Divider,
+  Image,
   Prose,
   SectionHeading,
   Stack,
@@ -20,10 +21,10 @@ import {
 import { type MarkedToken, type Token, type Tokens, lexer } from "marked";
 import { Fragment, type ReactNode } from "react";
 import { decode, marked, plainText, slugger, stripTicketIds } from "#/pixelslash/doc/doc-text";
-import { resolveHref } from "#/pixelslash/doc/resolve-links";
+import { resolveHref, resolveImageSrc } from "#/pixelslash/doc/resolve-links";
 
 /*
- * A PixelSlash repository document (SECURITY.md, apps/web/SELF-HOST.md) rendered as React at build
+ * A PixelSlash repository document (docs/cli.md, SECURITY.md, ...) rendered as React at build
  * time, ported from PixelSlash's site. marked lexes it; this file draws the tokens with the design
  * system's parts, so no HTML string is injected and every link goes through `resolveHref`.
  */
@@ -39,9 +40,11 @@ export type Doc = {
   tokens: MarkedToken[];
   headings: Heading[];
   ids: WeakMap<Token, string>;
+  /** The docs page this is shown on, so a `#anchor` link knows whether it leaves the page. */
+  page?: string;
 };
 
-export function parseDoc(markdown: string, source: string): Doc {
+export function parseDoc(markdown: string, source: string, page?: string): Doc {
   const all = marked(lexer(stripTicketIds(markdown)));
   const first = all.find((token) => token.type !== "space");
   const title = first?.type === "heading" && first.depth === 1 ? plainText(first.tokens) : "";
@@ -56,7 +59,7 @@ export function parseDoc(markdown: string, source: string): Doc {
     ids.set(token, id);
     headings.push({ depth: token.depth, text, id });
   }
-  return { source, title, tokens, headings, ids };
+  return { source, title, tokens, headings, ids, ...(page === undefined ? {} : { page }) };
 }
 
 function Inline({ tokens, doc }: { tokens: Token[] | undefined; doc: Doc }): ReactNode {
@@ -64,12 +67,19 @@ function Inline({ tokens, doc }: { tokens: Token[] | undefined; doc: Doc }): Rea
 }
 
 function InlineLink({ token, doc }: { token: Tokens.Link; doc: Doc }): ReactNode {
-  const href = resolveHref(token.href, doc.source);
+  const href = resolveHref(token.href, doc.source, doc.page);
   return (
     <TextLink href={href} external={/^https?:/.test(href)}>
       <Inline tokens={token.tokens} doc={doc} />
     </TextLink>
   );
+}
+
+/** A screenshot from PixelSlash's site `public` folder; any other image stays its alt text. */
+function InlineImage({ token, doc }: { token: Tokens.Image; doc: Doc }): ReactNode {
+  const src = resolveImageSrc(token.href, doc.source);
+  if (src === null) return token.text;
+  return <Image src={src} alt={token.text} width="full" aspect="natural" />;
 }
 
 function InlineToken({ token, doc }: { token: MarkedToken; doc: Doc }): ReactNode {
@@ -92,8 +102,7 @@ function InlineToken({ token, doc }: { token: MarkedToken; doc: Doc }): ReactNod
     case "br":
       return <br />;
     case "image":
-      // Neither document has an image; one would stay its alt text.
-      return token.text;
+      return <InlineImage token={token} doc={doc} />;
     default:
       return inlineText(token, doc);
   }
@@ -143,8 +152,10 @@ function ListBlock({ token, doc }: { token: Tokens.List; doc: Doc }): ReactNode 
 function TableBlock({ token, doc }: { token: Tokens.Table; doc: Doc }): ReactNode {
   // The kit's Table needs a name for screen readers; a document's table has none, so its columns name it.
   const label = token.header.map((cell) => plainText(cell.tokens)).join(", ");
+  // A wide table scrolls sideways on a phone, in a box the kit's Table does not make focusable; the
+  // table itself takes focus instead, so a keyboard can scroll it (axe: scrollable-region-focusable).
   return (
-    <Table label={label}>
+    <Table label={label} tabIndex={0}>
       <TableHead>
         <TableRow>
           {token.header.map((cell, index) => (

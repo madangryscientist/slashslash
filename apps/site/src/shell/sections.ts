@@ -4,7 +4,7 @@
  * second header row. The shell, the layout and the head script read only this.
  */
 import { FLAKESLASH_REPO_URL } from "#/content/flakeslash";
-import { PIXELSLASH_SITE_URL, SITE_NAME } from "#/content/site";
+import { SITE_NAME } from "#/content/site";
 
 export type SubPage = {
   label: string;
@@ -49,7 +49,7 @@ export const SECTIONS = {
       { label: "How it works", href: "/pixelslash/how-it-works" },
       { label: "Compare", href: "/pixelslash/compare" },
       { label: "Pricing", href: "/pixelslash/pricing" },
-      { label: "Docs", href: `${PIXELSLASH_SITE_URL}/docs`, external: true },
+      { label: "Docs", href: "/pixelslash/docs" },
     ],
   },
   flakeslash: {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { HERO } from "#/content/landing";
-import { OG_CARDS, WEARS, ogCardFor } from "#/content/og";
+import { OG_CARDS, ogCardFor, wornCard } from "#/content/og";
 import { PAGES } from "#/content/pages";
 import { PRODUCTS } from "#/content/products";
 import { STATEMENT } from "#/pixelslash/content/pricing";
@@ -10,8 +10,17 @@ const card = (path: string) => OG_CARDS.find((item) => item.path === path);
 describe("the share card list", () => {
   test("has exactly one card per page that wears its own, in PAGES order", () => {
     expect(OG_CARDS.map((item) => item.path)).toEqual(
-      PAGES.map((page) => page.path).filter((path) => WEARS[path] === undefined),
+      PAGES.map((page) => page.path).filter((path) => wornCard(path) === undefined),
     );
+  });
+
+  test("gives the docs pages the PixelSlash card and no card of their own", () => {
+    expect(wornCard("/pixelslash/docs")).toBe("/pixelslash");
+    expect(wornCard("/pixelslash/docs/upload")).toBe("/pixelslash");
+    expect(wornCard("/pixelslash/docsearch")).toBeUndefined();
+    expect(wornCard("/pixelslash/security")).toBe("/pixelslash");
+    expect(ogCardFor("/pixelslash/docs/getting-started").slug).toBe("pixelslash");
+    expect(OG_CARDS.some((item) => item.path.startsWith("/pixelslash/docs"))).toBe(false);
   });
 
   test("gives every card a unique slug made from its path", () => {

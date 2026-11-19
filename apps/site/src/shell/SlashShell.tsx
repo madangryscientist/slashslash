@@ -2,7 +2,7 @@ import { AppShell, AppShellBrand, Caption, Cluster, ColourSchemeToggle, Show, Ta
 import type { ReactNode } from "react";
 import { licenceOf } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
-import { LANDING_HEADLINE, PIXELSLASH_SITE_URL, SITE_NAME } from "#/content/site";
+import { LANDING_HEADLINE, SITE_NAME } from "#/content/site";
 import { TRADEMARK } from "#/pixelslash/content/trademark";
 import { FooterColumns } from "#/stand-ins/footer-columns";
 import { SECTIONS, TOOL_KEYS, markFor, type SectionKey } from "#/shell/sections";
@@ -76,9 +76,7 @@ function Footer(): ReactNode {
           title: "Developers",
           items: [
             <TextLink href="/developers">How it works in CI</TextLink>,
-            <TextLink href={`${PIXELSLASH_SITE_URL}/docs`} external>
-              PixelSlash docs
-            </TextLink>,
+            <TextLink href="/pixelslash/docs">PixelSlash docs</TextLink>,
             <TextLink href="https://github.com/slashsuite" external>
               Source on GitHub
             </TextLink>,
@@ -134,7 +132,8 @@ export function SlashShell({
         items={current.pages.map((page) => ({
           label: page.label,
           href: page.href,
-          selected: page.href === path,
+          // A tab is current on its own page and, but for the section's home, on the pages under it (each docs page under Docs).
+          selected: page.href === path || (page.href !== current.home && path.startsWith(`${page.href}/`)),
           ...("external" in page ? { external: true } : {}),
         }))}
       />

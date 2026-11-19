@@ -1,0 +1,26 @@
+---
+// /pixelslash/docs/<slug>: one page of PixelSlash's docs, a cut of docs/cli.md or a docs file of its own,
+// fetched at the pinned commit and rendered at build time on the shell. Unlisted pages are built too.
+import type { GetStaticPaths } from "astro";
+import { Container } from "@hackcove/ui-react";
+import Slash from "#/layouts/Slash.astro";
+import { DocsPage } from "#/pixelslash/doc/DocsPages";
+import { docFor } from "#/pixelslash/doc/docs-content";
+import { DOC_PAGES, findPage } from "#/pixelslash/doc/docs-map";
+import { docPage } from "#/pixelslash/doc/docs";
+
+export const getStaticPaths = (() => DOC_PAGES.map((page) => ({ params: { slug: page.slug } }))) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+const def = findPage(slug);
+if (def === undefined) throw new Error(`docs: no page ${slug}`);
+const page = docPage(docFor(slug), { title: def.title, suffix: " · PixelSlash docs" });
+---
+
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  <div class="py-8">
+    <Container>
+      <DocsPage slug={slug} />
+    </Container>
+  </div>
+</Slash>
