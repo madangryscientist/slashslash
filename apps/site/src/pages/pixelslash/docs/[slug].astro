@@ -5,6 +5,7 @@ import type { GetStaticPaths } from "astro";
 import { Container } from "@hackcove/ui-react";
 import Slash from "#/layouts/Slash.astro";
 import { DocsPage } from "#/pixelslash/doc/DocsPages";
+import { DocsSearch } from "#/pixelslash/doc/DocsSearch";
 import { docFor } from "#/pixelslash/doc/docs-content";
 import { DOC_PAGES, findPage } from "#/pixelslash/doc/docs-map";
 import { docPage } from "#/pixelslash/doc/docs";
@@ -20,7 +21,9 @@ const page = docPage(docFor(slug), { title: def.title, suffix: " · PixelSlash d
 <Slash section="pixelslash" title={page.title} description={page.description}>
   <div class="py-8">
     <Container>
-      <DocsPage slug={slug} />
+      <DocsPage slug={slug}>
+        <DocsSearch client:idle slot="search" />
+      </DocsPage>
     </Container>
   </div>
 </Slash>
