@@ -21,12 +21,13 @@ export const TOGGLESLASH_TITLE: Claim = {
 export const TOGGLESLASH_INTRO: { title: string; lead: Claim } = {
   title: "ToggleSlash",
   lead: {
-    text: "ToggleSlash is a feature flag service you run yourself. Today it is a server, a command line, a TypeScript server SDK and a dashboard, and there is no hosted service.",
+    text: "ToggleSlash is a feature flag service you run yourself. Today it is a server, a command line, server SDKs in TypeScript, Python, Go, Java, C# and Ruby, and a dashboard, and there is no hosted service.",
     facts: [
       "toggleslash/what-it-is",
       "toggleslash/server",
       "toggleslash/cli",
       "toggleslash/typescript-server-sdk",
+      "toggleslash/other-server-sdks",
       "toggleslash/dashboard",
       "toggleslash/dashboard-cloudflare-workers",
     ],
@@ -88,11 +89,24 @@ export const WORKS_TODAY: readonly Feature[] = [
     },
   },
   {
-    title: "A TypeScript server SDK",
-    command: "packages/sdk",
+    title: "Server SDKs in six languages",
+    command: "TypeScript on npm, five more from a checkout",
     text: {
-      text: "The server SDK fetches an environment's rules and evaluates flags inside your process, with the reason for each answer. It keeps a stream open to the server, so turning a flag on reaches a running app without a restart.",
-      facts: ["toggleslash/typescript-server-sdk", "toggleslash/live-updates"],
+      text: "Check a flag inside your own process, with no network call per check. The TypeScript SDK installs from npm, keeps an environment's ruleset current and evaluates flags in your process. The Python, Go, Java, C# and Ruby SDKs also evaluate locally and pass the same conformance tests. None of those five is published: they run from a checkout of the repository.",
+      facts: [
+        "toggleslash/typescript-server-sdk",
+        "toggleslash/live-updates",
+        "toggleslash/other-server-sdks",
+        "toggleslash/typescript-packages-npm",
+      ],
+    },
+  },
+  {
+    title: "One evaluation spec",
+    command: "docs/evaluation.md",
+    text: {
+      text: "A flag should give the same answer whichever language asks. Evaluation is written down once, with shared test vectors in `fixtures/evaluation/`. The TypeScript engine and the C# evaluator pass every vector.",
+      facts: ["toggleslash/evaluation-spec"],
     },
   },
   {

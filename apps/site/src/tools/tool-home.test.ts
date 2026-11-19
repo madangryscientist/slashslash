@@ -29,6 +29,7 @@ function text(html: string): string {
   return html
     .replace(/<(script|style|template)[\s\S]*?<\/\1>/g, " ")
     .replace(/<\/?span[^>]*>/g, "")
+    .replace(/<\/code>/g, "")
     .replace(/<[^>]+>/g, " ")
     .replaceAll("&#39;", "'")
     .replaceAll("&#x27;", "'")
@@ -133,7 +134,7 @@ describe.each(WITH_COMMANDS)("/$key, with a command on every feature", (tool: To
     const today = text(between(html, "works-today", "try-it"));
     for (const feature of tool.today) {
       expect(today).toContain(feature.command);
-      expect(today).toContain(feature.text.text);
+      expect(today).toContain(feature.text.text.replaceAll("`", ""));
     }
     const tryIt = text(between(html, "try-it", "planned"));
     expect(tryIt).toContain(tool.tryIt.lead.text);

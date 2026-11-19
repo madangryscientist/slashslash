@@ -29,6 +29,7 @@ function read(file: string): string {
 function text(html: string): string {
   return html
     .replace(/<(script|style|template)[\s\S]*?<\/\1>/g, " ")
+    .replace(/<\/code>/g, "")
     .replace(/<[^>]+>/g, " ")
     .replaceAll("&#39;", "'")
     .replaceAll("&#x27;", "'")
@@ -111,7 +112,7 @@ describe("/developers", () => {
       const card = text(cards[i] ?? "");
       expect(card).toContain(product.name);
       expect(card).toContain(product.question.text);
-      for (const paragraph of product.summary) expect(card).toContain(paragraph.text);
+      for (const paragraph of product.summary) expect(card).toContain(paragraph.text.replaceAll("`", ""));
       // The stage's label beside the name and its sentence, in this product's own card.
       expect(cards[i], product.name).toMatch(new RegExp(`data-status-for="${product.name}"[\\s\\S]*?${STAGES[product.stage].label}<`));
       expect(card).toContain(STAGES[product.stage].sentence);
