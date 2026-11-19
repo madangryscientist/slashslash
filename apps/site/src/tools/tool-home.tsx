@@ -111,7 +111,7 @@ export function ToolHome({
                   <Card key={feature.title} title={feature.title} titleStyle="name" size="lg">
                     <Stack gap="sm">
                       {feature.command === undefined ? null : (
-                        <span className="block max-w-full break-all">
+                        <span className="block max-w-full break-words">
                           <Code>{feature.command}</Code>
                         </span>
                       )}
