@@ -168,7 +168,7 @@ describe("/omnislash, the approved copy", () => {
   const prose = (part: string): string => text(part.replace(/<\/?(code|strong|span)[^>]*>/g, ""));
   const heading = (id: string): string => text(html.match(new RegExp(`<h2 id="${id}"[^>]*>([\\s\\S]*?)</h2>`))?.[1] ?? "");
 
-  test("its only h1 is the headline, which the share card and the product list entry carry too", () => {
+  test("its only h1 is the copy's headline", () => {
     const h1s = [...html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((m) => text(m[1] ?? ""));
     expect(h1s).toEqual(["From an idea to a merged change, in one tool."]);
   });
@@ -243,9 +243,23 @@ describe("/omnislash, the approved copy", () => {
   });
 
   test("the TryIt island is handed exactly the two commands, in one block with no lead line", () => {
-    expect(tool.tryIt.steps).toEqual([{ commands: ["bun install", "bun apps/cli/src/index.ts --help"] }]);
-    const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]+)"[^>]*>/g)].map((m) => m[1]);
-    expect(islands).toEqual(["TryIt"]);
+    const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]+)"[^>]*>/g)];
+    expect(islands.map((m) => m[1])).toEqual(["TryIt"]);
+    // Astro writes an island's props as JSON with each value wrapped as [type, value]: 0 a plain value, 1 an array.
+    const unwrap = (value: unknown): unknown => {
+      if (Array.isArray(value)) return value[0] === 1 ? (value[1] as unknown[]).map(unwrap) : unwrap(value[1]);
+      if (typeof value === "object" && value !== null)
+        return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, unwrap(child)]));
+      return value;
+    };
+    const raw = islands[0]?.[0].match(/\sprops="([^"]*)"/)?.[1] ?? "{}";
+    const props = Object.fromEntries(
+      Object.entries(JSON.parse(raw.replaceAll("&quot;", '"').replaceAll("&amp;", "&")) as object).map(([key, value]) => [
+        key,
+        unwrap(value),
+      ]),
+    );
+    expect(props.steps).toEqual([{ commands: ["bun install", "bun apps/cli/src/index.ts --help"] }]);
   });
 
   test("Planned: its heading, its lead and the three items", () => {

@@ -1,7 +1,7 @@
 /**
  * The /omnislash page, as plain data so a test can check it. Every word is the approved copy, transcribed as it was
- * written: change it only through new approved copy. A word in backticks is set as code, as the copy marks it
- * (`inlineCode` splits it out); the backticks themselves are not shown. Every product claim here cites OmniSlash's FACTS.md (facts.test.ts).
+ * written: change it only through new approved copy. A word in backticks is set as code, as the copy marks it; the
+ * backticks themselves are not shown. Every product claim here cites OmniSlash's FACTS.md (facts.test.ts).
  */
 
 import type { Claim } from "#/content/facts";
@@ -111,8 +111,6 @@ export const PLANNED: readonly Claim[] = [
   { text: "A team server, with access per user.", facts: ["omnislash/team-server"] },
 ];
 
-export const TRY_IT_TITLE = "Try it";
-
 /** Try it: the lead, the two commands in one block, and what comes after them. */
 export const TRY_IT: { lead: Claim; steps: readonly TryStep[]; after: Claim } = {
   lead: {
@@ -135,9 +133,3 @@ export const LICENCE: Claim = {
 export const LINKS: readonly { label: string; href: string }[] = [
   { label: "Repository on GitHub", href: OMNISLASH_REPO_URL },
 ];
-
-/** A text's runs: plain words and, at odd indexes, the words the copy marks as code. */
-export const inlineCode = (text: string): string[] => text.split("`");
-
-/** A text as the page shows it: the backticks dropped. */
-export const shown = (text: string): string => text.replaceAll("`", "");

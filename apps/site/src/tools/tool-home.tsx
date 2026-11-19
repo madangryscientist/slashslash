@@ -142,7 +142,7 @@ export function ToolHome({
             <Section
               id="try-it"
               size="lg"
-              title={tool.headings?.tryIt ?? `Try it on ${tool.tryOn}`}
+              title={tool.tryOn === undefined ? "Try it" : `Try it on ${tool.tryOn}`}
               description={tool.tryIt.lead.text}
             >
               {tool.tryIt.after === undefined ? (

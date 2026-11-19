@@ -4,7 +4,7 @@
  */
 
 import type { Claim, FactsProduct } from "#/content/facts";
-import { OMNISLASH_INTRO } from "#/content/omnislash";
+import { OMNISLASH_HEADLINE, OMNISLASH_INTRO } from "#/content/omnislash";
 import type { StageId } from "#/content/stages";
 
 export type Product = {
@@ -148,7 +148,7 @@ export const PRODUCTS: readonly Product[] = [
     name: "OmniSlash",
     stage: "alpha",
     facts: "omnislash",
-    question: { text: "From an idea to a merged change, in one tool.", facts: ["omnislash/what-it-is"] },
+    question: { text: OMNISLASH_HEADLINE, facts: ["omnislash/what-it-is"] },
     summary: [OMNISLASH_INTRO.lead],
     page: "/omnislash",
   },

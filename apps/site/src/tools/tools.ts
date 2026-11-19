@@ -27,22 +27,19 @@ export type Tool = {
    * it. A word in backticks in a text is set as code.
    */
   today: readonly { title: string; command?: string; text: Claim; list?: readonly Claim[] }[];
-  /** The try-it heading: what the reader tries it on. */
-  tryOn: string;
+  /** The try-it heading: what the reader tries it on. Without one, the heading is "Try it". */
+  tryOn?: string;
   /** The try-it section: its lead, one copy block per step, and an optional paragraph after the blocks. */
   tryIt: { lead: Claim; steps: readonly TryStep[]; after?: Claim };
   planned: { lead: string; items: readonly Claim[] };
   links: readonly { label: string; href: string }[];
   /** The section headings, where a tool's copy names its own; the rest keep the defaults ToolHome sets. */
-  headings?: { today?: string; tryIt?: string; planned?: string };
+  headings?: { today?: string; planned?: string };
   /** A comparison with other tools, between what works today and what is planned. */
   compared?: { title: string; text: Claim };
   /** False when the hero shows no command: the copy has none. */
   heroCode?: false;
-  /**
-   * The licence in the copy's own words, shown after the try-it section in place of the hero's licence line, which
-   * reads the facts file's words.
-   */
+  /** The licence in the copy's own words, shown in the hero in place of the licence line that reads the facts file's. */
   licence?: Claim;
 };
 
@@ -103,13 +100,11 @@ export const TOOLS = {
     lead: omnislash.OMNISLASH_INTRO.lead,
     repo: OMNISLASH_REPO_URL,
     today: omnislash.HOW_A_TICKET_MOVES,
-    tryOn: "your own machine",
     tryIt: omnislash.TRY_IT,
     planned: { lead: omnislash.PLANNED_LEAD, items: omnislash.PLANNED },
     links: omnislash.LINKS,
     headings: {
       today: omnislash.HOW_A_TICKET_MOVES_TITLE,
-      tryIt: omnislash.TRY_IT_TITLE,
       planned: omnislash.PLANNED_TITLE,
     },
     compared: omnislash.AGAINST,
