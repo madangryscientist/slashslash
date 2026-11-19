@@ -66,11 +66,7 @@ function Words({ text }: { text: string }): ReactNode {
 /** The hero's licence line: the copy's own words where the tool has them, else the facts file's. */
 function Licence({ tool, licence }: { tool: Tool; licence: Claim | undefined }): ReactNode {
   if (licence === undefined) return <LicenceLine product={tool.facts} />;
-  return (
-    <Text tone="muted">
-      <span data-licence-claim={tool.facts}>Licence: {licence.text}</span>
-    </Text>
-  );
+  return <Text tone="muted">Licence: {licence.text}</Text>;
 }
 
 export function ToolHome({
