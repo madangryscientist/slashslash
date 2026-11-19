@@ -1,4 +1,4 @@
-import { AppShell, AppShellBrand, Caption, Cluster, ColourSchemeToggle, Tabs, Text, TextLink } from "@hackcove/ui-react";
+import { AppShell, AppShellBrand, Caption, Cluster, ColourSchemeToggle, Show, Tabs, Text, TextLink } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { licenceOf } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
@@ -113,7 +113,15 @@ export function SlashShell({
     <Tabs
       label="Tools"
       items={TOOL_KEYS.map((key) => ({
-        label: <Marked mark={SECTIONS[key].mark}>{SECTIONS[key].name}</Marked>,
+        // The marks show from lg; below it the names stand alone, so every tool fits one row on a tablet.
+        label: (
+          <Cluster as="span" gap="xs" wrap={false}>
+            <Show from="lg" as="span">
+              <img src={SECTIONS[key].mark} alt="" width={16} height={16} />
+            </Show>
+            {SECTIONS[key].name}
+          </Cluster>
+        ),
         href: SECTIONS[key].home,
         selected: key === section,
       }))}
