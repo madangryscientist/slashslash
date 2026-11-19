@@ -3,6 +3,7 @@
 import { Container } from "@hackcove/ui-react";
 import Slash from "#/layouts/Slash.astro";
 import { DocsIndexPage } from "#/pixelslash/doc/DocsPages";
+import { DocsSearch } from "#/pixelslash/doc/DocsSearch";
 import { CLI_INTRO_DOC } from "#/pixelslash/doc/docs-content";
 import { docPage } from "#/pixelslash/doc/docs";
 import { OLD_ANCHOR_SCRIPT } from "#/pixelslash/doc/old-anchors";
@@ -15,7 +16,9 @@ const page = docPage(CLI_INTRO_DOC, { title: "Docs", suffix: " · PixelSlash" })
   <script is:inline set:html={OLD_ANCHOR_SCRIPT} />
   <div class="py-8">
     <Container>
-      <DocsIndexPage />
+      <DocsIndexPage>
+        <DocsSearch client:idle slot="search" />
+      </DocsIndexPage>
     </Container>
   </div>
 </Slash>

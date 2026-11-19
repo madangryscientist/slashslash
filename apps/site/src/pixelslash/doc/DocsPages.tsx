@@ -19,8 +19,9 @@ import { DocBody } from "#/pixelslash/doc/markdown";
 import { DOCS, REPO_URL } from "#/pixelslash/doc/resolve-links";
 
 /*
- * PixelSlash's docs pages, ported from its site onto the Slash shell. These pages load no script, so
- * the nav is every group's links in full (no fold), and there is no search box yet.
+ * PixelSlash's docs pages, ported from its site onto the Slash shell. The nav is every group's links in
+ * full (no fold). The search box is the one script these pages load: an island the .astro page passes
+ * in as `search`, since a tree rendered here at build time cannot hydrate a child of its own.
  */
 
 const pageHref = (page: DocPageDef): string => `${DOCS}/${page.slug}`;
@@ -107,12 +108,21 @@ function PrevNext({ slug }: { slug: string }): ReactNode {
   );
 }
 
-/** The nav beside the page from `lg`; below it, after the page, so the text comes first on a phone. */
-function WithNav({ current, children }: { current?: string; children: ReactNode }): ReactNode {
+/**
+ * The search, the page and the nav. Below `lg` they stack in that order: the search first, so a phone
+ * reader finds it without scrolling, then the page, then the nav. From `lg` the search heads the nav
+ * column and the page spans both rows beside them.
+ */
+function WithNav({ current, search, children }: { current?: string; search?: ReactNode; children: ReactNode }): ReactNode {
   return (
-    <div className="grid gap-10 lg:grid-cols-[14rem_minmax(0,1fr)]">
-      <div className="min-w-0 lg:order-2">{children}</div>
-      <div className="min-w-0 lg:order-1">
+    <div className="grid gap-10 lg:grid-cols-[14rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-y-6">
+      {search === undefined ? null : (
+        <div className="min-w-0 lg:col-start-1 lg:row-start-1" data-testid="docs-search-cell">
+          {search}
+        </div>
+      )}
+      <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">{children}</div>
+      <div className="min-w-0 lg:col-start-1 lg:row-start-2">
         <DocsNav {...(current === undefined ? {} : { current })} />
       </div>
     </div>
@@ -120,14 +130,14 @@ function WithNav({ current, children }: { current?: string; children: ReactNode 
 }
 
 /** One page of the docs: a cut of docs/cli.md, or a file of its own, rendered at build time. */
-export function DocsPage({ slug }: { slug: string }): ReactNode {
+export function DocsPage({ slug, search }: { slug: string; search?: ReactNode }): ReactNode {
   const page = findPage(slug);
   if (page === undefined) throw new Error(`docs: no page ${slug}`);
   const doc = docFor(slug);
   const group = GROUPS.find((candidate) => candidate.id === page.group);
   const breadcrumbs = <Breadcrumbs items={[{ label: "Docs", href: DOCS }, group?.title ?? "", page.title]} />;
   return (
-    <WithNav current={slug}>
+    <WithNav current={slug} search={search}>
       <ProseLayout title={page.title} breadcrumbs={breadcrumbs} gap="lg">
         {doc.headings.some((heading) => heading.depth <= 3) ? <OnThisPage doc={doc} /> : null}
         <div data-testid="docs-article">
@@ -149,11 +159,11 @@ const FIRST_STEP = {
 } as const;
 
 /** `/pixelslash/docs`: one first step, the lead of docs/cli.md, then every group, beside the docs nav. */
-export function DocsIndexPage(): ReactNode {
+export function DocsIndexPage({ search }: { search?: ReactNode }): ReactNode {
   const first = findPage(FIRST_STEP.slug);
   if (first === undefined) throw new Error(`docs: no page ${FIRST_STEP.slug}`);
   return (
-    <WithNav>
+    <WithNav search={search}>
       <ProseLayout
         width="full"
         title="Docs"
