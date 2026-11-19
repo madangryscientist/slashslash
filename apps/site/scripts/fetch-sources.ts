@@ -23,6 +23,9 @@ export const PIXELSLASH_FILES = [
   // Imported, not served: hero.json describes the two hero images, so it comes from the same commit.
   "apps/site/src/content/hero.json",
   "docs/capabilities/data.json",
+  // Rendered as /pixelslash/security and /pixelslash/self-host.
+  "SECURITY.md",
+  "apps/web/SELF-HOST.md",
 ] as const;
 
 /** The products whose FACTS.md the site reads, each by its repository name. */

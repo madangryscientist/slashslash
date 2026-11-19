@@ -7,7 +7,7 @@ import { PAGES } from "../src/content/pages.ts";
  * Every page, plus one unknown path, in each theme, on a desktop and a phone:
  * it answers its status and loads, never scrolls sideways on the phone, passes axe, and makes no
  * request off the site. The suite home, the
- * PixelSlash home and pricing, the FlakeSlash home and /developers also leave a full-page shot in each theme and
+ * PixelSlash home, pricing, security and self-host pages, the FlakeSlash home and /developers also leave a full-page shot in each theme and
  * viewport, for a person to look at.
  */
 
@@ -18,6 +18,8 @@ const FLIP_SHOTS: Partial<Record<string, string>> = {
   "/": "home-full",
   "/pixelslash": "pixelslash-home",
   "/pixelslash/pricing": "pixelslash-pricing",
+  "/pixelslash/security": "pixelslash-security",
+  "/pixelslash/self-host": "pixelslash-self-host",
   "/flakeslash": "flakeslash-home",
   "/developers": "developers",
 };
