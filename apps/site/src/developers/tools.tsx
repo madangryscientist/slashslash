@@ -4,6 +4,7 @@ import { PRODUCTS, type Product } from "#/content/products";
 import { TOGGLESLASH_REPO_URL } from "#/content/site";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { DevSection } from "#/developers/section";
+import { Rich } from "#/shell/rich-text";
 
 /** "Not public yet" until the constant holds a URL, then the link in its place. */
 function ToggleSlashAccess(): ReactNode {
@@ -62,7 +63,9 @@ export function ToolsInDetail(): ReactNode {
               <Text tone="muted">{STAGES[product.stage].sentence}</Text>
               <Text strong>{product.question.text}</Text>
               {product.summary.map((paragraph) => (
-                <Text key={paragraph.text}>{paragraph.text}</Text>
+                <Text key={paragraph.text}>
+                  <Rich text={paragraph.text} />
+                </Text>
               ))}
               {product.name === "ToggleSlash" ? <ToggleSlashDetail /> : null}
               {IDEA_NOTES[product.name] ? <Text>{IDEA_NOTES[product.name]}</Text> : null}

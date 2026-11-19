@@ -60,7 +60,7 @@ export const INSTALL: { npm: Claim; clone: Claim } = {
 
 /** Where a shot goes. */
 export const LOCAL_CLAIM: Claim = {
-  text: "A page shot leaves the machine only when you ask, and an upload goes only to the server your project names. If a project sets its own AI model, the model gets the three crops of a changed region, never a whole shot.",
+  text: "Shots leave the machine only through `pixelslash upload` or `--upload`, and only to the server you name. A model your project sets sees crops of a changed region, never a whole shot.",
   facts: ["pixelslash/local-unless-upload", "pixelslash/server-ai-explanations"],
 };
 
@@ -83,11 +83,20 @@ export const FEATURES: readonly {
   {
     title: "A perceptual diff",
     body: {
-      text: "Anti-aliasing, faint noise and sub-pixel shifts are told apart from a real change. Our benchmark results are on the How it works page.",
-      facts: ["pixelslash/perceptual-diff"],
+      text: "Your visual tests flag real changes, not rendering noise. A Rust crate compiled to WebAssembly tells anti-aliasing, faint noise and sub-pixel shifts apart from a real change, and reports changed regions. The command line tool and the review app run the same module, with no JavaScript fallback.",
+      facts: ["pixelslash/perceptual-diff", "pixelslash/wasm-diff-engine"],
     },
     href: "/how-it-works",
     icon: "diff",
+  },
+  {
+    title: "Your agent drives it",
+    body: {
+      text: "Your coding agent can check what its own change did to the screens. `pixelslash mcp` is an MCP server. A coding agent reads builds and changed shots, then accepts or rejects a change.",
+      facts: ["pixelslash/mcp-server"],
+    },
+    href: "/docs/mcp",
+    icon: "branch",
   },
   {
     title: "Many pages",
@@ -108,10 +117,10 @@ export const FEATURES: readonly {
     icon: "ci",
   },
   {
-    title: "A review server",
+    title: "A review app",
     body: {
-      text: "Uploading sends shots to a PixelSlash server. It holds the build for a person to review and reports a GitHub check.",
-      facts: ["pixelslash/upload-to-review-app", "pixelslash/github-status-and-comment"],
+      text: "A person sees every visual change and says yes or no to it. `pixelslash upload` sends shots to a PixelSlash review app, which diffs them against the default branch and holds the build for a person to accept or reject each change. Name an OpenAI-compatible model in the project and the app explains each change from crops of the changed regions.",
+      facts: ["pixelslash/upload-to-review-app", "pixelslash/server-ai-explanations"],
     },
     href: "/docs/upload#uploading-to-a-server",
     icon: "self-host",
@@ -230,7 +239,7 @@ function Features(): ReactNode {
       <CardGrid columns={3}>
         {FEATURES.map((feature) => (
           <Card key={feature.title} href={psHref(feature.href)} icon={feature.icon} size="lg" title={feature.title}>
-            {feature.body.text}
+            <Rich text={feature.body.text} />
           </Card>
         ))}
       </CardGrid>
@@ -264,7 +273,7 @@ function Local(): ReactNode {
     <Section
       size="lg"
       title="Your pixels stay on your machine."
-      description={LOCAL_CLAIM.text}
+      description={<Rich text={LOCAL_CLAIM.text} />}
       actions={
         <>
           <Button href={psHref("/how-it-works")}>How it works</Button>

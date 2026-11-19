@@ -94,4 +94,22 @@ describe("the approved copy, word for word on the built pages", () => {
     expect(page).toContain(HOW_IT_WORKS);
     expect(page).not.toContain("hosted judge");
   });
+
+  // The SS-110 copy (Draft C, approved 2026-11-19), word for word, on the page each claim sits on.
+  const SS110: [string, string, string][] = [
+    ["pixelslash.html", "P1", "Your visual tests flag real changes, not rendering noise. A Rust crate compiled to WebAssembly tells anti-aliasing, faint noise and sub-pixel shifts apart from a real change, and reports changed regions. The command line tool and the review app run the same module, with no JavaScript fallback."],
+    ["pixelslash.html", "P2", "Your coding agent can check what its own change did to the screens. pixelslash mcp is an MCP server. A coding agent reads builds and changed shots, then accepts or rejects a change."],
+    ["pixelslash.html", "P3", "A person sees every visual change and says yes or no to it. pixelslash upload sends shots to a PixelSlash review app, which diffs them against the default branch and holds the build for a person to accept or reject each change. Name an OpenAI-compatible model in the project and the app explains each change from crops of the changed regions."],
+    ["pixelslash.html", "P4", "Shots leave the machine only through pixelslash upload or --upload, and only to the server you name. A model your project sets sees crops of a changed region, never a whole shot."],
+    ["toggleslash.html", "T1", "Today it is a server, a command line, server SDKs in TypeScript, Python, Go, Java, C# and Ruby, and a dashboard, and there is no hosted service."],
+    ["toggleslash.html", "T2", "Check a flag inside your own process, with no network call per check. The TypeScript SDK installs from npm, keeps an environment's ruleset current and evaluates flags in your process. The Python, Go, Java, C# and Ruby SDKs also evaluate locally and pass the same conformance tests. None of those five is published: they run from a checkout of the repository."],
+    ["toggleslash.html", "T3", "A flag should give the same answer whichever language asks. Evaluation is written down once, with shared test vectors in fixtures/evaluation/. The TypeScript engine and the C# evaluator pass every vector."],
+    ["developers.html", "D1", "The diff is a Rust crate compiled to WebAssembly, the same module in the command line tool and the review app. pixelslash mcp is an MCP server, so a coding agent can read builds and changed shots and accept or reject a change."],
+    ["developers.html", "D2", "Today it has a C# server on SQLite with an audit trail of every admin change, a command line, a dashboard, and server SDKs in TypeScript, Python, Go, Java, C# and Ruby that pass the same conformance tests (only the TypeScript one is on npm). Evaluation is one written spec with shared test vectors."],
+  ];
+  for (const [file, id, sentence] of SS110) {
+    test(`${id} is on ${file}, word for word`, () => {
+      expect(words(file)).toContain(sentence);
+    });
+  }
 });

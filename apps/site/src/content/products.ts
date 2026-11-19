@@ -36,6 +36,10 @@ export const PRODUCTS: readonly Product[] = [
         text: "Small visual changes are easy to miss by eye. This tool spots them and tells real changes apart from tiny differences nobody would notice, so a redesign doesn't ship by accident.",
         facts: ["pixelslash/perceptual-diff"],
       },
+      {
+        text: "The diff is a Rust crate compiled to WebAssembly, the same module in the command line tool and the review app. `pixelslash mcp` is an MCP server, so a coding agent can read builds and changed shots and accept or reject a change.",
+        facts: ["pixelslash/wasm-diff-engine", "pixelslash/mcp-server"],
+      },
     ],
   },
   {
@@ -52,7 +56,7 @@ export const PRODUCTS: readonly Product[] = [
         facts: ["toggleslash/what-it-is"],
       },
       {
-        text: "It is being built now. Its source is public under the Elastic License 2.0, and you host it yourself. Today it has a C# server on SQLite with an audit trail of every admin change, a command line, a TypeScript server SDK and a dashboard.",
+        text: "It is being built now. Its source is public under the Elastic License 2.0, and you host it yourself. Today it has a C# server on SQLite with an audit trail of every admin change, a command line, a dashboard, and server SDKs in TypeScript, Python, Go, Java, C# and Ruby that pass the same conformance tests (only the TypeScript one is on npm). Evaluation is one written spec with shared test vectors.",
         facts: [
           "toggleslash/what-it-is",
           "toggleslash/licence",
@@ -60,7 +64,9 @@ export const PRODUCTS: readonly Product[] = [
           "toggleslash/audit-trail",
           "toggleslash/cli",
           "toggleslash/typescript-server-sdk",
+          "toggleslash/other-server-sdks",
           "toggleslash/dashboard",
+          "toggleslash/evaluation-spec",
         ],
       },
     ],
