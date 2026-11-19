@@ -2,7 +2,8 @@ import { AppShell, AppShellBrand, Caption, Cluster, ColourSchemeToggle, Show, Ta
 import type { ReactNode } from "react";
 import { licenceOf } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
-import { LANDING_HEADLINE, SITE_NAME } from "#/content/site";
+import { SITE_NAME } from "#/content/site";
+import { LANDING_HEADLINE } from "#/content/story";
 import { TRADEMARK } from "#/pixelslash/content/trademark";
 import { FooterColumns } from "#/stand-ins/footer-columns";
 import { SECTIONS, TOOL_KEYS, markFor, type SectionKey } from "#/shell/sections";

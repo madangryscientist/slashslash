@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { HERO } from "#/content/landing";
+import { HERO } from "#/content/story";
 import { OG_CARDS, ogCardFor, wornCard } from "#/content/og";
 import { PAGES } from "#/content/pages";
 import { PRODUCTS } from "#/content/products";
@@ -40,7 +40,7 @@ describe("the share card list", () => {
 
   test("takes its headlines from the content modules that hold them", () => {
     const question = (name: string) => PRODUCTS.find((product) => product.name === name)?.question.text;
-    expect(card("/")?.headline).toBe(HERO.title);
+    expect(card("/")?.headline).toBe(HERO.title.text);
     expect(card("/flakeslash")?.headline).toBe(question("FlakeSlash"));
     expect(card("/toggleslash")?.headline).toBe(question("ToggleSlash"));
     expect(card("/taskslash")?.headline).toBe(question("TaskSlash"));

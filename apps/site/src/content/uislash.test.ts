@@ -5,11 +5,15 @@ import { HERO, PIPELINE, STANDS } from "#/content/story";
 const written = PIPELINE.stages.find((stage) => stage.name === "Written");
 
 describe("UISlash on the site, in the approved words", () => {
-  test("its home card under Written is the approved line, word for word", () => {
+  test("its home row under Written is the approved paragraph, word for word, after OmniSlash's", () => {
     expect(written?.tools.map(({ tool, does }) => ({ tool, does: does.text }))).toEqual([
       {
+        tool: "OmniSlash",
+        does: "OmniSlash opens each builder in a git worktree on the ticket's own branch, and a lease lets only one holder work a ticket or a worktree at a time.",
+      },
+      {
         tool: "UISlash",
-        does: "UISlash hands an agent React components that take props alone and accept no className or style, which leaves it no way to style a page off the design.",
+        does: "UISlash gives the agent React components that take props alone and accept no className or style, so it cannot style a page off the design. Switching theme changes the whole site with no component change. It has seven themes, each checked against WCAG AA contrast.",
       },
     ]);
   });
@@ -30,19 +34,19 @@ describe("UISlash on the site, in the approved words", () => {
 
   test("the Written step's text is the approved line, word for word", () => {
     expect(written?.text.text).toBe(
-      "An agent writes the change in minutes, often touching more than a person would, and here it gets ready parts to build the screens from. Slash still does not write the code: it hands over the parts, then checks what the code does at each step after this one.",
+      "An agent builds the ticket on its own branch, in its own worktree, from ready parts.",
     );
   });
 
-  test("the hero lead ends with the approved sentence, word for word", () => {
+  test("the hero lead names the parts UISlash supplies, word for word", () => {
     expect(HERO.lead.text).toBe(
-      "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash adds a tool at each step a change goes through, from the first line written to the release, so what a change really does shows up before your customers find it.",
+      "OmniSlash carries the work. It refuses to start an agent on a ticket that nobody has drilled. It builds each ticket on its own branch. It has the pull request gated before it merges. The other tools check the work on the way: the parts it is built from, the builds and tests, the screens it changes and the release. Each tool does one job, so you can start with one and leave the rest.",
     );
   });
 
-  test("the alpha sentence names UISlash first and the rest of the paragraph is unchanged", () => {
+  test("the alphas paragraph names UISlash first and says it stores nothing, word for word", () => {
     expect(STANDS.stages.text).toBe(
-      "UISlash, TaskSlash, FlakeSlash, PixelSlash and ToggleSlash are alphas: try them and see what they do (start with how it works in CI). Expect the screens to change a lot, and expect bugs, which get fixed as they turn up. Between alpha versions, what the tools have stored (approvals, history, settings) may be reset. Your code and your customers' data are never touched. BundleSlash and SightSlash are planned.",
+      "UISlash, TaskSlash, FlakeSlash, PixelSlash, ToggleSlash and OmniSlash are alphas. Expect the screens, the components and the commands to change, and expect bugs. Between alpha versions, what a tool has stored may be reset: TaskSlash's job history, FlakeSlash's scans and issue corrections, PixelSlash's builds and approvals, ToggleSlash's flags and audit trail, and OmniSlash's work items. UISlash stores nothing.",
     );
   });
 });

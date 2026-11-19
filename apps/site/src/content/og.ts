@@ -3,7 +3,7 @@
  * design/logos (`og-pages.ts`, then `gen.py --og`) draws the cards from this list, and the layout's head names them.
  * The headline is the page's promise, taken from the content module that already holds it wherever one does.
  */
-import { HERO } from "#/content/landing";
+import { HERO } from "#/content/story";
 import { PAGES } from "#/content/pages";
 import { PRODUCTS, type Product } from "#/content/products";
 import { STATEMENT } from "#/pixelslash/content/pricing";
@@ -44,7 +44,7 @@ const LOCKUP: Record<OgTool, string> = {
 
 /** The headline and tool of each page. Each typed headline is the words of that page's h1. */
 const CARDS: Record<string, { tool: OgTool; headline: string }> = {
-  "/": { tool: "slash", headline: HERO.title },
+  "/": { tool: "slash", headline: HERO.title.text },
   "/developers": { tool: "slash", headline: "For developers" },
   "/flakeslash": { tool: "flakeslash", headline: question("FlakeSlash") },
   "/omnislash": { tool: "omnislash", headline: question("OmniSlash") },

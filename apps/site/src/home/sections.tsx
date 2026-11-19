@@ -21,19 +21,42 @@ export function HomeSection({ id, title, children }: { id: string; title: string
   );
 }
 
-/** The stage line either side of the words that link to the CI walkthrough. */
-const [stagesBefore, stagesAfter] = STANDS.stages.text.split(STANDS.tryLink.text);
+/** The words of a link in STANDS, for the pattern that finds them in a line. */
+const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const LINKED = new RegExp(`(${STANDS.links.map((link) => escape(link.text)).join("|")})`);
 
-/** Where it stands: what is built, what is planned, and where it runs. */
+/** A line of STANDS: text in backticks as inline code, and the words of each link as that link. */
+function StandsLine({ text }: { text: string }): ReactNode {
+  return text.split(/(`[^`]*`)/).map((part, index) => {
+    if (part.startsWith("`")) return <code key={index}>{part.slice(1, -1)}</code>;
+    return part.split(LINKED).map((piece, at) => {
+      const link = STANDS.links.find((item) => item.text === piece);
+      return link === undefined ? (
+        piece
+      ) : (
+        <TextLink key={`${index}-${at}`} href={link.href}>
+          {link.text}
+        </TextLink>
+      );
+    });
+  });
+}
+
+/** Where it stands: which tools are alphas, what may be reset, and where to start with each. */
 export function Stands(): ReactNode {
   return (
     <HomeSection id="stands" title={STANDS.title}>
-      <Text>
-        {stagesBefore}
-        <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
-        {stagesAfter}
-      </Text>
-      <Text>{STANDS.selfHost.text}</Text>
+      <Text>{STANDS.stages.text}</Text>
+      <Text>{STANDS.start.title}</Text>
+      <ul className="list-disc space-y-2 pl-6" data-stands-start="">
+        {STANDS.start.items.map((item) => (
+          <li key={item.text}>
+            <Text>
+              <StandsLine text={item.text} />
+            </Text>
+          </li>
+        ))}
+      </ul>
     </HomeSection>
   );
 }

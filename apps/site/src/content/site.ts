@@ -2,13 +2,9 @@
  * The few values that change when the name or the address changes. Nothing else in the site
  * hard-codes them.
  */
-import { HERO } from "#/content/landing";
 
 /** The name, as the page shows it. The address is SITE_URL below. */
 export const SITE_NAME = "slashslash.build";
-
-/** The landing page's h1 without its full stop, and the page title, link previews included. */
-export const LANDING_HEADLINE = HERO.title.replace(/\.$/, "");
 
 /** The /developers page lead, also its description in search results and link previews. */
 export const DEVELOPERS_DESCRIPTION =

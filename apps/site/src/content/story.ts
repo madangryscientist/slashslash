@@ -8,17 +8,8 @@
 import type { Claim, FactId } from "#/content/facts";
 import { PRODUCTS, type Product } from "#/content/products";
 
-/** A tool the story names: every product on the site, plus SightSlash, which is planned and has no row yet. */
-export type StoryTool = Product["name"] | "SightSlash";
-
-/** The tools that run on the owner's own server from one install, today. One word changes when a tool joins the image. */
-export const SELF_HOSTED: readonly Product["name"][] = ["PixelSlash", "ToggleSlash"];
-
-/** Two names join with " and "; three or more join with ", " and a final ", and ". */
-const listNames = (names: readonly string[]): string =>
-  names.length <= 2
-    ? names.join(" and ")
-    : `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+/** A tool the story names: every product on the site. */
+export type StoryTool = Product["name"];
 
 /** What each of the built tools is, for the claims about the suite as a whole. */
 const SUITE: readonly [FactId, ...FactId[]] = [
@@ -29,16 +20,27 @@ const SUITE: readonly [FactId, ...FactId[]] = [
   "uislash/what-it-is",
 ];
 
+/** The suite and OmniSlash, which carries the work from one step to the next. */
+const SUITE_AND_OMNI: readonly [FactId, ...FactId[]] = [...SUITE, "omnislash/what-it-is"];
+
 export const HERO: { title: Claim; lead: Claim } = {
   title: {
-    text: "Your agents ship fast. Slash shows what each change really does, before it ships.",
-    facts: SUITE,
+    text: "Slash takes agent work from an idea to a merged change, and checks it at every step.",
+    facts: SUITE_AND_OMNI,
   },
   lead: {
-    text: "Agents now write a lot of the code, and nobody reads every line any more. The old checks were built for a person reading a person's work, and they let a lot slip through. Slash adds a tool at each step a change goes through, from the first line written to the release, so what a change really does shows up before your customers find it.",
-    facts: SUITE,
+    text: "OmniSlash carries the work. It refuses to start an agent on a ticket that nobody has drilled. It builds each ticket on its own branch. It has the pull request gated before it merges. The other tools check the work on the way: the parts it is built from, the builds and tests, the screens it changes and the release. Each tool does one job, so you can start with one and leave the rest.",
+    facts: [
+      ...SUITE_AND_OMNI,
+      "omnislash/drilled-ticket-gate",
+      "omnislash/agent-build-worktree",
+      "omnislash/review-merge-skills",
+    ],
   },
 };
+
+/** The home's h1 without its full stop, for the footer line, which adds its own. */
+export const LANDING_HEADLINE = HERO.title.text.replace(/\.$/, "");
 
 /** The title of the ask at the end of the home, where the questions are. */
 export const VIEW = {
@@ -46,7 +48,7 @@ export const VIEW = {
 } as const;
 
 /** A step a change goes through, in the order most teams run them. */
-type StageName = "Written" | "Built and tested" | "Reviewed" | "Released";
+type StageName = "Planned" | "Written" | "Built and tested" | "Reviewed" | "Released";
 
 /** A step of the pipeline: its name, what happens there, and the tools that run there. */
 type PipelineStage = {
@@ -57,24 +59,59 @@ type PipelineStage = {
 
 /**
  * The one view of the suite: the steps a change goes through, in order, and under each step the tools
- * that run there, each with one sentence saying what it does. A planned tool says what it will do.
+ * that run there, each saying what it does there. A planned tool says what it will do. OmniSlash runs at
+ * more than one step, and says what it does at each.
  */
 export const PIPELINE: { title: string; lead: string; stages: readonly PipelineStage[]; next: Claim } = {
   title: "Where each tool fits",
-  lead: "Most teams send a change through the same steps. Each Slash tool does one job at one of those steps, so you can start with the one that hurts most and leave the rest.",
+  lead: "A change goes through the same steps, from the idea to the release. Each Slash tool does one job at one of those steps. Start with the one that hurts most.",
   stages: [
     {
-      name: "Written",
+      name: "Planned",
       text: {
-        text: "An agent writes the change in minutes, often touching more than a person would, and here it gets ready parts to build the screens from. Slash still does not write the code: it hands over the parts, then checks what the code does at each step after this one.",
-        facts: SUITE,
+        text: "An idea becomes a ticket, and the ticket is drilled before any agent starts on it.",
+        facts: ["omnislash/drilled-ticket-gate"],
       },
       tools: [
         {
+          tool: "OmniSlash",
+          does: {
+            text: "OmniSlash refuses to dispatch a ticket that has no drilled section, no done-when item or no recorded check, unless you override it and give a reason. Planned: each role runs on demand with its own inbox, and builders working in parallel are checked for conflicts.",
+            facts: [
+              "omnislash/drilled-ticket-gate",
+              "omnislash/role-runs-on-demand",
+              "omnislash/parallel-conflict-checks",
+            ],
+          },
+        },
+      ],
+    },
+    {
+      name: "Written",
+      text: {
+        text: "An agent builds the ticket on its own branch, in its own worktree, from ready parts.",
+        facts: ["omnislash/agent-build-worktree", "uislash/react-components"],
+      },
+      tools: [
+        {
+          tool: "OmniSlash",
+          does: {
+            text: "OmniSlash opens each builder in a git worktree on the ticket's own branch, and a lease lets only one holder work a ticket or a worktree at a time.",
+            facts: ["omnislash/agent-build-worktree", "omnislash/leases"],
+          },
+        },
+        {
           tool: "UISlash",
           does: {
-            text: "UISlash hands an agent React components that take props alone and accept no className or style, which leaves it no way to style a page off the design.",
-            facts: ["uislash/what-it-is", "uislash/react-components", "uislash/no-styling-escape"],
+            text: "UISlash gives the agent React components that take props alone and accept no className or style, so it cannot style a page off the design. Switching theme changes the whole site with no component change. It has seven themes, each checked against WCAG AA contrast.",
+            facts: [
+              "uislash/what-it-is",
+              "uislash/react-components",
+              "uislash/no-styling-escape",
+              "uislash/theme-reskins-all",
+              "uislash/seven-themes",
+              "uislash/contrast-checked",
+            ],
           },
         },
       ],
@@ -89,21 +126,21 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
         {
           tool: "TaskSlash",
           does: {
-            text: "Queues builds and tests and starts each one when your computer has capacity, on one machine today and across your CI runners next, so a test fails because of the code, not because everything ran at once.",
+            text: "TaskSlash queues builds and tests and starts each one when your computer has capacity, on one machine today and across your CI runners next, so a test fails because of the code, not because everything ran at once.",
             facts: ["taskslash/admission-by-capacity", "taskslash/ci-runners"],
           },
         },
         {
           tool: "FlakeSlash",
           does: {
-            text: "Finds the checks that both failed and passed on the same commit, so a failure means something and is not just a reason to run it again.",
+            text: "FlakeSlash finds the checks that both failed and passed on the same commit, so a failure means something and is not just a reason to run it again.",
             facts: ["flakeslash/flake-same-commit"],
           },
         },
         {
           tool: "BundleSlash",
           does: {
-            text: "Will measure how much code your customers download after each build, so a page cannot get slower to load one change at a time.",
+            text: "BundleSlash will measure how much code your customers download after each build, so a page cannot get slower to load one change at a time.",
             planned: "BundleSlash",
           },
         },
@@ -112,27 +149,27 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
     {
       name: "Reviewed",
       text: {
-        text: "A person approves the change. They read the edited lines; Slash shows them what those lines do to the product.",
-        facts: ["pixelslash/what-it-is"],
+        text: "The pull request is gated before it merges, and the reviewer sees what the change does to each page.",
+        facts: ["omnislash/review-merge-skills", "pixelslash/what-it-is"],
       },
       tools: [
         {
+          tool: "OmniSlash",
+          does: {
+            text: "Agent skills gate the pull request before merge: reviewers that presume every changed line is wrong, a watch on the pull request, and a merge made by a different role than the one that built it.",
+            facts: ["omnislash/review-merge-skills"],
+          },
+        },
+        {
           tool: "PixelSlash",
           does: {
-            text: "Takes screenshots of each page before and after the change and shows the reviewer every one that looks different, leaving out tiny differences nobody would notice.",
+            text: "PixelSlash takes screenshots of each page before and after the change and shows the reviewer every one that looks different. Anti-aliasing, noise and sub-pixel shifts are not changes. A person accepts or rejects each change in the review app.",
             facts: [
               "pixelslash/compare-two-urls",
               "pixelslash/many-pages",
               "pixelslash/perceptual-diff",
               "pixelslash/upload-to-review-app",
             ],
-          },
-        },
-        {
-          tool: "SightSlash",
-          does: {
-            text: "Will show each component in every state, not only the one someone happened to try.",
-            planned: "SightSlash",
           },
         },
       ],
@@ -147,7 +184,7 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
         {
           tool: "ToggleSlash",
           does: {
-            text: "Feature flags you run yourself: choose which customers get a feature, switch it off again without a new release, and keep a record of every switch.",
+            text: "ToggleSlash is feature flags you run yourself: choose which customers get a feature, switch it off again without a new release, and keep a record of every switch.",
             facts: ["toggleslash/what-it-is", "toggleslash/targeting", "toggleslash/audit-trail"],
           },
         },
@@ -160,19 +197,60 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
   },
 };
 
-export const STANDS: { title: string; stages: Claim; tryLink: { text: string; href: string }; selfHost: Claim } = {
+/**
+ * Where it stands: the alphas paragraph, then where to start with each tool. Text in backticks renders as
+ * inline code, and the words of each link render as that link.
+ */
+export const STANDS: {
+  title: string;
+  stages: Claim;
+  start: { title: string; items: readonly Claim[] };
+  links: readonly { text: string; href: string }[];
+} = {
   title: "Where it stands",
   stages: {
-    text: "UISlash, TaskSlash, FlakeSlash, PixelSlash and ToggleSlash are alphas: try them and see what they do (start with how it works in CI). Expect the screens to change a lot, and expect bugs, which get fixed as they turn up. Between alpha versions, what the tools have stored (approvals, history, settings) may be reset. Your code and your customers' data are never touched. BundleSlash and SightSlash are planned.",
-    facts: SUITE,
+    text: "UISlash, TaskSlash, FlakeSlash, PixelSlash, ToggleSlash and OmniSlash are alphas. Expect the screens, the components and the commands to change, and expect bugs. Between alpha versions, what a tool has stored may be reset: TaskSlash's job history, FlakeSlash's scans and issue corrections, PixelSlash's builds and approvals, ToggleSlash's flags and audit trail, and OmniSlash's work items. UISlash stores nothing.",
+    facts: SUITE_AND_OMNI,
   },
-  /** The words in `stages` that link to the CI walkthrough. */
-  tryLink: { text: "how it works in CI", href: "/developers" },
-  selfHost: {
-    text: `${listNames(SELF_HOSTED)} run on your own server from one install, today on Proxmox or Kubernetes.`,
-    facts: ["pixelslash/self-host-docker", "toggleslash/server-container"],
-    repo: ["self-host/README.md", "self-host/proxmox", "self-host/chart", "self-host/pins/pixelslash.sha", "self-host/pins/toggleslash.sha"],
+  start: {
+    title: "Where to start:",
+    items: [
+      {
+        text: "UISlash: install `@hackcove/ui-react` and `@hackcove/themes` from npm into a React 19 app that uses Tailwind v4, and read the docs at hack-cove.com/ui/.",
+        facts: ["uislash/npm-install", "uislash/themes-package", "uislash/docs-site"],
+      },
+      {
+        text: "TaskSlash: build it from source with cargo on Linux and run a command through `taskslash run`.",
+        facts: ["taskslash/no-release"],
+      },
+      {
+        text: "FlakeSlash: run `flakeslash scan` from a checkout against your GitHub Actions history, or sign in to the dashboard at flakeslash.slashslash.build with GitHub.",
+        facts: [
+          "flakeslash/scan-github-actions",
+          "flakeslash/cli-from-checkout",
+          "flakeslash/hosted-dashboard",
+          "flakeslash/dashboard-sign-in",
+        ],
+      },
+      {
+        text: "PixelSlash: install `@hackcove/pixelslash` from npm and compare two URLs that are already running, or start with how it works in CI.",
+        facts: ["pixelslash/npm-cli", "pixelslash/compare-two-urls"],
+      },
+      {
+        text: "ToggleSlash: run `bun run stack` from a checkout to start the server, the dashboard and an example app on one machine.",
+        facts: ["toggleslash/local-stack"],
+      },
+      {
+        text: "OmniSlash: clone it, run `bun install`, then `bun apps/cli/src/index.ts --help`.",
+        facts: ["omnislash/checkout-linux"],
+      },
+    ],
   },
+  links: [
+    { text: "hack-cove.com/ui/", href: "https://hack-cove.com/ui/" },
+    { text: "flakeslash.slashslash.build", href: "https://flakeslash.slashslash.build" },
+    { text: "how it works in CI", href: "/developers" },
+  ],
 };
 
 export const DEVELOPERS: { title: string; next: Claim } = {
@@ -190,11 +268,5 @@ export const VIEW_QUESTIONS = [
   "Would you want these tools together or separately?",
 ] as const;
 
-/**
- * The product names the story must place, for the tests: every PRODUCTS entry, then SightSlash. OmniSlash is left out
- * until the story's own approved copy places it: its home steps are written, not yet transcribed.
- */
-export const STORY_TOOLS: readonly StoryTool[] = [
-  ...PRODUCTS.map((product) => product.name).filter((name) => name !== "OmniSlash"),
-  "SightSlash",
-];
+/** The product names the story must place, for the tests: every PRODUCTS entry. */
+export const STORY_TOOLS: readonly StoryTool[] = PRODUCTS.map((product) => product.name);
