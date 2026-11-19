@@ -90,10 +90,4 @@ describe("suite story copy", () => {
     expect(opened.toSorted()).toEqual(alpha.toSorted());
   });
 
-  test("every link's words are in exactly one line of where it stands", () => {
-    for (const link of story.STANDS.links) {
-      const lines = [story.STANDS.stages, ...story.STANDS.start.items].filter((line) => line.text.includes(link.text));
-      expect(lines, link.text).toHaveLength(1);
-    }
-  });
 });

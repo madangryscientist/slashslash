@@ -5,7 +5,6 @@
  */
 
 export const HERO = {
-  lead: "Software teams check the code they change. Nobody checks what customers will actually see. slashslash closes that gap.",
   /** The hero drawing's three step captions, left to right (top to bottom on a phone). */
   before: "Before",
   change: "The change",

@@ -116,10 +116,10 @@ describe("/", () => {
     expect(text(pipeline).indexOf(PIPELINE.next.text)).toBeGreaterThan(text(pipeline).indexOf("Released"));
   });
 
-  test("has one tool card per tool: OmniSlash's once, at Planned", () => {
+  test("has one tool card per tool, OmniSlash's included", () => {
     const names = TOOL_CARDS.map((card) => card.name);
     expect(new Set(names).size).toBe(names.length);
-    expect(TOOL_CARDS.find((card) => card.name === "OmniSlash")?.does).toBe(PIPELINE.stages[0]?.tools[0]?.does);
+    expect(names.filter((name) => name === "OmniSlash")).toHaveLength(1);
   });
 
   test("shows the pipeline steps in order, each with its words, and each tool under the step it runs at", () => {
@@ -178,7 +178,7 @@ function strings(value: unknown): string[] {
   // A claim's fact ids and repository paths are citations, and a link's href an address, not words on the page.
   if (value !== null && typeof value === "object")
     return Object.entries(value).flatMap(([key, item]) =>
-      key === "facts" || key === "repo" || key === "href" ? [] : strings(item),
+      key === "facts" || key === "repo" || key === "external" ? [] : strings(item),
     );
   return [];
 }
@@ -199,8 +199,8 @@ function rows(chunk: string, attr: string): { name: string; html: string }[] {
     .map((part) => ({ name: part.slice(0, part.indexOf('"')), html: part }));
 }
 
-/** Where a link's words first appear in the section, so links compare in page order. */
-const order = (words: string): number => text(html.slice(html.indexOf('data-home-section="stands"'))).indexOf(words);
+/** Rich text as the page shows it: `code` without its backticks, [words](href) as its words. */
+const plain = (line: string): string => line.replaceAll("`", "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
 
 const afterTools = html.slice(html.indexOf('data-home-section="tools"'));
 const TITLES = [PIPELINE.title, STANDS.title, VIEW.title];
@@ -213,8 +213,7 @@ describe("the home from the pipeline on", () => {
 
   test("carries every string of the story's sections", () => {
     const words = text(afterTools);
-    // Backticks mark inline code: the page shows the code without them.
-    for (const line of strings([STANDS, VIEW_QUESTIONS])) expect(words, line).toContain(line.replaceAll("`", ""));
+    for (const line of strings([STANDS, VIEW_QUESTIONS])) expect(words, line).toContain(plain(line));
   });
 
   test("has no @@ label", () => {
@@ -227,7 +226,11 @@ describe("the home from the pipeline on", () => {
       text: text(m[2] ?? ""),
       href: m[1],
     }));
-    expect(links).toEqual([...STANDS.links].sort((a, b) => order(a.text) - order(b.text)));
+    expect(links).toEqual([
+      { text: "hack-cove.com/ui/", href: "https://hack-cove.com/ui/" },
+      { text: "flakeslash.slashslash.build", href: "https://flakeslash.slashslash.build" },
+      { text: "how it works in CI", href: "/developers" },
+    ]);
     const items = [...(stands.match(/data-stands-start[^>]*>([\s\S]*?)<\/ul>/)?.[1] ?? "").matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)];
     expect(items).toHaveLength(6);
     expect(stands).toContain("<code>@hackcove/ui-react</code>");

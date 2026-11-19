@@ -198,14 +198,13 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
 };
 
 /**
- * Where it stands: the alphas paragraph, then where to start with each tool. Text in backticks renders as
- * inline code, and the words of each link render as that link.
+ * Where it stands: the alphas paragraph, then where to start with each tool. The items are Rich text: `code`
+ * renders as inline code and [words](href) as a link; `external` lists the links that leave the site.
  */
 export const STANDS: {
   title: string;
   stages: Claim;
-  start: { title: string; items: readonly Claim[] };
-  links: readonly { text: string; href: string }[];
+  start: { title: string; items: readonly Claim[]; external: readonly string[] };
 } = {
   title: "Where it stands",
   stages: {
@@ -216,7 +215,7 @@ export const STANDS: {
     title: "Where to start:",
     items: [
       {
-        text: "UISlash: install `@hackcove/ui-react` and `@hackcove/themes` from npm into a React 19 app that uses Tailwind v4, and read the docs at hack-cove.com/ui/.",
+        text: "UISlash: install `@hackcove/ui-react` and `@hackcove/themes` from npm into a React 19 app that uses Tailwind v4, and read the docs at [hack-cove.com/ui/](https://hack-cove.com/ui/).",
         facts: ["uislash/npm-install", "uislash/themes-package", "uislash/docs-site"],
       },
       {
@@ -224,7 +223,7 @@ export const STANDS: {
         facts: ["taskslash/no-release"],
       },
       {
-        text: "FlakeSlash: run `flakeslash scan` from a checkout against your GitHub Actions history, or sign in to the dashboard at flakeslash.slashslash.build with GitHub.",
+        text: "FlakeSlash: run `flakeslash scan` from a checkout against your GitHub Actions history, or sign in to the dashboard at [flakeslash.slashslash.build](https://flakeslash.slashslash.build) with GitHub.",
         facts: [
           "flakeslash/scan-github-actions",
           "flakeslash/cli-from-checkout",
@@ -233,7 +232,7 @@ export const STANDS: {
         ],
       },
       {
-        text: "PixelSlash: install `@hackcove/pixelslash` from npm and compare two URLs that are already running, or start with how it works in CI.",
+        text: "PixelSlash: install `@hackcove/pixelslash` from npm and compare two URLs that are already running, or start with [how it works in CI](/developers).",
         facts: ["pixelslash/npm-cli", "pixelslash/compare-two-urls"],
       },
       {
@@ -245,12 +244,8 @@ export const STANDS: {
         facts: ["omnislash/checkout-linux"],
       },
     ],
+    external: ["https://hack-cove.com/ui/", "https://flakeslash.slashslash.build"],
   },
-  links: [
-    { text: "hack-cove.com/ui/", href: "https://hack-cove.com/ui/" },
-    { text: "flakeslash.slashslash.build", href: "https://flakeslash.slashslash.build" },
-    { text: "how it works in CI", href: "/developers" },
-  ],
 };
 
 export const DEVELOPERS: { title: string; next: Claim } = {

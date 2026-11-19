@@ -1,7 +1,8 @@
-import { Container, Section, Text, TextLink } from "@hackcove/ui-react";
+import { Container, Section, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STANDS, VIEW, VIEW_QUESTIONS } from "#/content/story";
 import { ContactLine } from "#/shell/contact-line";
+import { Rich } from "#/shell/rich-text";
 
 /*
  * The rest of the suite home, after the pipeline: where it stands, and the ask. Each is a kit Section
@@ -21,27 +22,6 @@ export function HomeSection({ id, title, children }: { id: string; title: string
   );
 }
 
-/** The words of a link in STANDS, for the pattern that finds them in a line. */
-const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const LINKED = new RegExp(`(${STANDS.links.map((link) => escape(link.text)).join("|")})`);
-
-/** A line of STANDS: text in backticks as inline code, and the words of each link as that link. */
-function StandsLine({ text }: { text: string }): ReactNode {
-  return text.split(/(`[^`]*`)/).map((part, index) => {
-    if (part.startsWith("`")) return <code key={index}>{part.slice(1, -1)}</code>;
-    return part.split(LINKED).map((piece, at) => {
-      const link = STANDS.links.find((item) => item.text === piece);
-      return link === undefined ? (
-        piece
-      ) : (
-        <TextLink key={`${index}-${at}`} href={link.href}>
-          {link.text}
-        </TextLink>
-      );
-    });
-  });
-}
-
 /** Where it stands: which tools are alphas, what may be reset, and where to start with each. */
 export function Stands(): ReactNode {
   return (
@@ -52,7 +32,7 @@ export function Stands(): ReactNode {
         {STANDS.start.items.map((item) => (
           <li key={item.text}>
             <Text>
-              <StandsLine text={item.text} />
+              <Rich text={item.text} external={STANDS.start.external} />
             </Text>
           </li>
         ))}

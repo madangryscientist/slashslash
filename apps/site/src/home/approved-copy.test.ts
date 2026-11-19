@@ -10,11 +10,14 @@ import { describe, expect, test } from "vitest";
 
 const DIST = resolve(import.meta.dirname, "../../dist");
 
-/** A built page's visible text: tags and scripts dropped, escapes undone, spaces folded. */
+/** A built page's visible body text: tags and scripts dropped, escapes undone, spaces folded. */
 function words(file: string): string {
   const path = resolve(DIST, file);
   if (!existsSync(path)) throw new Error(`No built page at ${path}. Run the build first: bunx moon run site:build.`);
-  return readFileSync(path, "utf8")
+  const html = readFileSync(path, "utf8");
+  // From the body on: the head's title repeats the headline, and must not stand in for the h1.
+  return html
+    .slice(html.indexOf("<body"))
     .replace(/<(script|style|template)[\s\S]*?<\/\1>/g, " ")
     .replace(/<\/(a|span|code|strong|em)>/g, "")
     .replace(/<[^>]+>/g, " ")
