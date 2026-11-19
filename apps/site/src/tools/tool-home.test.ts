@@ -44,14 +44,25 @@ function text(html: string): string {
 const between = (html: string, from: string, to: string): string =>
   html.slice(html.indexOf(`id="${from}"`), html.indexOf(`id="${to}"`));
 
-/** The variable each tool's try-it sets to the reader's own key. TaskSlash needs no key. */
+/** The variable each tool's try-it sets to the reader's own key. TaskSlash and OmniSlash need no key. */
 const KEY_VARIABLE: Record<Tool["key"], string | undefined> = {
   flakeslash: "GITHUB_TOKEN",
   toggleslash: "TOGGLESLASH_TOKEN",
   taskslash: undefined,
+  omnislash: undefined,
 };
 
-const ORDER = (tool: Tool): string[] => [tool.key, "works-today", "try-it", "planned", "docs"];
+const ORDER = (tool: Tool): string[] => [
+  tool.key,
+  "works-today",
+  ...(tool.compared === undefined ? [] : ["compared"]),
+  "try-it",
+  "planned",
+  "docs",
+];
+
+/** The tools whose home shows a command on every feature, a lead on every step and a command in the hero. */
+const WITH_COMMANDS = [TOOLS.flakeslash, TOOLS.toggleslash, TOOLS.taskslash] as const satisfies readonly Tool[];
 
 describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
   const html = read(`${tool.key}.html`);
@@ -74,21 +85,7 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
     expect(h1s).toEqual([promiseOf(tool)]);
   });
 
-  test("shows every command it says works today, and every try-it step", () => {
-    const today = text(between(html, "works-today", "try-it"));
-    for (const feature of tool.today) {
-      expect(today).toContain(feature.command);
-      expect(today).toContain(feature.text.text);
-    }
-    const tryIt = text(between(html, "try-it", "planned"));
-    expect(tryIt).toContain(tool.tryIt.lead.text);
-    for (const step of tool.tryIt.steps) {
-      expect(tryIt).toContain(step.lead);
-      for (const command of step.commands) expect(tryIt).toContain(command);
-    }
-  });
-
-  test("keeps the sections in order: what it is, today, try it, planned, docs", () => {
+  test("keeps the sections in order: what it is, today, any comparison, try it, planned, docs", () => {
     const at = ORDER(tool).map((id) => html.indexOf(`id="${id}"`));
     expect(at.every((i) => i >= 0)).toBe(true);
     expect(at.toSorted((a, b) => a - b)).toEqual(at);
@@ -127,6 +124,24 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
     const variable = KEY_VARIABLE[tool.key];
     if (variable !== undefined) expect(lines).toContain(`export ${variable}=<your key>`);
   });
+});
+
+describe.each(WITH_COMMANDS)("/$key, with a command on every feature", (tool: Tool) => {
+  const html = read(`${tool.key}.html`);
+
+  test("shows every command it says works today, and every try-it step", () => {
+    const today = text(between(html, "works-today", "try-it"));
+    for (const feature of tool.today) {
+      expect(today).toContain(feature.command);
+      expect(today).toContain(feature.text.text);
+    }
+    const tryIt = text(between(html, "try-it", "planned"));
+    expect(tryIt).toContain(tool.tryIt.lead.text);
+    for (const step of tool.tryIt.steps) {
+      expect(tryIt).toContain(step.lead);
+      for (const command of step.commands) expect(tryIt).toContain(command);
+    }
+  });
 
   test("gives every code block a copy button, and hydrates only the two copy islands", () => {
     const main = html.slice(html.indexOf(`id="${tool.key}"`));
@@ -138,5 +153,128 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
     const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]+)"[^>]*>/g)];
     expect(islands.map((m) => m[1])).toEqual(["HeroCode", "TryIt"]);
     for (const island of islands) expect(island[0]).toContain('client="visible"');
+  });
+});
+
+/*
+ * /omnislash against its approved copy, written out here word for word rather than read from content/omnislash.ts,
+ * so the test checks the page against the copy and not against itself.
+ */
+describe("/omnislash, the approved copy", () => {
+  const tool: Tool = TOOLS.omnislash;
+  const html = read("omnislash.html");
+
+  /** Visible text with inline code and spans joined to the words around them, as a reader sees them. */
+  const prose = (part: string): string => text(part.replace(/<\/?(code|strong|span)[^>]*>/g, ""));
+  const heading = (id: string): string => text(html.match(new RegExp(`<h2 id="${id}"[^>]*>([\\s\\S]*?)</h2>`))?.[1] ?? "");
+
+  test("its only h1 is the copy's headline", () => {
+    const h1s = [...html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((m) => text(m[1] ?? ""));
+    expect(h1s).toEqual(["From an idea to a merged change, in one tool."]);
+  });
+
+  test("the hero carries the lead and the licence, and no command", () => {
+    const hero = prose(between(html, "omnislash", "works-today"));
+    expect(hero).toContain(
+      "OmniSlash (Omni for short) is a command-line tool that keeps track of tasks, projects and the agents that work on them. It will not let an agent start on a ticket nobody has thought through. It builds each ticket on its own branch, and has the pull request gated before it merges. It is built for agents from the start. It is in alpha, so anything may change or break.",
+    );
+    expect(hero).toContain("Licence: OmniSlash is source available under the Elastic License 2.0.");
+    expect(between(html, "omnislash", "works-today")).not.toContain("<figure");
+  });
+
+  test("How a ticket moves: the five steps, with no command, and the three roles as a list", () => {
+    expect(heading("works-today")).toBe("How a ticket moves");
+    const section = between(html, "works-today", "compared");
+    const today = prose(section);
+    const steps: [string, string][] = [
+      [
+        "A drilled ticket.",
+        "You write the ticket. Before the first dispatch, it needs a ## Drilled section, at least one ## Done when item and a go check recorded on its current text. Without them, the dispatch is refused and nothing is queued. You can override the refusal with --no-check and a reason. A spike ticket has its own rule: it needs ## Questions, ## Box, ## Done when and a link to the ticket it serves.",
+      ],
+      [
+        "Its own branch.",
+        "A dispatch opens the builder in a git worktree on the ticket's own branch. If a worktree is already checked out on that branch, it reuses it. If not, it makes one from origin/main. The builder runs as a T3 Code thread.",
+      ],
+      [
+        "Leases.",
+        "A lease on a ticket or a worktree has one holder at a time. A second holder is refused until the first releases it or the lease expires. Two agents cannot work the same ticket or the same worktree at once.",
+      ],
+      [
+        "A gated merge.",
+        "The builder opens the pull request, and a different role gates and merges it. Read-only reviewers presume every changed line is wrong until they can show it is right. A watch follows the pull request once it is handed off.",
+      ],
+      ["Three roles.", "Agent skills prime a thread for each role."],
+    ];
+    for (const [title, body] of steps) expect(today).toContain(`${title} ${body}`);
+    expect(tool.today.every((step) => step.command === undefined)).toBe(true);
+    const roles = [...section.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((m) => text(m[1] ?? ""));
+    expect(roles).toEqual([
+      "Architect: plans, drills and dispatches every build, then gates and merges.",
+      "Sentinel: verifies, merges and deploys every pull request.",
+      "Muse: explores, and hands over a design once it is confirmed.",
+    ]);
+    // The words the copy marks as code are set as code.
+    for (const word of ["## Drilled", "## Done when", "go", "--no-check", "## Questions", "## Box", "origin/main"]) {
+      expect(section).toMatch(new RegExp(`<code[^>]*>${word}</code>`));
+    }
+  });
+
+  test("Against Jira and Linear sits between the steps and try it", () => {
+    expect(heading("compared")).toBe("Against Jira and Linear");
+    expect(prose(between(html, "compared", "try-it"))).toContain(
+      "Against Jira and Linear OmniSlash refuses to dispatch a ticket that has no drilled section, no done-when item or no recorded check, unless you override it. The Jira and Linear docs name no such check before an agent takes the work.",
+    );
+  });
+
+  test("Try it: the lead, the two-line block with a copy button, then the sentences after it", () => {
+    expect(heading("try-it")).toBe("Try it");
+    const section = between(html, "try-it", "planned");
+    const words = prose(section);
+    const lead = "OmniSlash runs from a fresh clone on Linux with Bun 1.4.2:";
+    const after =
+      "The second command prints the command reference. Postgres is the default store and needs a connection URL. To try it without Postgres, set OMNISLASH_STORE=sqlite, OMNISLASH_DB_CREATE=1 and OMNISLASH_DB to a new path, then add and list work items in that file. Dispatching a builder needs T3 Code.";
+    expect(words).toContain(lead);
+    expect(words).toContain(after);
+    expect(words.indexOf(lead)).toBeLessThan(words.indexOf("bun install"));
+    expect(words.indexOf("bun apps/cli/src/index.ts --help")).toBeLessThan(words.indexOf(after));
+    const figures = section.split("<figure").slice(1);
+    expect(figures).toHaveLength(1);
+    expect(figures[0]).toMatch(/<button[^>]*aria-label="Copy"/);
+  });
+
+  test("the TryIt island is handed exactly the two commands, in one block with no lead line", () => {
+    const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]+)"[^>]*>/g)];
+    expect(islands.map((m) => m[1])).toEqual(["TryIt"]);
+    // Astro writes an island's props as JSON with each value wrapped as [type, value]: 0 a plain value, 1 an array.
+    const unwrap = (value: unknown): unknown => {
+      if (Array.isArray(value)) return value[0] === 1 ? (value[1] as unknown[]).map(unwrap) : unwrap(value[1]);
+      if (typeof value === "object" && value !== null)
+        return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, unwrap(child)]));
+      return value;
+    };
+    const raw = islands[0]?.[0].match(/\sprops="([^"]*)"/)?.[1] ?? "{}";
+    const props = Object.fromEntries(
+      Object.entries(JSON.parse(raw.replaceAll("&quot;", '"').replaceAll("&amp;", "&")) as object).map(([key, value]) => [
+        key,
+        unwrap(value),
+      ]),
+    );
+    expect(props.steps).toEqual([{ commands: ["bun install", "bun apps/cli/src/index.ts --help"] }]);
+  });
+
+  test("Planned: its heading, its lead and the three items", () => {
+    expect(heading("planned")).toBe("Planned");
+    expect(prose(between(html, "planned", "docs"))).toContain(
+      "Planned These are planned, not built. Each role runs on demand, with an inbox for each role. Builders working in parallel are checked for conflicts with each other. A team server, with access per user.",
+    );
+  });
+});
+
+describe("/developers lists OmniSlash", () => {
+  test("with its product list entry and the lead", () => {
+    const words = text(read("developers.html"));
+    expect(words).toContain(
+      "OmniSlash Alpha Changing fast. Expect breaking changes between versions. From an idea to a merged change, in one tool. OmniSlash (Omni for short) is a command-line tool that keeps track of tasks, projects and the agents that work on them. It will not let an agent start on a ticket nobody has thought through. It builds each ticket on its own branch, and has the pull request gated before it merges. It is built for agents from the start. It is in alpha, so anything may change or break.",
+    );
   });
 });

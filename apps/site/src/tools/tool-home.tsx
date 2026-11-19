@@ -13,7 +13,8 @@ import {
   Stack,
   Text,
 } from "@hackcove/ui-react";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
+import type { Claim } from "#/content/facts";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { LicenceLine } from "#/shell/licence-line";
 import { SECTIONS } from "#/shell/sections";
@@ -54,6 +55,20 @@ function StageLine({ tool }: { tool: Tool }): ReactNode {
   );
 }
 
+/** A text with the words its copy marks in backticks set as code, and the backticks dropped. */
+function Words({ text }: { text: string }): ReactNode {
+  return text.split("`").map((run, index) =>
+    // The runs of one text never move, so their place is their key.
+    index % 2 === 1 ? <Code key={index}>{run}</Code> : <Fragment key={index}>{run}</Fragment>,
+  );
+}
+
+/** The hero's licence line: the copy's own words where the tool has them, else the facts file's. */
+function Licence({ tool, licence }: { tool: Tool; licence: Claim | undefined }): ReactNode {
+  if (licence === undefined) return <LicenceLine product={tool.facts} />;
+  return <Text tone="muted">Licence: {licence.text}</Text>;
+}
+
 export function ToolHome({
   tool,
   heroCode,
@@ -73,7 +88,7 @@ export function ToolHome({
             <CentredHero overline={<Lockup tool={tool} />} title={promiseOf(tool)}>
               <StageLine tool={tool} />
               <Lead>{tool.lead.text}</Lead>
-              <LicenceLine product={tool.facts} />
+              <Licence tool={tool} licence={tool.licence} />
               <CentredRow>
                 <Button href="#try-it" size="lg">
                   Try it
@@ -82,7 +97,7 @@ export function ToolHome({
                   Repository on GitHub
                 </Button>
               </CentredRow>
-              <div className="min-w-0 text-left">{heroCode}</div>
+              {heroCode === undefined ? null : <div className="min-w-0 text-left">{heroCode}</div>}
             </CentredHero>
           </div>
         </Container>
@@ -90,24 +105,54 @@ export function ToolHome({
       <div className="py-16">
         <Container>
           <Stack gap="xl">
-            <Section id="works-today" size="lg" title="What works today">
+            <Section id="works-today" size="lg" title={tool.headings?.today ?? "What works today"}>
               <CardGrid columns={2}>
                 {tool.today.map((feature) => (
                   <Card key={feature.title} title={feature.title} titleStyle="name" size="lg">
                     <Stack gap="sm">
-                      <span>
-                        <Code>{feature.command}</Code>
-                      </span>
-                      <Text>{feature.text.text}</Text>
+                      {feature.command === undefined ? null : (
+                        <span>
+                          <Code>{feature.command}</Code>
+                        </span>
+                      )}
+                      <Text>
+                        <Words text={feature.text.text} />
+                      </Text>
+                      {feature.list === undefined ? null : (
+                        <BulletList>
+                          {feature.list.map((item) => (
+                            <BulletItem key={item.text}>{item.text}</BulletItem>
+                          ))}
+                        </BulletList>
+                      )}
                     </Stack>
                   </Card>
                 ))}
               </CardGrid>
             </Section>
-            <Section id="try-it" size="lg" title={`Try it on ${tool.tryOn}`} description={tool.tryIt.lead.text}>
-              {tryIt}
+            {tool.compared === undefined ? null : (
+              <Section id="compared" size="lg" title={tool.compared.title}>
+                <Text>{tool.compared.text.text}</Text>
+              </Section>
+            )}
+            <Section
+              id="try-it"
+              size="lg"
+              title={tool.tryOn === undefined ? "Try it" : `Try it on ${tool.tryOn}`}
+              description={tool.tryIt.lead.text}
+            >
+              {tool.tryIt.after === undefined ? (
+                tryIt
+              ) : (
+                <Stack gap="lg">
+                  {tryIt}
+                  <Text>
+                    <Words text={tool.tryIt.after.text} />
+                  </Text>
+                </Stack>
+              )}
             </Section>
-            <Section id="planned" size="lg" title="Planned, not built" description={tool.planned.lead}>
+            <Section id="planned" size="lg" title={tool.headings?.planned ?? "Planned, not built"} description={tool.planned.lead}>
               <Card>
                 <BulletList>
                   {tool.planned.items.map((item) => (

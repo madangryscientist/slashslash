@@ -4,10 +4,11 @@
  */
 
 import type { Claim, FactsProduct } from "#/content/facts";
+import { OMNISLASH_HEADLINE, OMNISLASH_INTRO } from "#/content/omnislash";
 import type { StageId } from "#/content/stages";
 
 export type Product = {
-  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash" | "TaskSlash" | "UISlash";
+  name: "PixelSlash" | "ToggleSlash" | "BundleSlash" | "FlakeSlash" | "TaskSlash" | "UISlash" | "OmniSlash";
   /** The release stage, from the shared `STAGES` table. */
   stage: StageId;
   /** The one question it answers about a CI run. */
@@ -142,6 +143,14 @@ export const PRODUCTS: readonly Product[] = [
         ],
       },
     ],
+  },
+  {
+    name: "OmniSlash",
+    stage: "alpha",
+    facts: "omnislash",
+    question: { text: OMNISLASH_HEADLINE, facts: ["omnislash/what-it-is"] },
+    summary: [OMNISLASH_INTRO.lead],
+    page: "/omnislash",
   },
   {
     name: "BundleSlash",

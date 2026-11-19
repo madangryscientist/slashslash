@@ -45,3 +45,6 @@ export const TOGGLESLASH_REPO_URL: string = "https://github.com/slashsuite/toggl
 
 /** The TaskSlash repository, public under the MIT license. /taskslash builds its clone command and docs links from it. */
 export const TASKSLASH_REPO_URL = "https://github.com/slashsuite/taskslash";
+
+/** The OmniSlash repository, public under the Elastic License 2.0. /omnislash links it from its hero. */
+export const OMNISLASH_REPO_URL = "https://github.com/slashsuite/omnislash";

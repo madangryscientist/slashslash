@@ -53,6 +53,7 @@ describe("the shell on the 404 page", () => {
       { href: "/flakeslash", text: "FlakeSlash" },
       { href: "/toggleslash", text: "ToggleSlash" },
       { href: "/taskslash", text: "TaskSlash" },
+      { href: "/omnislash", text: "OmniSlash" },
     ]);
   });
 
@@ -62,6 +63,7 @@ describe("the shell on the 404 page", () => {
     expect(licences).toEqual([
       `${licenceOf("pixelslash")}: PixelSlash, ToggleSlash, FlakeSlash`,
       `${licenceOf("taskslash")}: TaskSlash, UISlash`,
+      `${licenceOf("omnislash")}: OmniSlash`,
     ]);
   });
 

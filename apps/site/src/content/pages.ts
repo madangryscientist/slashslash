@@ -7,6 +7,7 @@ export const PAGES: readonly { path: string; file: string }[] = [
   { path: "/", file: "index.astro" },
   { path: "/developers", file: "developers.astro" },
   { path: "/flakeslash", file: "flakeslash.astro" },
+  { path: "/omnislash", file: "omnislash.astro" },
   { path: "/pixelslash", file: "pixelslash/index.astro" },
   { path: "/pixelslash/compare", file: "pixelslash/compare.astro" },
   { path: "/pixelslash/how-it-works", file: "pixelslash/how-it-works.astro" },

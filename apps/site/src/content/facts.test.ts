@@ -16,6 +16,7 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import * as flakeslash from "#/content/flakeslash";
 import * as flow from "#/content/flow";
+import * as omnislash from "#/content/omnislash";
 import * as products from "#/content/products";
 import * as story from "#/content/story";
 import * as taskslash from "#/content/taskslash";
@@ -43,6 +44,7 @@ const MODULES: Record<string, object> = {
   "content/toggleslash": toggleslash,
   "content/flakeslash": flakeslash,
   "content/taskslash": taskslash,
+  "content/omnislash": omnislash,
   "home/tools": homeTools,
   "tools/tools": tools,
   "developers/today": developersToday,

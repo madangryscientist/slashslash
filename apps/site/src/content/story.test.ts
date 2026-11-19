@@ -73,7 +73,7 @@ describe("suite story copy", () => {
   });
 
   test("the stage sentences name exactly the alpha tools and exactly the planned tools", () => {
-    const alpha = PRODUCTS.filter((p) => p.stage === "alpha").map((p) => p.name);
+    const alpha = PRODUCTS.filter((p) => p.stage === "alpha" && story.STORY_TOOLS.includes(p.name)).map((p) => p.name);
     const planned = [
       ...PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name),
       "SightSlash" as const,
