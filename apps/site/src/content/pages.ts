@@ -1,3 +1,5 @@
+import { LISTED_PAGES } from "#/pixelslash/doc/docs-map";
+
 /**
  * Every real page on the site, in sitemap order: its public address (no trailing slash except the home page's) and its
  * source file under src/pages. The sitemap lists these and the tests read them; the 404 page is not a page here.
@@ -10,6 +12,9 @@ export const PAGES: readonly { path: string; file: string }[] = [
   { path: "/omnislash", file: "omnislash.astro" },
   { path: "/pixelslash", file: "pixelslash/index.astro" },
   { path: "/pixelslash/compare", file: "pixelslash/compare.astro" },
+  // PixelSlash's docs: the landing, then each listed page in nav order. Unlisted pages are built but left out.
+  { path: "/pixelslash/docs", file: "pixelslash/docs/index.astro" },
+  ...LISTED_PAGES.map((page) => ({ path: `/pixelslash/docs/${page.slug}`, file: "pixelslash/docs/[slug].astro" })),
   { path: "/pixelslash/how-it-works", file: "pixelslash/how-it-works.astro" },
   { path: "/pixelslash/pricing", file: "pixelslash/pricing.astro" },
   { path: "/pixelslash/security", file: "pixelslash/security.astro" },

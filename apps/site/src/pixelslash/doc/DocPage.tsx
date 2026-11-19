@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { DocBody, type Doc } from "#/pixelslash/doc/markdown";
 
 /** The document's H2 and H3, each a plain link to its heading in the body. */
-function OnThisPage({ doc }: { doc: Doc }): ReactNode {
+export function OnThisPage({ doc }: { doc: Doc }): ReactNode {
   const shown = doc.headings.filter((heading) => heading.depth <= 3);
   return (
     <nav aria-label="On this page" data-testid="on-this-page">

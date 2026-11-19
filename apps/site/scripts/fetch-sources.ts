@@ -13,9 +13,31 @@
  */
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { DOC_PAGES } from "#/pixelslash/doc/docs-map";
+
+/** The screenshots the docs show, every file of PixelSlash's apps/site/public/docs-images/. */
+const DOCS_IMAGES = [
+  "ci-index.png",
+  "ci-report.png",
+  "ds-judge.png",
+  "ds-nojudge.png",
+  "gs-labelled.png",
+  "png-android.png",
+  "png-compare.png",
+  "png-report.png",
+  "pw-index.png",
+  "pw-report.png",
+  "sb-index.png",
+  "sb-report.png",
+  "server-report.png",
+  "url-compare.png",
+  "url-dashboard.png",
+  "url-ignore.png",
+  "url-index.png",
+] as const;
 
 /** Every PixelSlash file the pages read, by its path in that repository. */
-export const PIXELSLASH_FILES = [
+export const PIXELSLASH_FILES: readonly string[] = [
   "apps/web/github-app/manifest.json",
   "apps/site/public/hero/main.png",
   "apps/site/public/hero/branch.png",
@@ -26,7 +48,12 @@ export const PIXELSLASH_FILES = [
   // Rendered as /pixelslash/security and /pixelslash/self-host.
   "SECURITY.md",
   "apps/web/SELF-HOST.md",
-] as const;
+  // The docs under /pixelslash/docs: docs/cli.md, cut into pages, and each page that is a file of its
+  // own, read from the docs map so the two lists cannot drift; then the screenshots they show.
+  "docs/cli.md",
+  ...DOC_PAGES.flatMap((page) => (page.file === undefined ? [] : [page.file])),
+  ...DOCS_IMAGES.map((name) => `apps/site/public/docs-images/${name}`),
+];
 
 /** The products whose FACTS.md the site reads, each by its repository name. */
 export const FACTS_PRODUCTS = ["pixelslash", "toggleslash", "flakeslash", "taskslash", "uislash", "omnislash"] as const;

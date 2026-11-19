@@ -3,7 +3,7 @@ import type { Claim } from "#/content/facts";
 /**
  * Every page of the PixelSlash site, in nav order. This site serves the four marketing pages, each with a
  * description (a Claim citing PixelSlash's facts), and the security and self-host pages, which take theirs
- * from their own document (pixelslash/doc/docs.ts). The docs stay on pixelslash.dev.
+ * from their own document (pixelslash/doc/docs.ts). The docs are built from the docs map (pixelslash/doc/docs-map.ts).
  */
 type Page = { to: string; label: string; title: string; description?: Claim };
 
@@ -61,7 +61,7 @@ const LIST = [
   },
 ] as const satisfies readonly Page[];
 
-/** A PixelSlash page's path on pixelslash.dev. */
+/** A PixelSlash page's path, as the ported code names it (`/pricing`). */
 export type SitePath = (typeof LIST)[number]["to"];
 
 export const PAGES: readonly (Page & { to: SitePath })[] = LIST;

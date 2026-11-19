@@ -1,17 +1,20 @@
 /**
- * Where a PixelSlash link goes. The marketing pages, the security page and the self-host guide live
- * here, under /pixelslash; the docs alone still live on pixelslash.dev until they move here too. A
- * path is the page's path on pixelslash.dev (`/pricing`), as the ported code names it.
+ * Where a PixelSlash link goes. Every PixelSlash page lives here, under /pixelslash: the marketing
+ * pages, the security page, the self-host guide and the docs. A path is the page's path as the ported
+ * code names it (`/pricing`, `/docs/upload#uploading-to-a-server`).
  */
-export const PIXELSLASH_DEV = "https://pixelslash.dev";
 
 /** The pages this site serves under /pixelslash. */
 export const LOCAL: readonly string[] = ["/", "/how-it-works", "/compare", "/pricing", "/security", "/self-host"];
 
-/** `/pricing` -> `/pixelslash/pricing` for a page here, else the page on pixelslash.dev. */
+/** `/docs` and every `/docs/...` path, its anchor kept: the docs pages, built from the docs map. */
+const DOCS_PATH = /^\/docs(\/[a-z0-9-]+)?(#.*)?$/;
+
+/** `/pricing` -> `/pixelslash/pricing`, `/docs/upload#x` -> `/pixelslash/docs/upload#x`. Any other path is a mistake. */
 export function psHref(path: string): string {
   if (/^(#|mailto:|https?:)/.test(path)) return path;
-  if (!LOCAL.includes(path)) return `${PIXELSLASH_DEV}${path}`;
+  if (DOCS_PATH.test(path)) return `/pixelslash${path}`;
+  if (!LOCAL.includes(path)) throw new Error(`No PixelSlash page ${path} is served here`);
   return path === "/" ? "/pixelslash" : `/pixelslash${path}`;
 }
 

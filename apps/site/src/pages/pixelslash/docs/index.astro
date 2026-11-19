@@ -1,0 +1,21 @@
+---
+// /pixelslash/docs: PixelSlash's docs landing, the lead of docs/cli.md and every group of pages, rendered at build time on the shell.
+import { Container } from "@hackcove/ui-react";
+import Slash from "#/layouts/Slash.astro";
+import { DocsIndexPage } from "#/pixelslash/doc/DocsPages";
+import { CLI_INTRO_DOC } from "#/pixelslash/doc/docs-content";
+import { docPage } from "#/pixelslash/doc/docs";
+import { OLD_ANCHOR_SCRIPT } from "#/pixelslash/doc/old-anchors";
+
+const page = docPage(CLI_INTRO_DOC, { title: "Docs", suffix: " · PixelSlash" });
+---
+
+<Slash section="pixelslash" title={page.title} description={page.description}>
+  {/* `/pixelslash/docs#anchor` links from before the docs were cut up land on the page that holds the anchor. */}
+  <script is:inline set:html={OLD_ANCHOR_SCRIPT} />
+  <div class="py-8">
+    <Container>
+      <DocsIndexPage />
+    </Container>
+  </div>
+</Slash>

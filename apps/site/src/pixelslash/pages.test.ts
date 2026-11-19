@@ -14,7 +14,7 @@ import { plainText, TICKET_ID } from "#/pixelslash/doc/doc-text";
 import { docPage, SECURITY_DOC, SELF_HOST_DOC } from "#/pixelslash/doc/docs";
 import type { Doc } from "#/pixelslash/doc/markdown";
 import { STAGE } from "#/pixelslash/content/stage";
-import { LOCAL, PIXELSLASH_DEV } from "#/pixelslash/paths";
+import { LOCAL } from "#/pixelslash/paths";
 import { ComparePage } from "#/pixelslash/pages/compare";
 import { PROMISE } from "#/pixelslash/pages/home";
 import { HowItWorksPage } from "#/pixelslash/pages/how-it-works";
@@ -110,9 +110,11 @@ const CITED = new Set(
     .map((link) => new URL(link).origin),
 );
 
-test("the pages built here are the ones LOCAL names, and no other PixelSlash page", () => {
+test("the pages built here are the ones LOCAL names and the docs, and no other PixelSlash page", () => {
   expect(SERVED.map((page) => page.path).toSorted()).toEqual([...LOCAL].toSorted());
-  expect(globSync(["pixelslash.html", "pixelslash/**/*.html"], { cwd: DIST }).toSorted()).toEqual(
+  // The docs pages are checked by doc/docs.test.tsx.
+  const built = globSync(["pixelslash.html", "pixelslash/**/*.html"], { cwd: DIST });
+  expect(built.filter((file) => file !== "pixelslash/docs.html" && !file.startsWith("pixelslash/docs/")).toSorted()).toEqual(
     SERVED.map((page) => page.file).toSorted(),
   );
 });
@@ -143,14 +145,14 @@ describe.each(SERVED)("/pixelslash$path", ({ path, file, h1, doc }) => {
     expect(headings(html)).toEqual(expected);
   });
 
-  test("the sub-nav marks this page alone as current, if it lists it, and Docs goes to pixelslash.dev", () => {
+  test("the sub-nav marks this page alone as current, if it lists it, and Docs goes to the docs here", () => {
     const nav = html.match(/<nav\b[^>]*aria-label="PixelSlash"[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? "";
     const links = [...nav.matchAll(/<a\b([^>]*)>/g)].map((m) => m[1] ?? "");
     const current = links.filter((attrs) => /\saria-current="page"/.test(attrs));
     const listed = SECTIONS.pixelslash.pages.some((page) => page.href === here(path));
     expect(current).toHaveLength(listed ? 1 : 0);
     if (listed) expect(current[0]).toContain(`href="${here(path)}"`);
-    expect(links.some((attrs) => attrs.includes(`href="${PIXELSLASH_DEV}/docs"`))).toBe(true);
+    expect(links.some((attrs) => attrs.includes('href="/pixelslash/docs"'))).toBe(true);
   });
 });
 
@@ -223,7 +225,7 @@ describe("/pixelslash/compare's matrix", () => {
 });
 
 describe("every PixelSlash page", () => {
-  test("names only files that exist here, and sends PixelSlash pages not served here to pixelslash.dev", () => {
+  test("names only files that exist here, and links nothing on pixelslash.dev", () => {
     for (const { file } of SERVED) {
       const html = read(file);
       for (const [, ref = ""] of html.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
@@ -236,16 +238,14 @@ describe("every PixelSlash page", () => {
         } else if (/^https?:/.test(ref)) {
           const url = new URL(ref);
           const allowed =
-            url.origin === PIXELSLASH_DEV ||
             url.origin === "https://github.com" ||
             url.origin === "https://slashslash.build" ||
             CITED.has(url.origin);
           expect(allowed, `${file} links ${ref}`).toBe(true);
         }
       }
-      // Every PixelSlash page the copy names goes here when it is served here, else to pixelslash.dev.
-      for (const other of PAGES.filter((page) => !LOCAL.includes(page.to)))
-        expect(html, `${file}: ${other.label}`).not.toContain(`href="${here(other.to)}"`);
+      // Every PixelSlash page is served here now, the docs included.
+      expect(html, file).not.toMatch(/href="https?:\/\/pixelslash\.dev/);
     }
   });
 

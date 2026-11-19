@@ -58,7 +58,8 @@ const CARDS: Record<string, { tool: OgTool; headline: string }> = {
 
 /**
  * Pages that wear another page's card instead of their own, by path: the 404 page (not in `PAGES`) the
- * suite's, and the two PixelSlash documents served here the PixelSlash card.
+ * suite's, and the two PixelSlash documents served here the PixelSlash card. The docs pages are not
+ * listed: `wornCard` gives every one of them the PixelSlash card.
  */
 export const WEARS: Readonly<Record<string, string>> = {
   "/404": "/",
@@ -66,7 +67,15 @@ export const WEARS: Readonly<Record<string, string>> = {
   "/pixelslash/self-host": "/pixelslash",
 };
 
-export const OG_CARDS: readonly OgCard[] = PAGES.filter(({ path }) => WEARS[path] === undefined).map(({ path }) => {
+/** The page whose card `path` wears instead of its own, if any: `WEARS`, and the PixelSlash card for every docs page. */
+export function wornCard(path: string): string | undefined {
+  const worn = WEARS[path];
+  if (worn !== undefined) return worn;
+  if (path === "/pixelslash/docs" || path.startsWith("/pixelslash/docs/")) return "/pixelslash";
+  return undefined;
+}
+
+export const OG_CARDS: readonly OgCard[] = PAGES.filter(({ path }) => wornCard(path) === undefined).map(({ path }) => {
   const card = CARDS[path];
   if (card === undefined) throw new Error(`No share card for ${path}`);
   return {
@@ -77,9 +86,9 @@ export const OG_CARDS: readonly OgCard[] = PAGES.filter(({ path }) => WEARS[path
   };
 });
 
-/** The card a page wears: its own, or the one `WEARS` names for it. */
+/** The card a page wears: its own, or the one `wornCard` names for it. */
 export function ogCardFor(path: string): OgCard {
-  const card = OG_CARDS.find((item) => item.path === (WEARS[path] ?? path));
+  const card = OG_CARDS.find((item) => item.path === (wornCard(path) ?? path));
   if (card === undefined) throw new Error(`No share card for ${path}: add it to og.ts`);
   return card;
 }

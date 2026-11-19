@@ -10,10 +10,16 @@ import { type Doc, parseDoc } from "#/pixelslash/doc/markdown";
 export const SECURITY_DOC = parseDoc(security, "SECURITY.md");
 export const SELF_HOST_DOC = parseDoc(selfHost, "apps/web/SELF-HOST.md");
 
-/** A document page's title and description: its first heading, and its first paragraph as plain text. */
-export function docPage(doc: Doc): { title: string; description: string } {
+/**
+ * A document page's title and description: `title` (the document's first heading unless given) with
+ * `suffix` after it, and its first paragraph as plain text.
+ */
+export function docPage(
+  doc: Doc,
+  { title = doc.title, suffix = " · PixelSlash" }: { title?: string; suffix?: string } = {},
+): { title: string; description: string } {
   const paragraph = doc.tokens.find((token) => token.type === "paragraph");
   const description = paragraph?.type === "paragraph" ? plainText(paragraph.tokens).replace(/\s+/g, " ").trim() : "";
-  if (doc.title === "" || description === "") throw new Error(`${doc.source} has no title or no first paragraph`);
-  return { title: `${doc.title} · PixelSlash`, description };
+  if (title === "" || description === "") throw new Error(`${doc.source} has no title or no first paragraph`);
+  return { title: `${title}${suffix}`, description };
 }
