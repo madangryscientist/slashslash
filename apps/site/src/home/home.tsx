@@ -1,5 +1,6 @@
 import { Card, Container, Lead, ListRow, Pill, Step, Steps, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
+import type { Claim } from "#/content/facts";
 import { STAGES, STAGE_TONE } from "#/content/stages";
 import { HERO, PIPELINE } from "#/content/story";
 import { HomeSection } from "#/home/sections";
@@ -10,7 +11,7 @@ import { CentredHero } from "#/stand-ins/centred-hero";
 /*
  * The suite home's first screen, on the kit's parts: the hero (the story's title and lead, over the
  * hand-drawn panes, with no link or button), then the pipeline: the steps a change goes through, in
- * order, each with the tools that run there and one sentence on what each does. Nothing here runs in
+ * order, each with the tools that run there and what each does there. Nothing here runs in
  * the browser; the page adds the Motion island beside it.
  */
 
@@ -30,8 +31,11 @@ function HomeHero(): ReactNode {
   );
 }
 
-/** A tool's row: its mark, its name and release stage, and what it does; a link to its page here if it has one. */
-function ToolRow({ tool, divided }: { tool: ToolCard; divided: boolean }): ReactNode {
+/**
+ * A tool's row: its mark, its name and release stage, and what it does at this step; a link to its page here
+ * if it has one.
+ */
+function ToolRow({ tool, does, divided }: { tool: ToolCard; does: Claim; divided: boolean }): ReactNode {
   return (
     // On a linked row the kit puts data-* on the stretched link, not the row, so the name rides a wrapper.
     <div data-tool={tool.name}>
@@ -39,7 +43,7 @@ function ToolRow({ tool, divided }: { tool: ToolCard; divided: boolean }): React
         divided={divided}
         {...(tool.href === undefined ? {} : { href: tool.href })}
         leading={<img src={tool.mark} alt="" width={28} height={28} />}
-        secondary={tool.does.text}
+        secondary={does.text}
       >
         <span className="inline-flex flex-wrap items-center gap-2">
           <strong>{tool.name}</strong>
@@ -72,7 +76,7 @@ function Pipeline(): ReactNode {
               {stage.tools.length === 0 ? null : (
                 <Card flush>
                   {stage.tools.map((row, index) => (
-                    <ToolRow key={row.tool} tool={cardFor(row.tool)} divided={index > 0} />
+                    <ToolRow key={row.tool} tool={cardFor(row.tool)} does={row.does} divided={index > 0} />
                   ))}
                 </Card>
               )}

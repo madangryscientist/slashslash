@@ -45,13 +45,22 @@ describe("suite story copy", () => {
     expect(strings.filter((text) => forbidden.test(text))).toEqual([]);
   });
 
-  test("every PRODUCTS entry, and SightSlash, sits at exactly one pipeline step", () => {
-    const placed = story.PIPELINE.stages.flatMap((stage) => stage.tools.map((row) => row.tool));
-    expect(placed.toSorted()).toEqual([...story.STORY_TOOLS].toSorted());
+  test("OmniSlash sits at Planned, Written and Reviewed, and every other tool at exactly one step", () => {
+    const placedAt = (tool: StoryToolName): string[] =>
+      story.PIPELINE.stages.filter((stage) => stage.tools.some((row) => row.tool === tool)).map((stage) => stage.name);
+    expect(placedAt("OmniSlash")).toEqual(["Planned", "Written", "Reviewed"]);
+    for (const tool of story.STORY_TOOLS.filter((name) => name !== "OmniSlash")) {
+      expect(placedAt(tool), tool).toHaveLength(1);
+    }
+    for (const stage of story.PIPELINE.stages) {
+      const tools = stage.tools.map((row) => row.tool);
+      expect(new Set(tools).size, stage.name).toBe(tools.length);
+    }
   });
 
-  test("the pipeline runs in one order: written, built and tested, reviewed, released", () => {
+  test("the pipeline runs in one order: planned, written, built and tested, reviewed, released", () => {
     expect(story.PIPELINE.stages.map((stage) => stage.name)).toEqual([
+      "Planned",
       "Written",
       "Built and tested",
       "Reviewed",
@@ -59,33 +68,26 @@ describe("suite story copy", () => {
     ]);
   });
 
-  test("each tool says what it does in one sentence, and a planned tool says what it will do", () => {
-    const planned = new Set<string>([
-      ...PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name),
-      "SightSlash",
-    ]);
+  test("each tool's row ends with a full stop, and a planned tool says what it will do", () => {
+    const planned = new Set<string>(PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name));
     for (const row of story.PIPELINE.stages.flatMap((stage) => stage.tools)) {
-      expect(sentences(row.does.text), row.tool).toHaveLength(1);
       expect(row.does.text.endsWith("."), row.tool).toBe(true);
       expect(row.does.text.includes("?"), row.tool).toBe(false);
-      expect(row.does.text.startsWith("Will "), row.tool).toBe(planned.has(row.tool));
+      if (planned.has(row.tool)) expect(row.does.text, row.tool).toMatch(/\bwill\b/);
+      else expect(row.does.text.startsWith("Will "), row.tool).toBe(false);
     }
   });
 
-  test("the stage sentences name exactly the alpha tools and exactly the planned tools", () => {
-    const alpha = PRODUCTS.filter((p) => p.stage === "alpha" && story.STORY_TOOLS.includes(p.name)).map((p) => p.name);
-    const planned = [
-      ...PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name),
-      "SightSlash" as const,
-    ];
+  test("the alphas sentence names exactly the alpha tools", () => {
+    const alpha = PRODUCTS.filter((p) => p.stage === "alpha").map((p) => p.name);
     const alphaSentence = sentenceWith(story.STANDS.stages.text, "are alphas");
-    const plannedSentence = sentenceWith(story.STANDS.stages.text, "are planned");
     expect(namedIn(alphaSentence).toSorted()).toEqual(alpha.toSorted());
-    expect(namedIn(plannedSentence).toSorted()).toEqual(planned.toSorted());
   });
 
-  test("the self-host sentence names exactly the SELF_HOSTED tools", () => {
-    const named = namedIn(story.STANDS.selfHost.text).toSorted();
-    expect(named).toEqual([...story.SELF_HOSTED].toSorted());
+  test("where to start has one item per alpha tool, each opening with its name", () => {
+    const alpha = PRODUCTS.filter((p) => p.stage === "alpha").map((p) => p.name);
+    const opened = story.STANDS.start.items.map((item) => item.text.slice(0, item.text.indexOf(":")));
+    expect(opened.toSorted()).toEqual(alpha.toSorted());
   });
+
 });

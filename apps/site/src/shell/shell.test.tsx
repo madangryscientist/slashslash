@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import { licenceOf } from "#/content/facts";
 import { PRODUCTS } from "#/content/products";
+import { HERO } from "#/content/story";
 import { renderToStaticMarkup } from "react-dom/server";
 import { SECTIONS, markFor } from "#/shell/sections";
 import { SlashShell } from "#/shell/SlashShell";
@@ -65,6 +66,11 @@ describe("the shell on the 404 page", () => {
       `${licenceOf("taskslash")}: TaskSlash, UISlash`,
       `${licenceOf("omnislash")}: OmniSlash`,
     ]);
+  });
+
+  test("the footer line is the home's headline", () => {
+    const footer = (elements(page(), "footer")[0] ?? "").replace(/<!--.*?-->/g, "");
+    expect(text(footer)).toContain(HERO.title.text);
   });
 
   test("the footer names every product", () => {

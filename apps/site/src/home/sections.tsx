@@ -1,7 +1,8 @@
-import { Container, Section, Text, TextLink } from "@hackcove/ui-react";
+import { Container, Section, Text } from "@hackcove/ui-react";
 import type { ReactNode } from "react";
 import { STANDS, VIEW, VIEW_QUESTIONS } from "#/content/story";
 import { ContactLine } from "#/shell/contact-line";
+import { Rich } from "#/shell/rich-text";
 
 /*
  * The rest of the suite home, after the pipeline: where it stands, and the ask. Each is a kit Section
@@ -21,19 +22,21 @@ export function HomeSection({ id, title, children }: { id: string; title: string
   );
 }
 
-/** The stage line either side of the words that link to the CI walkthrough. */
-const [stagesBefore, stagesAfter] = STANDS.stages.text.split(STANDS.tryLink.text);
-
-/** Where it stands: what is built, what is planned, and where it runs. */
+/** Where it stands: which tools are alphas, what may be reset, and where to start with each. */
 export function Stands(): ReactNode {
   return (
     <HomeSection id="stands" title={STANDS.title}>
-      <Text>
-        {stagesBefore}
-        <TextLink href={STANDS.tryLink.href}>{STANDS.tryLink.text}</TextLink>
-        {stagesAfter}
-      </Text>
-      <Text>{STANDS.selfHost.text}</Text>
+      <Text>{STANDS.stages.text}</Text>
+      <Text>{STANDS.start.title}</Text>
+      <ul className="list-disc space-y-2 pl-6" data-stands-start="">
+        {STANDS.start.items.map((item) => (
+          <li key={item.text}>
+            <Text>
+              <Rich text={item.text} external={STANDS.start.external} />
+            </Text>
+          </li>
+        ))}
+      </ul>
     </HomeSection>
   );
 }

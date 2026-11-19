@@ -5,9 +5,6 @@
  */
 
 export const HERO = {
-  /** The h1, with its full stop. LANDING_HEADLINE in site.ts is the same line without it. */
-  title: "See what a change really does, before your customers do.",
-  lead: "Software teams check the code they change. Nobody checks what customers will actually see. slashslash closes that gap.",
   /** The hero drawing's three step captions, left to right (top to bottom on a phone). */
   before: "Before",
   change: "The change",

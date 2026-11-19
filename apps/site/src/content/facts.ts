@@ -24,7 +24,7 @@ export type FactId = `${FactsProduct}/${string}`;
 export const WHAT_IT_IS = "what-it-is";
 
 /** A tool that has no repository yet, so no facts file: every claim about it must read as planned. */
-export type UnbuiltTool = "BundleSlash" | "SightSlash";
+export type UnbuiltTool = "BundleSlash";
 
 /**
  * A product claim: anything that says what a product does, will do, where it runs, its licence or its
