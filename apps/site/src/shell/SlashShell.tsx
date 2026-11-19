@@ -132,7 +132,8 @@ export function SlashShell({
         items={current.pages.map((page) => ({
           label: page.label,
           href: page.href,
-          selected: page.href === path,
+          // A tab is current on its own page and, but for the section's home, on the pages under it (each docs page under Docs).
+          selected: page.href === path || (page.href !== current.home && path.startsWith(`${page.href}/`)),
           ...("external" in page ? { external: true } : {}),
         }))}
       />

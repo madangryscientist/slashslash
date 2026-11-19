@@ -148,32 +148,34 @@ const FIRST_STEP = {
   text: "Install PixelSlash, compare two versions of a page and read the report. About fifteen minutes, all on your machine.",
 } as const;
 
-/** `/pixelslash/docs`: one first step, the lead of docs/cli.md, then every group. */
+/** `/pixelslash/docs`: one first step, the lead of docs/cli.md, then every group, beside the docs nav. */
 export function DocsIndexPage(): ReactNode {
   const first = findPage(FIRST_STEP.slug);
   if (first === undefined) throw new Error(`docs: no page ${FIRST_STEP.slug}`);
   return (
-    <ProseLayout
-      width="full"
-      title="Docs"
-      description="Install PixelSlash, run a first compare, then look up whatever you are doing next."
-    >
-      <Callout
-        tone="neutral"
-        title="New here? Start with the first compare"
-        actions={
-          <Button href={pageHref(first)} data-testid="docs-first-step">
-            {FIRST_STEP.action}
-          </Button>
-        }
-        data-testid="docs-start"
+    <WithNav>
+      <ProseLayout
+        width="full"
+        title="Docs"
+        description="Install PixelSlash, run a first compare, then look up whatever you are doing next."
       >
-        {FIRST_STEP.text}
-      </Callout>
-      <div className="max-w-[75ch]" data-testid="docs-intro">
-        <DocBody doc={CLI_INTRO_DOC} />
-      </div>
-      <DocsGroupGrid />
-    </ProseLayout>
+        <Callout
+          tone="neutral"
+          title="New here? Start with the first compare"
+          actions={
+            <Button href={pageHref(first)} data-testid="docs-first-step">
+              {FIRST_STEP.action}
+            </Button>
+          }
+          data-testid="docs-start"
+        >
+          {FIRST_STEP.text}
+        </Callout>
+        <div className="max-w-[75ch]" data-testid="docs-intro">
+          <DocBody doc={CLI_INTRO_DOC} />
+        </div>
+        <DocsGroupGrid />
+      </ProseLayout>
+    </WithNav>
   );
 }

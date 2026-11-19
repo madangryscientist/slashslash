@@ -1,7 +1,7 @@
 import { type Token, lexer } from "marked";
 import { CLI_INTRO, CLI_PAGES } from "#/pixelslash/doc/cli";
 import { marked, plainText } from "#/pixelslash/doc/doc-text";
-import { DOC_PAGES, type DocPageDef, findPage } from "#/pixelslash/doc/docs-map";
+import { DOC_PAGES, type DocPageDef } from "#/pixelslash/doc/docs-map";
 import { type Doc, type Heading, parseDoc } from "#/pixelslash/doc/markdown";
 
 /*
@@ -51,7 +51,7 @@ export const DOCS_BY_SLUG: ReadonlyMap<string, Doc> = new Map(DOC_PAGES.map((pag
 /** The document a docs page shows. */
 export function docFor(slug: string): Doc {
   const doc = DOCS_BY_SLUG.get(slug);
-  if (doc === undefined || findPage(slug) === undefined) throw new Error(`docs: no page ${slug}`);
+  if (doc === undefined) throw new Error(`docs: no page ${slug}`);
   return doc;
 }
 

@@ -165,10 +165,13 @@ describe("the docs pages", () => {
     expect(CLI_INTRO_DOC.title).toBe(CLI_SPLIT.title);
     expect(CLI_SPLIT.title).toBe("PixelSlash");
     expect(indexHtml).toContain("compares two versions of a page");
+    expect(indexHtml).toContain('data-testid="docs-nav"');
+    expect(indexHtml.match(/<a\b[^>]*aria-current="page"[^>]*>/g)).toEqual([expect.stringContaining('href="/pixelslash/docs"')]);
   });
 
   test("the index lists every listed page, once, under its group", () => {
-    const cards = indexHtml.slice(indexHtml.indexOf('data-testid="docs-index"'));
+    // The group cards alone: the docs nav after them lists the pages too.
+    const cards = indexHtml.slice(indexHtml.indexOf('data-testid="docs-index"'), indexHtml.indexOf('data-testid="docs-nav"'));
     const counts = LISTED_PAGES.map((item) => [
       item.slug,
       cards.match(new RegExp(`href="/pixelslash/docs/${item.slug}"`, "g"))?.length ?? 0,
@@ -292,6 +295,17 @@ describe("the built docs pages", () => {
     const description = decode(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "");
     expect(description.length).toBeGreaterThan(40);
     expect(decode(fetched("docs/getting-started.md"))).toContain(description.slice(0, 30));
+  });
+
+  test("every link into the docs from the other PixelSlash pages names a page and a heading that exist", () => {
+    const links = ["pixelslash.html", "pixelslash/how-it-works.html", "pixelslash/security.html", "pixelslash/self-host.html"].flatMap(
+      (file) => [...built(file).matchAll(/href="\/pixelslash\/docs\/([a-z0-9-]+)(?:#([^"]+))?"/g)].map((m) => ({ file, slug: m[1] ?? "", anchor: m[2] })),
+    );
+    expect(links.length).toBeGreaterThan(0);
+    for (const { file, slug, anchor } of links) {
+      expect(DOC_PAGES.map((page) => page.slug), file).toContain(slug);
+      if (anchor !== undefined) expect(DOCS_BY_SLUG.get(slug)?.headings.map((h) => h.id), `${file} #${anchor}`).toContain(anchor);
+    }
   });
 
   test("the docs index carries the old-anchor script, inline", () => {

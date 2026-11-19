@@ -24,10 +24,7 @@ for (const path of PAGES) {
       await expect(page.getByRole("banner")).toBeVisible();
       await expect(page.getByRole("contentinfo")).toBeAttached();
 
-      // The landing lists the groups as cards; every other page has the docs nav.
-      const groups = path === "/pixelslash/docs" ? page.locator('[data-testid="docs-index"] h2') : page.locator('[data-testid^="docs-group-"]');
-      await expect(groups).toHaveCount(GROUPS.length);
-      expect(GROUPS.length).toBe(12);
+      await expect(page.locator('[data-testid="docs-nav"] [data-testid^="docs-group-"]')).toHaveCount(GROUPS.length);
 
       const neighbours = await page.locator('[data-testid="docs-prev"] a, [data-testid="docs-next"] a').evaluateAll((links) =>
         links.map((a) => a.getAttribute("href") ?? ""),
