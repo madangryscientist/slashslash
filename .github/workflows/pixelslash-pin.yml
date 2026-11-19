@@ -34,7 +34,7 @@ jobs:
   pin:
     runs-on: ubuntu-latest
     env:
-      PIXELSLASH: https://github.com/madangryscientist/pixelslash
+      PIXELSLASH: https://github.com/slashsuite/pixelslash
       BRANCH: bot/pixelslash-pin
       # As in ci.yml: moon diffs against the base branch, which needs the full history, and reads
       # the shared cache with the read token only.

@@ -28,7 +28,7 @@ const ghSignedIn = () => run(["gh", "auth", "status"]).code === 0;
 /** Whether GitHub serves `sha` as a commit of the repo, and whether `main` contains it. */
 function lookUp(product: Product, url: string, sha: string): { exists: boolean; onMain: boolean } {
   if (ghSignedIn()) {
-    const repo = `repos/madangryscientist/${product}`;
+    const repo = `repos/slashsuite/${product}`;
     if (run(["gh", "api", `${repo}/commits/${sha}`, "--jq", ".sha"]).out !== sha) return { exists: false, onMain: false };
     // `main...sha` is "identical" or "behind" when main already has the commit.
     const status = run(["gh", "api", `${repo}/compare/main...${sha}`, "--jq", ".status"]).out;
@@ -50,7 +50,7 @@ const [product, given, ...extra] = process.argv.slice(2);
 if (!PRODUCTS.includes(product as Product) || extra.length > 0)
   fail("usage: bun self-host/bump.ts <pixelslash|toggleslash> [<sha>]");
 const p = product as Product;
-const url = `https://github.com/madangryscientist/${p}.git`;
+const url = `https://github.com/slashsuite/${p}.git`;
 const pinFile = join(import.meta.dir, "pins", `${p}.sha`);
 const old = readFileSync(pinFile, "utf8").trim();
 
@@ -70,4 +70,4 @@ if (!found.onMain) console.warn(`warning: ${sha} is not on ${p} main`);
 
 writeFileSync(pinFile, `${sha}\n`);
 console.log(`${p}: ${old} to ${sha}`);
-console.log(`https://github.com/madangryscientist/${p}/compare/${old}...${sha}`);
+console.log(`https://github.com/slashsuite/${p}/compare/${old}...${sha}`);

@@ -31,10 +31,10 @@ export type FactsProduct = (typeof FACTS_PRODUCTS)[number];
 
 /** The repository each product's FACTS.md comes from, as owner/repo. */
 const FACTS_REPOS: Record<FactsProduct, string> = {
-  pixelslash: "madangryscientist/pixelslash",
-  toggleslash: "madangryscientist/toggleslash",
-  flakeslash: "madangryscientist/flakeslash",
-  taskslash: "madangryscientist/taskslash",
+  pixelslash: "slashsuite/pixelslash",
+  toggleslash: "slashsuite/toggleslash",
+  flakeslash: "slashsuite/flakeslash",
+  taskslash: "slashsuite/taskslash",
   uislash: "slashsuite/uislash",
   omnislash: "slashsuite/omnislash",
 };

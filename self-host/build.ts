@@ -35,7 +35,7 @@ export function readVersion(): string {
   return version;
 }
 
-const repo = (product: string) => `https://github.com/madangryscientist/${product}.git`;
+const repo = (product: string) => `https://github.com/slashsuite/${product}.git`;
 const productImage = (product: string) => `slashslash-product/${product}:${pin(product)}`;
 
 function run(args: string[], quiet = false): number {
