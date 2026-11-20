@@ -14,7 +14,7 @@ const results = await Promise.all(
       const response = await fetch(url, { signal: AbortSignal.timeout(4000) });
       return { name, url, healthy: ok(response.status), said: `HTTP ${response.status}` };
     } catch (error) {
-      return { name, url, healthy: false, said: String((error as Error).message ?? error) };
+      return { name, url, healthy: false, said: error instanceof Error ? error.message : String(error) };
     }
   }),
 );

@@ -68,10 +68,11 @@ export function build(tag: string, version = `${readVersion()}-dev`): void {
     throw new Error("building the self-host image failed");
 }
 
+function flag(name: string): string | undefined {
+  const at = process.argv.indexOf(name);
+  return at > 0 ? process.argv[at + 1] : undefined;
+}
+
 if (import.meta.main) {
-  const flag = (name: string) => {
-    const at = process.argv.indexOf(name);
-    return at > 0 ? process.argv[at + 1] : undefined;
-  };
   build(flag("--tag") ?? "slashslash:dev", flag("--version"));
 }

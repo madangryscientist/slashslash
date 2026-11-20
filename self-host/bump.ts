@@ -14,8 +14,12 @@ const PRODUCTS = ["pixelslash", "toggleslash"] as const;
 type Product = (typeof PRODUCTS)[number];
 
 function run(cmd: string[], cwd?: string): { code: number; out: string } {
-  const r = Bun.spawnSync(cmd, { cwd, stdout: "pipe", stderr: "pipe" });
+  const r = Bun.spawnSync(cmd, { ...(cwd === undefined ? {} : { cwd }), stdout: "pipe", stderr: "pipe" });
   return { code: r.exitCode ?? 1, out: (r.stdout.toString() + r.stderr.toString()).trim() };
+}
+
+function isProduct(s: string | undefined): s is Product {
+  return PRODUCTS.some((p) => p === s);
 }
 
 function fail(line: string): never {
@@ -47,9 +51,9 @@ function lookUp(product: Product, url: string, sha: string): { exists: boolean; 
 }
 
 const [product, given, ...extra] = process.argv.slice(2);
-if (!PRODUCTS.includes(product as Product) || extra.length > 0)
+if (!isProduct(product) || extra.length > 0)
   fail("usage: bun self-host/bump.ts <pixelslash|toggleslash> [<sha>]");
-const p = product as Product;
+const p = product;
 const url = `https://github.com/slashsuite/${p}.git`;
 const pinFile = join(import.meta.dir, "pins", `${p}.sha`);
 const old = readFileSync(pinFile, "utf8").trim();

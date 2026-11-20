@@ -112,7 +112,9 @@
     {
       "files": [
         "scripts/**",
-        "apps/*/scripts/**"
+        "apps/*/scripts/**",
+        "self-host/*.ts",
+        "self-host/rootfs/usr/local/lib/slashslash/*.ts"
       ],
       "rules": {
         "no-console": "off"

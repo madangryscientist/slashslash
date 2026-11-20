@@ -5,8 +5,17 @@ $schema: "../.moon/cache/schemas/project.json"
 # Proxmox install script's dry runs and ShellCheck, which build nothing, so the gate's `:test` runs
 # it. The chart task checks the Helm chart in chart/ (lint, renders, kubeconform, the restricted
 # pod standard, the committed render): it downloads helm and kubeconform, so the gate does not run it
-# either (self-host.yml does). There is no build, lint or typecheck task here.
+# either (self-host.yml does). The typecheck and lint tasks cover the scripts here, the Proxmox
+# tests and the in-image health check. There is no build task here.
 tasks:
+  typecheck:
+    script: "bun run tsc --noEmit -p self-host/tsconfig.json"
+    options:
+      runFromWorkspaceRoot: true
+  lint:
+    script: "bun run oxlint --type-aware --deny-warnings self-host"
+    options:
+      runFromWorkspaceRoot: true
   smoke:
     command: "bun smoke.ts"
     options:
