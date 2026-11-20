@@ -38,7 +38,7 @@ const HOME = {
   ],
   steps: [
     "Where each tool fits",
-    "A change goes through the same steps, from the idea to the release. Each Slash tool does one job at one of those steps. Start with the one that hurts most.",
+    "A change goes through the same steps, from the idea to the release. Each Slash product does one job at one of those steps. Start with the one that hurts most.",
     "Planned",
     "An idea becomes a ticket, and the ticket is drilled before any agent starts on it.",
     "OmniSlash refuses to dispatch a ticket that has no drilled section, no done-when item or no recorded check, unless you override it and give a reason. Planned: each role runs on demand with its own inbox, and builders working in parallel are checked for conflicts.",

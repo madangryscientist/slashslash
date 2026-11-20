@@ -21,7 +21,7 @@ const standIns = (): string[] =>
     .toSorted();
 
 describe("stand-ins", () => {
-  test("every stand-in's first comment names the Hack Cove package it stands in for", () => {
+  test("every stand-in's first comment names the UISlash package it stands in for", () => {
     const missing = standIns().filter(
       (file) => !/@hackcove\/(?:ui-react|themes)\b/.test(firstComment(readFileSync(resolve(DIR, file), "utf8")) ?? ""),
     );

@@ -1,9 +1,9 @@
 ---
 name: self-host
-description: Walk someone through running their own Slash tools instance (PixelSlash and ToggleSlash, the self-host image), on whatever they run: Proxmox, a Docker host, Docker Compose, Kubernetes or another platform. Use when someone wants to self-host the Slash tools, upgrade or remove an instance, or put one behind HTTPS.
+description: Walk someone through running their own Slash products instance (PixelSlash and ToggleSlash, the self-host image), on whatever they run: Proxmox, a Docker host, Docker Compose, Kubernetes or another platform. Use when someone wants to self-host the Slash products, upgrade or remove an instance, or put one behind HTTPS.
 ---
 
-# Self-host the Slash tools
+# Self-host the Slash products
 
 One image, `ghcr.io/slashsuite/slashslash`, runs both tools: PixelSlash on port 3000,
 ToggleSlash on 8080, everything on one volume at `/data`, as UID 1654, never root.

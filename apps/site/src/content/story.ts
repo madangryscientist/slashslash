@@ -64,7 +64,7 @@ type PipelineStage = {
  */
 export const PIPELINE: { title: string; lead: string; stages: readonly PipelineStage[]; next: Claim } = {
   title: "Where each tool fits",
-  lead: "A change goes through the same steps, from the idea to the release. Each Slash tool does one job at one of those steps. Start with the one that hurts most.",
+  lead: "A change goes through the same steps, from the idea to the release. Each Slash product does one job at one of those steps. Start with the one that hurts most.",
   stages: [
     {
       name: "Planned",

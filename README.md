@@ -1,6 +1,6 @@
 # slashslash
 
-The source of **[slashslash.build](https://slashslash.build)**, the public site for the Slash tools
+The source of **[slashslash.build](https://slashslash.build)**, the public site for the Slash suite
 (ToggleSlash, BundleSlash, FlakeSlash and PixelSlash).
 
 Two pages, built to static HTML with [Astro](https://astro.build):
