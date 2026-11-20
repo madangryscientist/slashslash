@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { runInNewContext } from "node:vm";
 import { type Token, lexer } from "marked";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
@@ -222,8 +223,8 @@ describe("the docs pages", () => {
       // The text alone: the edit link after it goes to the page's own file on GitHub, as it should.
       const html = page.slice(page.indexOf('data-testid="docs-article"'), page.indexOf('data-testid="docs-edit"'));
       expect(html, slug).not.toMatch(/href="(?!https:)[^"]*\.md/);
-      for (const page of DOC_PAGES.filter((item) => item.file !== undefined))
-        expect(html, slug).not.toContain(`/blob/main/${page.file}"`);
+      for (const doc of DOC_PAGES.filter((item) => item.file !== undefined))
+        expect(html, slug).not.toContain(`/blob/main/${doc.file}"`);
     }
   });
 });
@@ -246,6 +247,14 @@ describe("the screenshots in the docs", () => {
   });
 });
 
+/** Runs the script against a stand-in `location`, and returns where it sent the browser, if anywhere. */
+function run(script: string, hash: string): string | undefined {
+  let sent: string | undefined;
+  const location = { hash, replace: (to: string) => (sent = to) };
+  runInNewContext(script, { location });
+  return sent;
+}
+
 describe("links into the docs", () => {
   test("an old /pixelslash/docs#anchor is sent to the page that holds it, for every heading of cli.md", () => {
     for (const [anchor, slug] of CLI_SPLIT.anchorPage) expect(OLD_ANCHOR_SCRIPT).toContain(`"${anchor}":"${slug}"`);
@@ -254,14 +263,6 @@ describe("links into the docs", () => {
     expect(CLI_SPLIT.anchorPage.get("snapshot-capture-the-pinned-image")).toBe("capture");
     expect(CLI_SPLIT.anchorPage.get("exit-codes-and-the-failed-line")).toBe("signing-in");
   });
-
-  /** Runs the script against a stand-in `location`, and returns where it sent the browser, if anywhere. */
-  function run(script: string, hash: string): string | undefined {
-    let sent: string | undefined;
-    const location = { hash, replace: (to: string) => (sent = to) };
-    new Function("location", script)(location);
-    return sent;
-  }
 
   test("the script, run, replaces the location with the page that holds the anchor", () => {
     expect(run(oldAnchorScript(ANCHOR_PAGE), "#exit-codes-and-the-failed-line")).toBe(
@@ -302,10 +303,11 @@ describe("the built docs pages", () => {
       (file) => [...built(file).matchAll(/href="\/pixelslash\/docs\/([a-z0-9-]+)(?:#([^"]+))?"/g)].map((m) => ({ file, slug: m[1] ?? "", anchor: m[2] })),
     );
     expect(links.length).toBeGreaterThan(0);
-    for (const { file, slug, anchor } of links) {
-      expect(DOC_PAGES.map((page) => page.slug), file).toContain(slug);
-      if (anchor !== undefined) expect(DOCS_BY_SLUG.get(slug)?.headings.map((h) => h.id), `${file} #${anchor}`).toContain(anchor);
-    }
+    for (const { file, slug } of links) expect(DOC_PAGES.map((page) => page.slug), file).toContain(slug);
+    const unknownAnchors = links
+      .filter(({ slug, anchor }) => anchor !== undefined && !(DOCS_BY_SLUG.get(slug)?.headings.some((h) => h.id === anchor) ?? false))
+      .map(({ file, anchor = "" }) => `${file} #${anchor}`);
+    expect(unknownAnchors).toEqual([]);
   });
 
   test("the docs index carries the old-anchor script, inline", () => {

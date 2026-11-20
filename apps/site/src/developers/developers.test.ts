@@ -72,7 +72,7 @@ describe("/developers", () => {
     const ids = ["for-developers", "agents", "walkthrough", "env", "flags", "tools-detail", "today", "ask"];
     const at = ids.map((id) => html.indexOf(`id="${id}"`));
     for (const [i, place] of at.entries()) expect(place, ids[i]).toBeGreaterThan(-1);
-    expect(at).toEqual([...at].sort((a, b) => a - b));
+    expect(at).toEqual(at.toSorted((a, b) => a - b));
   });
 
   test("renders the walkthrough, in full", () => {
@@ -82,9 +82,10 @@ describe("/developers", () => {
       for (const fit of step.fits) {
         expect(words).toContain(fit.text.text);
         for (const line of fit.output?.lines ?? []) expect(words).toContain(text(line.replace(/^\$ /, "")));
-        if (fit.output?.image) expect(html).toContain(`src="${fit.output.image.src}"`);
       }
     }
+    const images = FLOW.flatMap((step) => step.fits.flatMap((fit) => (fit.output?.image ? [fit.output.image.src] : [])));
+    for (const src of images) expect(html).toContain(`src="${src}"`);
   });
 
   test("reads the PixelSlash report from the fetched files, not a tracked copy", () => {
@@ -189,9 +190,8 @@ describe("real and imagined stay apart", () => {
   });
 
   test("a planned tool never shows real output", () => {
-    for (const { fit, html: chunk } of fits) {
-      if (fit.stage === "planned") expect(chunk, fit.tool).not.toContain('data-kind="real"');
-    }
+    const shown = fits.filter(({ fit, html: chunk }) => fit.stage === "planned" && chunk.includes('data-kind="real"'));
+    expect(shown.map(({ fit }) => fit.tool)).toEqual([]);
   });
 });
 

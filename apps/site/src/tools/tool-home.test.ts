@@ -123,7 +123,8 @@ describe.each(Object.values(TOOLS))("/$key", (tool: Tool) => {
     const lines = text(between(html, "try-it", "planned"));
     expect(lines).not.toContain("=...");
     const variable = KEY_VARIABLE[tool.key];
-    if (variable !== undefined) expect(lines).toContain(`export ${variable}=<your key>`);
+    const steps = variable === undefined ? [] : [`export ${variable}=<your key>`];
+    for (const step of steps) expect(lines).toContain(step);
   });
 });
 
@@ -157,6 +158,20 @@ describe.each(WITH_COMMANDS)("/$key, with a command on every feature", (tool: To
   });
 });
 
+/** Visible text with inline code and spans joined to the words around them, as a reader sees them. */
+const prose = (part: string): string => text(part.replace(/<\/?(code|strong|span)[^>]*>/g, ""));
+
+/** An island's props, which Astro writes as JSON with each value wrapped as [type, value]: 0 a plain value, 1 an array. */
+function unwrap(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    const [kind, inner]: unknown[] = value;
+    return kind === 1 && Array.isArray(inner) ? inner.map(unwrap) : unwrap(inner);
+  }
+  if (typeof value === "object" && value !== null)
+    return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, unwrap(child)]));
+  return value;
+}
+
 /*
  * /omnislash against its approved copy, written out here word for word rather than read from content/omnislash.ts,
  * so the test checks the page against the copy and not against itself.
@@ -165,8 +180,6 @@ describe("/omnislash, the approved copy", () => {
   const tool: Tool = TOOLS.omnislash;
   const html = read("omnislash.html");
 
-  /** Visible text with inline code and spans joined to the words around them, as a reader sees them. */
-  const prose = (part: string): string => text(part.replace(/<\/?(code|strong|span)[^>]*>/g, ""));
   const heading = (id: string): string => text(html.match(new RegExp(`<h2 id="${id}"[^>]*>([\\s\\S]*?)</h2>`))?.[1] ?? "");
 
   test("its only h1 is the copy's headline", () => {
@@ -246,21 +259,9 @@ describe("/omnislash, the approved copy", () => {
   test("the TryIt island is handed exactly the two commands, in one block with no lead line", () => {
     const islands = [...html.matchAll(/<astro-island[^>]*component-export="([^"]+)"[^>]*>/g)];
     expect(islands.map((m) => m[1])).toEqual(["TryIt"]);
-    // Astro writes an island's props as JSON with each value wrapped as [type, value]: 0 a plain value, 1 an array.
-    const unwrap = (value: unknown): unknown => {
-      if (Array.isArray(value)) return value[0] === 1 ? (value[1] as unknown[]).map(unwrap) : unwrap(value[1]);
-      if (typeof value === "object" && value !== null)
-        return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, unwrap(child)]));
-      return value;
-    };
     const raw = islands[0]?.[0].match(/\sprops="([^"]*)"/)?.[1] ?? "{}";
-    const props = Object.fromEntries(
-      Object.entries(JSON.parse(raw.replaceAll("&quot;", '"').replaceAll("&amp;", "&")) as object).map(([key, value]) => [
-        key,
-        unwrap(value),
-      ]),
-    );
-    expect(props.steps).toEqual([{ commands: ["bun install", "bun apps/cli/src/index.ts --help"] }]);
+    const props = unwrap(JSON.parse(raw.replaceAll("&quot;", '"').replaceAll("&amp;", "&")));
+    expect(props).toHaveProperty("steps", [{ commands: ["bun install", "bun apps/cli/src/index.ts --help"] }]);
   });
 
   test("Planned: its heading, its lead and the three items", () => {

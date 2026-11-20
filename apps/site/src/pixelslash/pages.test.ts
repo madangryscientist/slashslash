@@ -150,8 +150,7 @@ describe.each(SERVED)("/pixelslash$path", ({ path, file, h1, doc }) => {
     const links = [...nav.matchAll(/<a\b([^>]*)>/g)].map((m) => m[1] ?? "");
     const current = links.filter((attrs) => /\saria-current="page"/.test(attrs));
     const listed = SECTIONS.pixelslash.pages.some((page) => page.href === here(path));
-    expect(current).toHaveLength(listed ? 1 : 0);
-    if (listed) expect(current[0]).toContain(`href="${here(path)}"`);
+    expect(current.map((attrs) => attrs.includes(`href="${here(path)}"`))).toEqual(listed ? [true] : []);
     expect(links.some((attrs) => attrs.includes('href="/pixelslash/docs"'))).toBe(true);
   });
 });
@@ -205,10 +204,11 @@ test("SECURITY.md's link to the self-host guide lands on the guide here", () => 
   expect(read("pixelslash/security.html")).toContain('href="/pixelslash/self-host"');
 });
 
+const rows = (part: string): string[] => [...part.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => m[1] ?? "");
+
 describe("/pixelslash/compare's matrix", () => {
   const html = read("pixelslash/compare.html");
   const table = html.match(/<table[^>]*data-testid="matrix"[^>]*>([\s\S]*?)<\/table>/)?.[1] ?? "";
-  const rows = (part: string): string[] => [...part.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => m[1] ?? "");
 
   test("has one body row per capability in the fetched data", () => {
     const body = [...table.matchAll(/<tbody[^>]*>([\s\S]*?)<\/tbody>/g)].flatMap((m) => rows(m[1] ?? ""));
@@ -224,26 +224,26 @@ describe("/pixelslash/compare's matrix", () => {
   });
 });
 
+/** What is wrong with one href or src on a PixelSlash page: a /pixelslash path not in dist, or an origin not cited. */
+function refProblem(file: string, ref: string): string[] {
+  if (ref.startsWith("/")) {
+    const path = ref.split(/[?#]/)[0] ?? "";
+    const exists = [path, `${path}.html`, `${path}/index.html`].some((f) => existsSync(resolve(DIST, `.${f}`)));
+    // The shell's own links (the suite home, the other tools, /developers) reach pages this app
+    // has not built yet; the link check (site/src/content/links.test.ts) holds those to PAGES.
+    return path.startsWith("/pixelslash") && !exists ? [`${file} links ${ref}, which is not in dist`] : [];
+  }
+  if (!/^https?:/.test(ref)) return [];
+  const { origin } = new URL(ref);
+  const allowed = origin === "https://github.com" || origin === "https://slashslash.build" || CITED.has(origin);
+  return allowed ? [] : [`${file} links ${ref}`];
+}
+
 describe("every PixelSlash page", () => {
   test("names only files that exist here, and links nothing on pixelslash.dev", () => {
     for (const { file } of SERVED) {
       const html = read(file);
-      for (const [, ref = ""] of html.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
-        if (ref.startsWith("/")) {
-          const path = ref.split(/[?#]/)[0] ?? "";
-          const exists = [path, `${path}.html`, `${path}/index.html`].some((f) => existsSync(resolve(DIST, `.${f}`)));
-          // The shell's own links (the suite home, the other tools, /developers) reach pages this app
-          // has not built yet; the link check (site/src/content/links.test.ts) holds those to PAGES.
-          if (path.startsWith("/pixelslash")) expect(exists, `${file} links ${ref}, which is not in dist`).toBe(true);
-        } else if (/^https?:/.test(ref)) {
-          const url = new URL(ref);
-          const allowed =
-            url.origin === "https://github.com" ||
-            url.origin === "https://slashslash.build" ||
-            CITED.has(url.origin);
-          expect(allowed, `${file} links ${ref}`).toBe(true);
-        }
-      }
+      expect([...html.matchAll(/\s(?:href|src)="([^"]+)"/g)].flatMap(([, ref = ""]) => refProblem(file, ref))).toEqual([]);
       // Every PixelSlash page is served here now, the docs included.
       expect(html, file).not.toMatch(/href="https?:\/\/pixelslash\.dev/);
     }
