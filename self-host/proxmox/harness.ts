@@ -66,10 +66,10 @@ case "$tool" in
 esac
 `;
 
-export type Run = { code: number; out: string; err: string; calls: string };
+type Run = { code: number; out: string; err: string; calls: string };
 
 /** The temporary directory a test file works in, filled in before its first test runs. */
-export type Harness = {
+type Harness = {
   dir: string;
   dataPath: string;
   lxcDir: string;
