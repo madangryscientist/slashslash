@@ -83,11 +83,78 @@ const EVERYTHING = [
   "--set", "resources.requests.memory=1Gi",
 ];
 
-type Doc = Record<string, any>;
+type Doc = Record<string, unknown>;
+const isDoc = (x: unknown): x is Doc => typeof x === "object" && x !== null && !Array.isArray(x);
+/** `x` when it is an object, else an empty one, so a missing field reads as absent. */
+const obj = (x: unknown): Doc => (isDoc(x) ? x : {});
+/** `x` when it is a list, else an empty one. */
+const list = (x: unknown): unknown[] => (Array.isArray(x) ? x : []);
+/** The objects in `x` when it is a list, else none. */
+const docList = (x: unknown): Doc[] => list(x).filter(isDoc);
+/** `doc.a.b.c`, or undefined where any step is missing. */
+const at = (doc: unknown, ...path: string[]): unknown => path.reduce<unknown>((cur, key) => obj(cur)[key], doc);
+
 /** Every document in a multi-document YAML stream (Bun returns a lone document unwrapped). */
 function parse(yaml: string): Doc[] {
-  const parsed = Bun.YAML.parse(yaml) as Doc | Doc[];
-  return (Array.isArray(parsed) ? parsed : [parsed]).filter(Boolean);
+  const parsed: unknown = Bun.YAML.parse(yaml);
+  return Array.isArray(parsed) ? docList(parsed) : docList([parsed]);
+}
+
+const ALLOWED_VOLUMES = ["configMap", "csi", "downwardAPI", "emptyDir", "ephemeral", "persistentVolumeClaim", "projected", "secret"];
+const WRITABLE_PATHS = ["/data", "/run", "/tmp", "/home/app"];
+// s6-overlay refuses the root-owned emptyDir at /run without it (the image smoke runs it so).
+const S6_WRITABLE_RUN = "S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES";
+
+/** The pod-level fields: no host namespaces, UID and GID 1654, non-root, RuntimeDefault seccomp, no sysctls. */
+function podProblems(spec: Doc): string[] {
+  const pod = obj(spec["securityContext"]);
+  const problems = ["hostNetwork", "hostPID", "hostIPC"].filter((key) => Boolean(spec[key])).map((key) => `${key} is set`);
+  if (pod["runAsNonRoot"] !== true) problems.push("pod securityContext.runAsNonRoot is not true");
+  for (const key of ["runAsUser", "runAsGroup", "fsGroup"]) if (pod[key] !== 1654) problems.push(`pod securityContext.${key} is not 1654`);
+  if (at(pod, "seccompProfile", "type") !== "RuntimeDefault") problems.push("pod seccompProfile is not RuntimeDefault");
+  if (list(pod["sysctls"]).length > 0) problems.push("pod sets sysctls");
+  return problems;
+}
+
+function volumeProblems(spec: Doc): string[] {
+  return docList(spec["volumes"]).flatMap((volume) => {
+    const types = Object.keys(volume).filter((k) => k !== "name");
+    return types.every((t) => ALLOWED_VOLUMES.includes(t)) ? [] : [`volume ${String(volume["name"])} is ${types.join(",")}`];
+  });
+}
+
+/** A container's securityContext: unprivileged, no escalation, capabilities dropped, read-only root. */
+function containerSecurityProblems(container: Doc): string[] {
+  const sc = obj(container["securityContext"]);
+  const seccomp = at(sc, "seccompProfile", "type");
+  const procMount = sc["procMount"];
+  const checks: [boolean, string][] = [
+    [Boolean(sc["privileged"]), "privileged"],
+    [sc["allowPrivilegeEscalation"] !== false, "allowPrivilegeEscalation is not false"],
+    [!list(at(sc, "capabilities", "drop")).includes("ALL"), "capabilities.drop does not hold ALL"],
+    [list(at(sc, "capabilities", "add")).some((cap) => cap !== "NET_BIND_SERVICE"), "adds a capability"],
+    [sc["runAsNonRoot"] === false || sc["runAsUser"] === 0, "runs as root"],
+    [Boolean(sc["seccompProfile"]) && seccomp !== "RuntimeDefault", "seccompProfile is not RuntimeDefault"],
+    [sc["readOnlyRootFilesystem"] !== true, "readOnlyRootFilesystem is not true"],
+    [Boolean(procMount) && procMount !== "Default", "procMount is not Default"],
+  ];
+  return checks.filter(([bad]) => bad).map(([, what]) => what);
+}
+
+/** A container's ports, writable mounts and the supervisor's switch for the emptyDir at /run. */
+function containerMountProblems(container: Doc): string[] {
+  const mounts = new Set(docList(container["volumeMounts"]).map((m) => m["mountPath"]));
+  return [
+    ...(docList(container["ports"]).some((p) => p["hostPort"]) ? ["sets a hostPort"] : []),
+    ...WRITABLE_PATHS.filter((path) => !mounts.has(path)).map((path) => `nothing mounted at ${path}`),
+    ...(docList(container["env"]).some((e) => e["name"] === S6_WRITABLE_RUN && e["value"] === "1") ? [] : [`does not set ${S6_WRITABLE_RUN}=1`]),
+  ];
+}
+
+function containerProblems(container: Doc): string[] {
+  return [...containerSecurityProblems(container), ...containerMountProblems(container)].map(
+    (what) => `container ${String(container["name"])}: ${what}`,
+  );
 }
 
 /**
@@ -96,52 +163,36 @@ function parse(yaml: string): Doc[] {
  * writable paths mounted, and the supervisor's switch that accepts the emptyDir at /run.
  */
 function restrictedProblems(docs: Doc[]): string[] {
-  const problems: string[] = [];
-  const pods = docs.filter((d) => d?.spec?.template?.spec).map((d) => ({ name: `${d.kind}/${d.metadata?.name}`, spec: d.spec.template.spec }));
-  if (pods.length === 0) problems.push("no pod template in the render");
-  const allowedVolumes = ["configMap", "csi", "downwardAPI", "emptyDir", "ephemeral", "persistentVolumeClaim", "projected", "secret"];
-  for (const { name, spec } of pods) {
-    const pod = spec.securityContext ?? {};
-    const say = (what: string) => problems.push(`${name}: ${what}`);
-    for (const key of ["hostNetwork", "hostPID", "hostIPC"]) if (spec[key]) say(`${key} is set`);
-    if (pod.runAsNonRoot !== true) say("pod securityContext.runAsNonRoot is not true");
-    for (const key of ["runAsUser", "runAsGroup", "fsGroup"]) if (pod[key] !== 1654) say(`pod securityContext.${key} is not 1654`);
-    if (pod.seccompProfile?.type !== "RuntimeDefault") say("pod seccompProfile is not RuntimeDefault");
-    if (pod.sysctls?.length) say("pod sets sysctls");
-    for (const volume of spec.volumes ?? []) {
-      const types = Object.keys(volume).filter((k) => k !== "name");
-      if (!types.every((t) => allowedVolumes.includes(t))) say(`volume ${volume.name} is ${types.join(",")}`);
-    }
-    const containers = [...(spec.initContainers ?? []), ...(spec.containers ?? [])];
-    for (const c of containers) {
-      const sc = c.securityContext ?? {};
-      const said = (what: string) => say(`container ${c.name}: ${what}`);
-      if (sc.privileged) said("privileged");
-      if (sc.allowPrivilegeEscalation !== false) said("allowPrivilegeEscalation is not false");
-      if (!(sc.capabilities?.drop ?? []).includes("ALL")) said("capabilities.drop does not hold ALL");
-      if ((sc.capabilities?.add ?? []).some((cap: string) => cap !== "NET_BIND_SERVICE")) said("adds a capability");
-      if (sc.runAsNonRoot === false || sc.runAsUser === 0) said("runs as root");
-      if (sc.seccompProfile && sc.seccompProfile.type !== "RuntimeDefault") said("seccompProfile is not RuntimeDefault");
-      if (sc.readOnlyRootFilesystem !== true) said("readOnlyRootFilesystem is not true");
-      if (sc.procMount && sc.procMount !== "Default") said("procMount is not Default");
-      if ((c.ports ?? []).some((p: Doc) => p.hostPort)) said("sets a hostPort");
-      const mounts = new Set((c.volumeMounts ?? []).map((m: Doc) => m.mountPath));
-      for (const path of ["/data", "/run", "/tmp", "/home/app"]) if (!mounts.has(path)) said(`nothing mounted at ${path}`);
-      // s6-overlay refuses the root-owned emptyDir at /run without it (the image smoke runs it so).
-      if (!(c.env ?? []).some((e: Doc) => e.name === "S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES" && e.value === "1"))
-        said("does not set S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES=1");
-    }
-  }
-  return problems;
+  const pods = docs.flatMap((d) => {
+    const spec = at(d, "spec", "template", "spec");
+    return isDoc(spec) ? [{ name: `${String(d["kind"])}/${String(at(d, "metadata", "name"))}`, spec }] : [];
+  });
+  if (pods.length === 0) return ["no pod template in the render"];
+  return pods.flatMap(({ name, spec }) =>
+    [
+      ...podProblems(spec),
+      ...volumeProblems(spec),
+      ...[...docList(spec["initContainers"]), ...docList(spec["containers"])].flatMap(containerProblems),
+    ].map((what) => `${name}: ${what}`),
+  );
 }
 
 function versionProblems(): string[] {
   const version = readVersion();
-  const chart = Bun.YAML.parse(readFileSync(join(CHART, "Chart.yaml"), "utf8")) as Doc;
+  const chart = obj(Bun.YAML.parse(readFileSync(join(CHART, "Chart.yaml"), "utf8")));
   return (["version", "appVersion"] as const)
     .filter((key) => String(chart[key]) !== version)
-    .map((key) => `Chart.yaml ${key} is ${chart[key]}, but self-host/VERSION is ${version}`);
+    .map((key) => `Chart.yaml ${key} is ${String(chart[key])}, but self-host/VERSION is ${version}`);
 }
+
+/** The kinds a render holds, sorted and comma-joined. */
+const kinds = (yaml: string) =>
+  parse(yaml)
+    .map((d) => String(d["kind"]))
+    .toSorted((a, b) => a.localeCompare(b))
+    .join(",");
+/** Whether a render's Secret carries the ToggleSlash admin token. */
+const token = (yaml: string) => parse(yaml).some((d) => d["kind"] === "Secret" && "TOGGLESLASH_ADMIN_TOKEN" in obj(d["stringData"]));
 
 function check(ok: boolean, what: string, detail = ""): void {
   if (!ok) {
@@ -158,7 +209,9 @@ async function main(): Promise<void> {
     const version = readVersion();
     check(versionProblems().length === 0, `the chart is version ${version}`, versionProblems().join("\n"));
     const out = mkdtempSync(join(process.env["TMPDIR"] || tmpdir(), "slashslash-chart-"));
-    run([helm, "registry", "login", "ghcr.io", "--username", process.env["GITHUB_ACTOR"]!, "--password-stdin"], process.env["GH_TOKEN"]);
+    const actor = process.env["GITHUB_ACTOR"];
+    if (!actor) throw new Error("GITHUB_ACTOR is not set: publish logs in to ghcr.io as that user");
+    run([helm, "registry", "login", "ghcr.io", "--username", actor, "--password-stdin"], process.env["GH_TOKEN"]);
     run([helm, "package", CHART, "--destination", out]);
     console.log(run([helm, "push", join(out, `slashslash-${version}.tgz`), "oci://ghcr.io/slashsuite/charts"]));
     return;
@@ -176,10 +229,8 @@ async function main(): Promise<void> {
     "the defaults with an existingSecret": run([helm, "template", "slashslash", CHART, ...DEFAULTS]),
     "every optional part on": run([helm, "template", "slashslash", CHART, ...EVERYTHING]),
   };
-  const kinds = (yaml: string) => parse(yaml).map((d) => d.kind).sort().join(",");
   check(kinds(renders["the defaults with an existingSecret"]) === "Service,StatefulSet", "the defaults render a Service and a StatefulSet, and no Secret");
   check(kinds(renders["every optional part on"]) === "Ingress,Secret,Service,StatefulSet", "every optional part renders an Ingress and a Secret too");
-  const token = (yaml: string) => parse(yaml).some((d) => d.kind === "Secret" && "TOGGLESLASH_ADMIN_TOKEN" in (d.stringData ?? {}));
   const noToken = run([helm, "template", "slashslash", CHART, "--set", "github.clientId=a", "--set", "github.clientSecret=b"]);
   check(token(renders["every optional part on"]) && !token(noToken), "the admin token key is in the Secret only when it is set");
 

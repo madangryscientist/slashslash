@@ -64,7 +64,7 @@ async function waitFor(what: string, test: () => boolean | Promise<boolean>, sec
 }
 
 const health = (name = NAME) => docker(["inspect", "-f", "{{.State.Health.Status}}", name], true);
-const hostPort = (port: number, name = NAME) => docker(["port", name, `${port}/tcp`]).split("\n")[0]!.replace("0.0.0.0", "127.0.0.1");
+const hostPort = (port: number, name = NAME) => docker(["port", name, `${port}/tcp`]).split("\n")[0]?.replace("0.0.0.0", "127.0.0.1") ?? "";
 
 /** The pid of the first process whose command line contains `needle`. */
 function pidOf(needle: string): number | null {
@@ -133,7 +133,7 @@ async function backupAndRestore(token: string): Promise<void> {
   // A manual backup, then the volume's state wiped with both products stopped, then a restore.
   const hashes = secretHashes();
   check(hashes.split("\n").length >= 2, "PixelSlash generated its secret files", hashes);
-  const file = docker(["exec", NAME, "slashslash", "backup"]).split("\n").at(-1)!;
+  const file = docker(["exec", NAME, "slashslash", "backup"]).split("\n").at(-1) ?? "";
   check(/^\/data\/backups\/manual-\d{8}T\d{6}Z-.+\.tgz$/.test(file), `slashslash backup wrote ${file}`);
   await projectAndTokenAreThere(token, "a backup");
   sh("for s in pixelslash toggleslash; do /command/s6-svc -wD -T 60000 -d /run/service/$s; done; rm -rf /data/pixelslash /data/toggleslash /data/secrets");
@@ -147,7 +147,7 @@ async function backupAndRestore(token: string): Promise<void> {
   docker(["restart", NAME]);
   await projectAndTokenAreThere(token, "a restart on a volume last run by 0.0.1");
   const upgrades = backups("upgrade");
-  check(upgrades.length === 1 && upgrades[0]!.endsWith("-0.0.1.tgz"), `the start wrote exactly one upgrade backup (${upgrades.join(" ")})`);
+  check(upgrades.length === 1 && upgrades[0]?.endsWith("-0.0.1.tgz") === true, `the start wrote exactly one upgrade backup (${upgrades.join(" ")})`);
   check(sh("cat /data/.slashslash-version") === VERSION, `the volume now records ${VERSION}`);
   console.log(`  | ${docker(["exec", NAME, "slashslash", "restore", `/data/backups/${upgrades[0]}`])}`);
   await projectAndTokenAreThere(token, "restoring the upgrade backup");
@@ -277,7 +277,7 @@ async function upgradeFrom(released: string): Promise<void> {
     if (from === VERSION)
       check(upgrades.length === 0, `upgrade from ${from}: the same version, so no upgrade backup (${upgrades.join(" ")})`);
     else
-      check(upgrades.length === 1 && upgrades[0]!.endsWith(`-${from}.tgz`),
+      check(upgrades.length === 1 && upgrades[0]?.endsWith(`-${from}.tgz`) === true,
         `upgrade from ${from}: exactly one upgrade backup (${upgrades.join(" ")})`);
     const status = await project(token);
     check(status === 200, `upgrade from ${from}: the ToggleSlash project is there (${status})`);
@@ -366,7 +366,7 @@ async function main(): Promise<void> {
 try {
   await main();
 } catch (error) {
-  console.error((error as Error).message);
+  console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
 } finally {
   docker(["rm", "-f", NAME], true);
