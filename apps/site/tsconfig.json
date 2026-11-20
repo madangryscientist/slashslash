@@ -4,7 +4,7 @@
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "jsx": "react-jsx",
-    "types": ["node", "vite/client"],
+    "types": ["node", "astro/client"],
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,

@@ -6,7 +6,7 @@ tasks:
   # reads docs/personas, so that is an input as well. A task's own `inputs` replace the default project
   # glob, so `**/*` is listed again.
   lint:
-    script: "bun run oxlint --deny-warnings scripts && bun scripts/check-slop.ts && bun scripts/personas.ts --check"
+    script: "bun run oxlint --type-aware --deny-warnings scripts && bun scripts/check-slop.ts && bun scripts/personas.ts --check"
     inputs:
       - "**/*"
       - "/docs/personas/**"

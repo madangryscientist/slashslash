@@ -6,6 +6,7 @@ implicitInputs:
   - "/package.json"
   - "/bun.lock"
   - "/scripts/check-slop.ts"
+  - "/.oxlintrc.json"
   # Generated or installed, never a source: leave them out of every task's hash.
   - "!/**/node_modules/**"
   - "!/**/dist/**"
