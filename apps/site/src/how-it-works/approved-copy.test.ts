@@ -94,7 +94,7 @@ const REST = [
   "8. Merge. Role: sentinel, else architect. Rule: the land skill. The builder opens the PR; another role gates and merges it. Next: release.",
   "9. Release behind a flag. Tool: ToggleSlash. A flag decides which users see which version: per environment, by key, by rule on context attributes, by segment, by prerequisite flag or by percentage. SDKs get changes over a stream, with polling as fallback. Every admin write is in the audit trail with before and after.",
   "Today and planned",
-  'Solid outline, runs today. Dashed outline and the word "planned", not built yet.',
+  'Legend: solid outline, runs today. Dashed outline and the word "planned", not built yet.',
   "Today",
   "OmniSlash: drilled-ticket gate, worktree per builder, leases, role skills, review and merge skills, role inbox, role runs (`send` starts one when the role has none). Alpha.",
   "TaskSlash: daemon queue, admission by capacity, moon targets. Alpha, build from source with cargo.",
