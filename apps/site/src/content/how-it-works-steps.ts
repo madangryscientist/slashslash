@@ -155,7 +155,7 @@ export const STATUS: {
   planned: readonly Claim[];
 } = {
   title: "Today and planned",
-  legend: 'Solid outline, runs today. Dashed outline and the word "planned", not built yet.',
+  legend: 'Legend: solid outline, runs today. Dashed outline and the word "planned", not built yet.',
   todayTitle: "Today",
   today: [
     {
