@@ -1,18 +1,23 @@
 # slashslash
 
 The source of **[slashslash.build](https://slashslash.build)**, the public site for the Slash suite
-(ToggleSlash, BundleSlash, FlakeSlash and PixelSlash).
+(PixelSlash, ToggleSlash, FlakeSlash, TaskSlash, UISlash, OmniSlash and BundleSlash).
 
-Two pages, built to static HTML with [Astro](https://astro.build):
+Built to static HTML with [Astro](https://astro.build). The pages in `apps/site/src/pages/`:
 
 - `/` is written for a CEO, COO or CFO: "See what a change really does, before your customers do." It
   explains, with no code on screen, how a change reaches customers today, what nobody checks, what that
   costs and what slashslash adds, then asks four questions.
 - `/developers` holds the developer detail: the seven stops of one feature, environment variables, the
-  effect of one flag, the four tools with their status labels, how to run PixelSlash today, and its own
+  effect of one flag, the tools with their status labels, how to run PixelSlash today, and its own
   questions.
+- one home per tool: `/flakeslash`, `/toggleslash`, `/taskslash` and `/omnislash`, each built from the
+  same tool page layout (`src/tools/ToolPage.astro`).
+- `/pixelslash` and its subpages: `/pixelslash/how-it-works`, `/pixelslash/compare`, `/pixelslash/pricing`,
+  `/pixelslash/security`, `/pixelslash/self-host`, and the docs under `/pixelslash/docs`, which have a search box.
+- `/404` and the generated `sitemap.xml` and PixelSlash `search-index.json`.
 
-Both are read by scrolling, with nothing to click. No database, accounts, form or cookie.
+The home pages are read by scrolling, with nothing to click. No database, accounts, form or cookie.
 
 ## Layout
 
@@ -47,14 +52,17 @@ by hand with `gh workflow run pixelslash-pin.yml`.
 ## Check
 
 ```bash
-bun run lint       # site:lint (oxlint) and scripts:lint (scripts/check-slop.ts)
-bun run typecheck  # site:typecheck (astro check) and scripts:typecheck (tsc)
+bun run lint       # every project's lint: site:lint (oxlint --type-aware, warnings fail), scripts:lint
+                   # (oxlint --type-aware, scripts/check-slop.ts, personas.ts --check) and self-host:lint
+bun run typecheck  # site:typecheck (astro check), scripts:typecheck (tsc) and self-host:typecheck
 bun run build      # site:build
 bun run test       # site:test, which builds first
 ```
 
-Each runs `moon run --concurrency 3 :<task>` across the projects; CI runs all four in one
-`bunx moon run --concurrency 3 :lint :typecheck :build :test`.
+Each runs `moon run --concurrency 3 :<task>` across the projects; CI runs `bunx moon run --concurrency 3
+:lint :typecheck :build :test` as its gate. It then runs the browser tests as its own step,
+`bunx moon run site:e2e` (Playwright, the production build on a Chromium desktop and a Chromium phone), after
+installing Chromium.
 
 The tests read `apps/site/dist/` and check the agreed copy and its order, that every product shows its status label,
 that made-up material says so, that no privacy claim and no forbidden word is present, that nothing is hidden
@@ -66,14 +74,15 @@ search engines (`robots.txt`, `sitemap.xml`, a canonical address per page, no ro
 Astro renders every page to HTML at build time (`src/pages/`), on one layout, `src/layouts/Slash.astro`, which
 puts each page on the Slash shell (`src/shell/`): the header, the tool switcher and the footer, in the page's
 section (the suite or one tool). The pages are React components grouped by page (`src/home/`,
-`src/developers/`, `src/tools/` for the FlakeSlash and ToggleSlash homes, `src/pixelslash/`), the drawings are
+`src/developers/`, `src/tools/` for the tool homes, `src/pixelslash/`), the drawings are
 in `src/illustrations/`, and the words are in `src/content/`. Only a few things run in the browser:
 
 - the light/dark toggle (an inline script in the layout),
-- the motion island (`src/illustrations/motion.tsx`, `client:load`), which plays each drawing once as it scrolls
-  into view,
-- the report viewer on `/` (`src/home/report-viewer.tsx`, `client:visible`),
-- the copy buttons on `/developers` and the tool homes (`client:visible`).
+- the motion island (`src/illustrations/motion.tsx`, `client:load`) on `/` and `/developers`, which plays each
+  drawing once as it scrolls into view,
+- the walkthrough and the today block on `/developers` (`client:visible`), with their copy buttons,
+- the hero command and the try-it block on each tool home (`HeroCode` and `TryIt`, `client:visible`),
+- the docs search on the PixelSlash docs pages (`DocsSearch`, `client:idle`).
 
 The layout carries an inline script that runs before first paint: it applies the stored or system colour
 scheme, so there is no flash. The home adds its own guard that sets the `motion` class when the reader allows
@@ -92,9 +101,8 @@ labelled where they appear). Never give something unbuilt a `real` frame; a test
 
 - `src/content/site.ts`: the name, the address (`SITE_URL`, which makes the share image's URL absolute) and
   the contact line. Never put an email address or a phone number there.
-- `src/content/products.ts`: the four products and their status labels. `src/content/flow.ts`: the seven stops.
-- `TOGGLESLASH_REPO_URL` in `src/content/site.ts` is empty while that repository is private; set it and a
-  link replaces the words "Not public yet".
+- `src/content/products.ts`: the seven products and their status labels. `src/content/flow.ts`: the seven stops.
+- `TOGGLESLASH_REPO_URL` in `src/content/site.ts` names the public ToggleSlash repository, and the page links it.
 
 ## Design system
 

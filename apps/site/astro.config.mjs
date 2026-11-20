@@ -9,7 +9,7 @@ const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
 // bunfig.toml links every package into Bun's one global store (~/.bun/install/cache/links), outside
 // the repo. The dev server only serves files under the repo by default, so it refused (403) the React
-// runtime the islands load, and nothing hydrated: no motion, no report viewer. It may also read the
+// runtime the islands load, and nothing hydrated: no motion, no copy buttons. It may also read the
 // store, found from where react really lives.
 const store = (() => {
   const real = realpathSync(here("./node_modules/react"));
@@ -18,7 +18,7 @@ const store = (() => {
 
 // The slashslash pages and the PixelSlash pages under /pixelslash, built to static HTML on the Slash
 // shell. React renders the pages at build time; only the colour scheme toggle, the copy buttons, the
-// report viewer and the motion are hydrated in the browser.
+// motion, the tool home blocks and the docs search are hydrated in the browser.
 export default defineConfig({
   site: "https://slashslash.build",
   trailingSlash: "never",
