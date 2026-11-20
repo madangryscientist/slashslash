@@ -42,7 +42,9 @@ tasks:
     deps:
       - "~:fetch-sources"
   lint:
-    command: "bun run oxlint --deny-warnings"
+    command: "bun run oxlint --type-aware --deny-warnings"
+    deps:
+      - "~:fetch-sources"
   test:
     # The tests read the built pages in dist/.
     command: "bun run vitest run"

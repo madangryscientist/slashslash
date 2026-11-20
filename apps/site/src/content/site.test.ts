@@ -40,6 +40,11 @@ function visibleText(html: string): string {
     .replace(/\s+/g, " ");
 }
 
+const descriptionOf = (html: string): string | undefined => html.match(/name="description" content="([^"]*)"/)?.[1];
+
+const canonical = (page: string): string | undefined =>
+  readFileSync(resolve(CLIENT, page), "utf8").match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+
 describe("built page", () => {
   test("PixelSlash's pages take their stage from the product's stage in the shared table", () => {
     expect(STAGE).toBe(PRODUCTS.find((product) => product.name === "PixelSlash")?.stage);
@@ -110,9 +115,8 @@ describe("built page", () => {
     builtPages();
     const developers = readFileSync(resolve(CLIENT, "developers.html"), "utf8");
     const landing = readFileSync(resolve(CLIENT, "index.html"), "utf8");
-    const of = (html: string) => html.match(/name="description" content="([^"]*)"/)?.[1];
-    expect(of(developers)).toBeDefined();
-    expect(of(developers)).not.toBe(of(landing));
+    expect(descriptionOf(developers)).toBeDefined();
+    expect(descriptionOf(developers)).not.toBe(descriptionOf(landing));
   });
 });
 
@@ -144,8 +148,6 @@ describe("is open to search engines", () => {
   });
 
   test("each real page has its own canonical address on the live site", () => {
-    const canonical = (page: string): string | undefined =>
-      readFileSync(resolve(CLIENT, page), "utf8").match(/<link rel="canonical" href="([^"]+)"/)?.[1];
     expect(canonical("index.html")).toBe(`${SITE_URL}/`);
     expect(canonical("developers.html")).toBe(`${SITE_URL}/developers`);
   });

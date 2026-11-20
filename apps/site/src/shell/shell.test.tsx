@@ -33,21 +33,21 @@ const links = (html: string): { href: string; text: string }[] =>
     text: text(m[2] ?? ""),
   }));
 
-describe("the shell on the 404 page", () => {
-  const page = (): string => built("404.html");
+const notFound = (): string => built("404.html");
 
+describe("the shell on the 404 page", () => {
   test("<html> is built in the suite's light scope", () => {
-    expect(page().match(/<html[^>]*class="([^"]*)"/)?.[1]?.split(/\s+/)).toContain(SECTIONS.suite.day);
+    expect(notFound().match(/<html[^>]*class="([^"]*)"/)?.[1]?.split(/\s+/)).toContain(SECTIONS.suite.day);
   });
 
   test("one header, whose suite lockup links home", () => {
-    const headers = elements(page(), "header");
+    const headers = elements(notFound(), "header");
     expect(headers).toHaveLength(1);
     expect(links(headers[0] ?? "")[0]).toEqual({ href: "/", text: SECTIONS.suite.name });
   });
 
   test("the switcher, named Tools, links each tool's home and no other", () => {
-    const nav = elements(page(), "nav").find((n) => /aria-label="Tools"/.test(n));
+    const nav = elements(notFound(), "nav").find((n) => /aria-label="Tools"/.test(n));
     expect(nav, "no nav named Tools").toBeDefined();
     expect(links(nav ?? "")).toEqual([
       { href: "/pixelslash", text: "PixelSlash" },
@@ -59,7 +59,7 @@ describe("the shell on the 404 page", () => {
   });
 
   test("the footer names each tool's own licence in its facts file's words: TaskSlash and UISlash are MIT, the others Elastic License 2.0", () => {
-    const footer = elements(page(), "footer")[0] ?? "";
+    const footer = elements(notFound(), "footer")[0] ?? "";
     const licences = [...footer.matchAll(/data-licence="[^"]*">([\s\S]*?)<\/span>/g)].map((m) => text(m[1] ?? ""));
     expect(licences).toEqual([
       `${licenceOf("pixelslash")}: PixelSlash, ToggleSlash, FlakeSlash`,
@@ -69,19 +69,19 @@ describe("the shell on the 404 page", () => {
   });
 
   test("the footer line is the home's headline", () => {
-    const footer = (elements(page(), "footer")[0] ?? "").replace(/<!--.*?-->/g, "");
+    const footer = (elements(notFound(), "footer")[0] ?? "").replace(/<!--.*?-->/g, "");
     expect(text(footer)).toContain(HERO.title.text);
   });
 
   test("the footer names every product", () => {
-    const footers = elements(page(), "footer");
+    const footers = elements(notFound(), "footer");
     expect(footers).toHaveLength(1);
     const words = text(footers[0] ?? "");
     for (const product of PRODUCTS) expect(words).toContain(product.name);
   });
 
   test("only a planned tool carries the Planned caption: a built tool with no page here is named alone", () => {
-    const footer = elements(page(), "footer")[0] ?? "";
+    const footer = elements(notFound(), "footer")[0] ?? "";
     const caption = (name: string): boolean => new RegExp(`${name}\\s*Planned`).test(text(footer));
     for (const product of PRODUCTS) expect(caption(product.name), product.name).toBe(product.stage === "planned");
     expect(links(footer).map((link) => link.text)).not.toContain("UISlash");
@@ -89,7 +89,7 @@ describe("the shell on the 404 page", () => {
   });
 
   test("the head script names the suite's dark scope", () => {
-    const head = page().match(/<head>[\s\S]*<\/head>/)?.[0] ?? "";
+    const head = notFound().match(/<head>[\s\S]*<\/head>/)?.[0] ?? "";
     const scripts = elements(head, "script").join("");
     expect(scripts).toContain(SECTIONS.suite.night);
   });

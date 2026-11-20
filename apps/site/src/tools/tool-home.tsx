@@ -69,6 +69,83 @@ function Licence({ tool, licence }: { tool: Tool; licence: Claim | undefined }):
   return <Text tone="muted">Licence: {licence.text}</Text>;
 }
 
+function Hero({ tool, heroCode }: { tool: Tool; heroCode: ReactNode }): ReactNode {
+  return (
+    <section id={tool.key} className="hero-ground">
+      <Container>
+        <div className="pt-12 pb-4 md:pt-16">
+          <CentredHero overline={<Lockup tool={tool} />} title={promiseOf(tool)}>
+            <StageLine tool={tool} />
+            <Lead>{tool.lead.text}</Lead>
+            <Licence tool={tool} licence={tool.licence} />
+            <CentredRow>
+              <Button href="#try-it" size="lg">
+                Try it
+              </Button>
+              <Button href={tool.repo} variant="outline" size="lg">
+                Repository on GitHub
+              </Button>
+            </CentredRow>
+            {heroCode === undefined ? null : <div className="min-w-0 text-left">{heroCode}</div>}
+          </CentredHero>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function WorksToday({ tool }: { tool: Tool }): ReactNode {
+  return (
+    <Section id="works-today" size="lg" title={tool.headings?.today ?? "What works today"}>
+      <CardGrid columns={2}>
+        {tool.today.map((feature) => (
+          <Card key={feature.title} title={feature.title} titleStyle="name" size="lg">
+            <Stack gap="sm">
+              {feature.command === undefined ? null : (
+                <span className="block max-w-full break-words">
+                  <Code>{feature.command}</Code>
+                </span>
+              )}
+              <Text>
+                <Words text={feature.text.text} />
+              </Text>
+              {feature.list === undefined ? null : (
+                <BulletList>
+                  {feature.list.map((item) => (
+                    <BulletItem key={item.text}>{item.text}</BulletItem>
+                  ))}
+                </BulletList>
+              )}
+            </Stack>
+          </Card>
+        ))}
+      </CardGrid>
+    </Section>
+  );
+}
+
+function TryItSection({ tool, tryIt }: { tool: Tool; tryIt: ReactNode }): ReactNode {
+  return (
+    <Section
+      id="try-it"
+      size="lg"
+      title={tool.tryOn === undefined ? "Try it" : `Try it on ${tool.tryOn}`}
+      description={tool.tryIt.lead.text}
+    >
+      {tool.tryIt.after === undefined ? (
+        tryIt
+      ) : (
+        <Stack gap="lg">
+          {tryIt}
+          <Text>
+            <Words text={tool.tryIt.after.text} />
+          </Text>
+        </Stack>
+      )}
+    </Section>
+  );
+}
+
 export function ToolHome({
   tool,
   heroCode,
@@ -82,76 +159,17 @@ export function ToolHome({
 }): ReactNode {
   return (
     <>
-      <section id={tool.key} className="hero-ground">
-        <Container>
-          <div className="pt-12 pb-4 md:pt-16">
-            <CentredHero overline={<Lockup tool={tool} />} title={promiseOf(tool)}>
-              <StageLine tool={tool} />
-              <Lead>{tool.lead.text}</Lead>
-              <Licence tool={tool} licence={tool.licence} />
-              <CentredRow>
-                <Button href="#try-it" size="lg">
-                  Try it
-                </Button>
-                <Button href={tool.repo} variant="outline" size="lg">
-                  Repository on GitHub
-                </Button>
-              </CentredRow>
-              {heroCode === undefined ? null : <div className="min-w-0 text-left">{heroCode}</div>}
-            </CentredHero>
-          </div>
-        </Container>
-      </section>
+      <Hero tool={tool} heroCode={heroCode} />
       <div className="py-16">
         <Container>
           <Stack gap="xl">
-            <Section id="works-today" size="lg" title={tool.headings?.today ?? "What works today"}>
-              <CardGrid columns={2}>
-                {tool.today.map((feature) => (
-                  <Card key={feature.title} title={feature.title} titleStyle="name" size="lg">
-                    <Stack gap="sm">
-                      {feature.command === undefined ? null : (
-                        <span className="block max-w-full break-words">
-                          <Code>{feature.command}</Code>
-                        </span>
-                      )}
-                      <Text>
-                        <Words text={feature.text.text} />
-                      </Text>
-                      {feature.list === undefined ? null : (
-                        <BulletList>
-                          {feature.list.map((item) => (
-                            <BulletItem key={item.text}>{item.text}</BulletItem>
-                          ))}
-                        </BulletList>
-                      )}
-                    </Stack>
-                  </Card>
-                ))}
-              </CardGrid>
-            </Section>
+            <WorksToday tool={tool} />
             {tool.compared === undefined ? null : (
               <Section id="compared" size="lg" title={tool.compared.title}>
                 <Text>{tool.compared.text.text}</Text>
               </Section>
             )}
-            <Section
-              id="try-it"
-              size="lg"
-              title={tool.tryOn === undefined ? "Try it" : `Try it on ${tool.tryOn}`}
-              description={tool.tryIt.lead.text}
-            >
-              {tool.tryIt.after === undefined ? (
-                tryIt
-              ) : (
-                <Stack gap="lg">
-                  {tryIt}
-                  <Text>
-                    <Words text={tool.tryIt.after.text} />
-                  </Text>
-                </Stack>
-              )}
-            </Section>
+            <TryItSection tool={tool} tryIt={tryIt} />
             <Section id="planned" size="lg" title={tool.headings?.planned ?? "Planned, not built"} description={tool.planned.lead}>
               <Card>
                 <BulletList>

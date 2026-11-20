@@ -7,7 +7,7 @@ import { CONTACT } from "#/content/site";
 import { STAGES } from "#/content/stages";
 import { HERO, PIPELINE, STANDS, VIEW, VIEW_QUESTIONS } from "#/content/story";
 import { TOOL_CARDS } from "#/home/tools";
-import { SECTIONS } from "#/shell/sections";
+import { isSectionKey, SECTIONS } from "#/shell/sections";
 
 /*
  * The suite home as the site builds it, read from dist (`bunx moon run site:test` builds first):
@@ -138,8 +138,8 @@ describe("/", () => {
     for (const card of cards) {
       const key = card.name.toLowerCase();
       const hrefs = [...card.html.matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
-      expect(hrefs, card.name).toEqual(key in SECTIONS ? [SECTIONS[key as keyof typeof SECTIONS].home] : []);
-      if (hrefs[0] !== undefined) expect(existsSync(resolve(DIST, `${hrefs[0].slice(1)}.html`)), card.name).toBe(true);
+      expect(hrefs, card.name).toEqual(isSectionKey(key) ? [SECTIONS[key].home] : []);
+      for (const href of hrefs) expect(existsSync(resolve(DIST, `${(href ?? "").slice(1)}.html`)), card.name).toBe(true);
     }
   });
 

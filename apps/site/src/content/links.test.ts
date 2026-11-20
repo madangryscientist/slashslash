@@ -43,6 +43,18 @@ function target(path: string): string | undefined {
   return candidates.find((file) => existsSync(resolve(DIST, file)) && statSync(resolve(DIST, file)).isFile());
 }
 
+/** A link to this site: a path or an #anchor, not a protocol-relative address. */
+const isInternal = (href: string): boolean => (href.startsWith("/") || href.startsWith("#")) && !href.startsWith("//");
+
+/** Whether an internal href on a page reaches a built file and, when it has an #anchor, an id on it. */
+function resolves(page: string, href: string, idsOf: (page: string) => Set<string>): boolean {
+  const [rest = "", hash] = href.split("#", 2);
+  const path = rest.split("?", 1)[0] ?? "";
+  const file = path === "" ? page : target(path);
+  if (file === undefined) return false;
+  return !hash || (file.endsWith(".html") && idsOf(file).has(decode(hash) ?? ""));
+}
+
 /** Every internal href on every built page that does not resolve, as `<page> <href>`. */
 function deadLinks(): string[] {
   const ids = new Map<string, Set<string>>();
@@ -51,18 +63,11 @@ function deadLinks(): string[] {
     if (!found) ids.set(page, (found = new Set(attrs(html(page), "id"))));
     return found;
   };
-  const dead: string[] = [];
-  for (const page of pages()) {
-    for (const href of attrs(html(page), "href")) {
-      if (!(href.startsWith("/") || href.startsWith("#")) || href.startsWith("//")) continue;
-      const [rest = "", hash] = href.split("#", 2);
-      const path = rest.split("?", 1)[0] ?? "";
-      const file = path === "" ? page : target(path);
-      const ok = file !== undefined && (!hash || (file.endsWith(".html") && idsOf(file).has(decode(hash) ?? "")));
-      if (!ok) dead.push(`${page} ${href}`);
-    }
-  }
-  return dead;
+  return pages().flatMap((page) =>
+    attrs(html(page), "href")
+      .filter((href) => isInternal(href) && !resolves(page, href, idsOf))
+      .map((href) => `${page} ${href}`),
+  );
 }
 
 describe("internal links", () => {

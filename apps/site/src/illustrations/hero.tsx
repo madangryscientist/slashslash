@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { HERO } from "#/content/landing";
 
 /*
@@ -11,7 +11,7 @@ import { HERO } from "#/content/landing";
  */
 
 function Bar({ width }: { width: number }): ReactNode {
-  return <i className="bar" style={{ "--w": `${width}%` } as CSSProperties} />;
+  return <i className="bar" style={{ "--w": `${width}%` }} />;
 }
 
 /** One checkout. Before and After are the same drawing, so they line up row for row. */

@@ -95,8 +95,13 @@ export const SECTIONS = {
 
 export type SectionKey = keyof typeof SECTIONS;
 
+/** Whether a string names a section: a tool's lowercase name, or "suite". */
+export function isSectionKey(key: string): key is SectionKey {
+  return Object.hasOwn(SECTIONS, key);
+}
+
 /** The tools in the switcher: every section but the suite, in SECTIONS' order. */
-export const TOOL_KEYS = (Object.keys(SECTIONS) as SectionKey[]).filter(
-  (key): key is Exclude<SectionKey, "suite"> => key !== "suite",
-);
+export const TOOL_KEYS = Object.keys(SECTIONS)
+  .filter(isSectionKey)
+  .filter((key): key is Exclude<SectionKey, "suite"> => key !== "suite");
 

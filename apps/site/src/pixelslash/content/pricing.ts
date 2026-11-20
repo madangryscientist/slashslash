@@ -32,7 +32,7 @@ export const LICENCE_BRIEF: Claim = {
 
 /** The cards after the hero: the licence, read from the facts file, then where it runs. */
 export const CARDS = [
-  { title: "Free, and source available", icon: "branch", body: { licence: "pixelslash" as FactsProduct } },
+  { title: "Free, and source available", icon: "branch", body: { licence: "pixelslash" satisfies FactsProduct } },
   {
     title: "Self-host all of it",
     icon: "self-host",

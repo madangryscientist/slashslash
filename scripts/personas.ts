@@ -33,42 +33,77 @@ type Persona = {
 };
 type File = { groups: Record<string, string>; models: string[]; personas: Persona[] };
 
-const text = (v: unknown): v is string => typeof v === "string" && v.trim() !== "";
+type Fields = Record<string, unknown>;
 
-function validate(f: File): string[] {
+const text = (v: unknown): v is string => typeof v === "string" && v.trim() !== "";
+const fields = (v: unknown): v is Fields => typeof v === "object" && v !== null && !Array.isArray(v);
+const nonEmptyList = (v: unknown, each: (x: unknown) => boolean): boolean =>
+	Array.isArray(v) && v.length > 0 && v.every(each);
+const pagePath = (x: unknown): boolean => text(x) && x.startsWith("/");
+const yesNoQuestion = (x: unknown): boolean => text(x) && x.endsWith("?");
+const kebab = (x: unknown): boolean => text(x) && /^[a-z][a-z0-9-]*$/.test(x);
+
+function focusError(focus: unknown): string | undefined {
+	if (!fields(focus) || Object.keys(focus).length === 0) return "needs a focus line";
+	if (!Object.values(focus).every(text)) return "every focus line needs text";
+	return undefined;
+}
+
+/** What is wrong with one persona, each problem once, in the order of its keys. */
+function personaErrors(p: Fields, groups: Fields, models: unknown[], duplicate: boolean): string[] {
+	const focus = focusError(p.focus);
+	const checks: [ok: boolean, why: string][] = [
+		[kebab(p.id), "id must be lower-case kebab"],
+		[!duplicate, "duplicate id"],
+		[text(p.name), "name is empty"],
+		[text(p.group) && Object.hasOwn(groups, p.group), `group "${String(p.group)}" is not in groups`],
+		[models.includes(p.model), `model "${String(p.model)}" is not in models`],
+		[text(p.device), "device is empty"],
+		[nonEmptyList(p.pages, pagePath), "pages must be a non-empty list of paths starting with /"],
+		[text(p.profile), "profile is empty"],
+		[focus === undefined, focus ?? ""],
+		[nonEmptyList(p.questions, yesNoQuestion), "questions must be a non-empty list of yes or no questions ending in ?"],
+	];
+	const at = `persona ${text(p.id) ? p.id : "?"}`;
+	return checks.filter(([ok]) => !ok).map(([, why]) => `${at}: ${why}`);
+}
+
+function everyPersonaErrors(personas: unknown[], groups: Fields, models: unknown[]): string[] {
 	const errs: string[] = [];
-	if (!f.groups || typeof f.groups !== "object") return ["groups must be an object"];
-	if (!Array.isArray(f.models)) return ["models must be a list"];
-	if (!Array.isArray(f.personas)) return ["personas must be a list"];
-	if (f.personas.length !== REQUIRED)
-		errs.push(`need exactly ${REQUIRED} personas, found ${f.personas.length}`);
-	const ids = new Set<string>();
-	for (const p of f.personas) {
-		const at = `persona ${text(p.id) ? p.id : "?"}`;
-		if (!text(p.id) || !/^[a-z][a-z0-9-]*$/.test(p.id)) errs.push(`${at}: id must be lower-case kebab`);
-		if (ids.has(p.id)) errs.push(`${at}: duplicate id`);
+	const ids = new Set<unknown>();
+	for (const p of personas) {
+		if (!fields(p)) {
+			errs.push("persona ?: must be an object");
+			continue;
+		}
+		errs.push(...personaErrors(p, groups, models, ids.has(p.id)));
 		ids.add(p.id);
-		if (!text(p.name)) errs.push(`${at}: name is empty`);
-		if (!text(p.group) || !Object.hasOwn(f.groups, p.group)) errs.push(`${at}: group "${p.group}" is not in groups`);
-		if (!f.models.includes(p.model)) errs.push(`${at}: model "${p.model}" is not in models`);
-		if (!text(p.device)) errs.push(`${at}: device is empty`);
-		if (!Array.isArray(p.pages) || p.pages.length === 0 || !p.pages.every((x) => text(x) && x.startsWith("/")))
-			errs.push(`${at}: pages must be a non-empty list of paths starting with /`);
-		if (!text(p.profile)) errs.push(`${at}: profile is empty`);
-		if (!p.focus || typeof p.focus !== "object" || Array.isArray(p.focus) || Object.keys(p.focus).length === 0)
-			errs.push(`${at}: needs a focus line`);
-		else if (!Object.values(p.focus).every(text)) errs.push(`${at}: every focus line needs text`);
-		if (!Array.isArray(p.questions) || p.questions.length === 0 || !p.questions.every((q) => text(q) && q.endsWith("?")))
-			errs.push(`${at}: questions must be a non-empty list of yes or no questions ending in ?`);
 	}
+	return errs;
+}
+
+function validate(f: unknown): string[] {
+	if (!fields(f)) return ["the file must be an object"];
+	const { groups, models, personas } = f;
+	if (!fields(groups)) return ["groups must be an object"];
+	if (!Object.values(groups).every(text)) return ["every group needs a name"];
+	if (!Array.isArray(models)) return ["models must be a list"];
+	if (!models.every(text)) return ["every model needs a name"];
+	if (!Array.isArray(personas)) return ["personas must be a list"];
+	const errs: string[] = [];
+	if (personas.length !== REQUIRED) errs.push(`need exactly ${REQUIRED} personas, found ${personas.length}`);
+	errs.push(...everyPersonaErrors(personas, groups, models));
 	if (DASH.test(JSON.stringify(f))) errs.push("an em or en dash is not allowed");
 	return errs;
 }
 
+/** True when the parsed JSON has the shape validate checks, so the README can be generated from it. */
+const isFile = (f: unknown): f is File => validate(f).length === 0;
+
 const cell = (s: string) => s.replace(/\s*[\r\n]+\s*/g, " ").replace(/\|/g, "\\|");
 
 function generated(f: File): string {
-	const subjects = [...new Set(f.personas.flatMap((p) => Object.keys(p.focus)))].sort();
+	const subjects = [...new Set(f.personas.flatMap((p) => Object.keys(p.focus)))].toSorted();
 	const head = ["Persona", "Group", "Model", "Device", "Pages", "Who", ...subjects.map((s) => `Looks for (${s})`)];
 	const rows = f.personas.map((p) =>
 		[
@@ -90,10 +125,9 @@ function generated(f: File): string {
 	return [table, "", "### Review questions", "", questions.join("\n\n")].join("\n");
 }
 
-const file = JSON.parse(readFileSync(jsonPath, "utf8")) as File;
-const errs = validate(file);
-if (errs.length) {
-	console.error(errs.map((e) => `personas.json: ${e}`).join("\n"));
+const file: unknown = JSON.parse(readFileSync(jsonPath, "utf8"));
+if (!isFile(file)) {
+	console.error(validate(file).map((e) => `personas.json: ${e}`).join("\n"));
 	process.exit(1);
 }
 const readme = readFileSync(readmePath, "utf8");
