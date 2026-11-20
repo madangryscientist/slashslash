@@ -1,4 +1,4 @@
-# The Slash tools on Kubernetes
+# The Slash products on Kubernetes
 
 This Helm chart runs the one self-host image (PixelSlash and ToggleSlash, see
 [`self-host/README.md`](../README.md)) as a single pod with one volume.

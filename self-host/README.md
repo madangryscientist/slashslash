@@ -1,4 +1,4 @@
-# The Slash tools on your own server
+# The Slash products on your own server
 
 One image runs PixelSlash and ToggleSlash together: one container, one volume, two GitHub values.
 

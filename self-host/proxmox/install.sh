@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The Slash tools in one Proxmox LXC: run once in the Proxmox host's shell, as root.
+# The Slash products in one Proxmox LXC: run once in the Proxmox host's shell, as root.
 #
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/slashsuite/slashslash/main/self-host/proxmox/install.sh)"
 #
@@ -30,7 +30,7 @@ DRY_RUN="${DRY_RUN:-0}"
 usage() {
   cat <<'EOF'
 Usage:
-  install.sh                           install the Slash tools in a new LXC
+  install.sh                           install the Slash products in a new LXC
   install.sh --upgrade CTID [VERSION]  upgrade that LXC to VERSION (default latest)
   install.sh --uninstall CTID [--purge]
                                        remove that LXC; --purge also deletes its data volume
@@ -90,7 +90,7 @@ ask() { # name, prompt, default, [password]
   [ -n "${!name:-}" ] && return 0
   if can_ask; then
     [ "${4:-}" = password ] && kind="--passwordbox"
-    value="$(whiptail --title "Slash tools" "$kind" "$prompt" 10 70 "$default" 3>&1 1>&2 2>&3)" ||
+    value="$(whiptail --title "Slash products" "$kind" "$prompt" 10 70 "$default" 3>&1 1>&2 2>&3)" ||
       die "cancelled"
     printf -v "$name" '%s' "$value"
   else
@@ -122,7 +122,7 @@ image_version() {
 }
 
 description() { # version
-  printf 'Slash tools: PixelSlash on :3000, ToggleSlash on :8080, image %s:%s, data at %s. Made by slashslash self-host/proxmox/install.sh.' \
+  printf 'Slash products: PixelSlash on :3000, ToggleSlash on :8080, image %s:%s, data at %s. Made by slashslash self-host/proxmox/install.sh.' \
     "$IMAGE" "$1" "$MOUNT"
 }
 
