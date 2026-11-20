@@ -85,8 +85,10 @@ function everyPersonaErrors(personas: unknown[], groups: Fields, models: unknown
 function validate(f: unknown): string[] {
 	if (!fields(f)) return ["the file must be an object"];
 	const { groups, models, personas } = f;
-	if (!fields(groups) || !Object.values(groups).every(text)) return ["groups must be an object of names"];
-	if (!Array.isArray(models) || !models.every(text)) return ["models must be a list of names"];
+	if (!fields(groups)) return ["groups must be an object"];
+	if (!Object.values(groups).every(text)) return ["every group needs a name"];
+	if (!Array.isArray(models)) return ["models must be a list"];
+	if (!models.every(text)) return ["every model needs a name"];
 	if (!Array.isArray(personas)) return ["personas must be a list"];
 	const errs: string[] = [];
 	if (personas.length !== REQUIRED) errs.push(`need exactly ${REQUIRED} personas, found ${personas.length}`);
