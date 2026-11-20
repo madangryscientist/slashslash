@@ -16,6 +16,8 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import * as flakeslash from "#/content/flakeslash";
 import * as flow from "#/content/flow";
+import * as howItWorks from "#/content/how-it-works";
+import * as howItWorksSteps from "#/content/how-it-works-steps";
 import * as omnislash from "#/content/omnislash";
 import * as products from "#/content/products";
 import * as story from "#/content/story";
@@ -41,6 +43,8 @@ const MODULES: Record<string, object> = {
   "content/products": products,
   "content/story": story,
   "content/flow": flow,
+  "content/how-it-works": howItWorks,
+  "content/how-it-works-steps": howItWorksSteps,
   "content/toggleslash": toggleslash,
   "content/flakeslash": flakeslash,
   "content/taskslash": taskslash,

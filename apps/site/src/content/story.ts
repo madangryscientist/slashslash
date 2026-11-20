@@ -76,10 +76,9 @@ export const PIPELINE: { title: string; lead: string; stages: readonly PipelineS
         {
           tool: "OmniSlash",
           does: {
-            text: "OmniSlash refuses to dispatch a ticket that has no drilled section, no done-when item or no recorded check, unless you override it and give a reason. Planned: each role runs on demand with its own inbox, and builders working in parallel are checked for conflicts.",
+            text: "OmniSlash refuses to dispatch a ticket that has no drilled section, no done-when item or no recorded check, unless you override it and give a reason. Planned: builders working in parallel are checked for conflicts.",
             facts: [
               "omnislash/drilled-ticket-gate",
-              "omnislash/role-runs-on-demand",
               "omnislash/parallel-conflict-checks",
             ],
           },

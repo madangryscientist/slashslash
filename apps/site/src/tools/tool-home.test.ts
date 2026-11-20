@@ -264,10 +264,10 @@ describe("/omnislash, the approved copy", () => {
     expect(props).toHaveProperty("steps", [{ commands: ["bun install", "bun apps/cli/src/index.ts --help"] }]);
   });
 
-  test("Planned: its heading, its lead and the three items", () => {
+  test("Planned: its heading, its lead and the two items", () => {
     expect(heading("planned")).toBe("Planned");
     expect(prose(between(html, "planned", "docs"))).toContain(
-      "Planned These are planned, not built. Each role runs on demand, with an inbox for each role. Builders working in parallel are checked for conflicts with each other. A team server, with access per user.",
+      "Planned These are planned, not built. Builders working in parallel are checked for conflicts with each other. A team server, with access per user.",
     );
   });
 });

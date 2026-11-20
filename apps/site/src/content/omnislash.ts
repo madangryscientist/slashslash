@@ -103,7 +103,6 @@ export const PLANNED_LEAD = "These are planned, not built.";
 
 /** Planned, each item in the facts file's Planned list. */
 export const PLANNED: readonly Claim[] = [
-  { text: "Each role runs on demand, with an inbox for each role.", facts: ["omnislash/role-runs-on-demand"] },
   {
     text: "Builders working in parallel are checked for conflicts with each other.",
     facts: ["omnislash/parallel-conflict-checks"],
