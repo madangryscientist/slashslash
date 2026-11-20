@@ -28,6 +28,9 @@ const sentenceWith = (text: string, phrase: string): string => {
   return found;
 };
 
+const placedAt = (tool: StoryToolName): string[] =>
+  story.PIPELINE.stages.filter((stage) => stage.tools.some((row) => row.tool === tool)).map((stage) => stage.name);
+
 describe("suite story copy", () => {
   test("no string counts the tools", () => {
     const counted =
@@ -46,8 +49,6 @@ describe("suite story copy", () => {
   });
 
   test("OmniSlash sits at Planned, Written and Reviewed, and every other tool at exactly one step", () => {
-    const placedAt = (tool: StoryToolName): string[] =>
-      story.PIPELINE.stages.filter((stage) => stage.tools.some((row) => row.tool === tool)).map((stage) => stage.name);
     expect(placedAt("OmniSlash")).toEqual(["Planned", "Written", "Reviewed"]);
     for (const tool of story.STORY_TOOLS.filter((name) => name !== "OmniSlash")) {
       expect(placedAt(tool), tool).toHaveLength(1);
@@ -70,12 +71,15 @@ describe("suite story copy", () => {
 
   test("each tool's row ends with a full stop, and a planned tool says what it will do", () => {
     const planned = new Set<string>(PRODUCTS.filter((p) => p.stage === "planned").map((p) => p.name));
-    for (const row of story.PIPELINE.stages.flatMap((stage) => stage.tools)) {
+    const rows = story.PIPELINE.stages.flatMap((stage) => stage.tools);
+    for (const row of rows) {
       expect(row.does.text.endsWith("."), row.tool).toBe(true);
       expect(row.does.text.includes("?"), row.tool).toBe(false);
-      if (planned.has(row.tool)) expect(row.does.text, row.tool).toMatch(/\bwill\b/);
-      else expect(row.does.text.startsWith("Will "), row.tool).toBe(false);
     }
+    const plannedRows = rows.filter((row) => planned.has(row.tool));
+    expect(plannedRows.filter((row) => !/\bwill\b/.test(row.does.text)).map((row) => row.tool)).toEqual([]);
+    const builtRows = rows.filter((row) => !planned.has(row.tool));
+    expect(builtRows.filter((row) => row.does.text.startsWith("Will ")).map((row) => row.tool)).toEqual([]);
   });
 
   test("the alphas sentence names exactly the alpha tools", () => {

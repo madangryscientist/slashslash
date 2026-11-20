@@ -160,7 +160,7 @@ export function isFactsProduct(name: string): name is FactsProduct {
 }
 
 /** Where a fact sits in its file, or undefined when its product's file has no such id. */
-export function factKind(id: FactId): "what" | "today" | "planned" | "licence" | "where" | undefined {
+export function factKind(id: string): "what" | "today" | "planned" | "licence" | "where" | undefined {
   const [product = "", key = ""] = id.split("/");
   if (!isFactsProduct(product)) return undefined;
   const facts = FACTS[product];

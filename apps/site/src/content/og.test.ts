@@ -7,6 +7,8 @@ import { STATEMENT } from "#/pixelslash/content/pricing";
 
 const card = (path: string) => OG_CARDS.find((item) => item.path === path);
 
+const question = (name: string) => PRODUCTS.find((product) => product.name === name)?.question.text;
+
 describe("the share card list", () => {
   test("has exactly one card per page that wears its own, in PAGES order", () => {
     expect(OG_CARDS.map((item) => item.path)).toEqual(
@@ -39,7 +41,6 @@ describe("the share card list", () => {
   });
 
   test("takes its headlines from the content modules that hold them", () => {
-    const question = (name: string) => PRODUCTS.find((product) => product.name === name)?.question.text;
     expect(card("/")?.headline).toBe(HERO.title.text);
     expect(card("/flakeslash")?.headline).toBe(question("FlakeSlash"));
     expect(card("/toggleslash")?.headline).toBe(question("ToggleSlash"));

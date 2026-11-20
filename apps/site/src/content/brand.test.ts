@@ -113,8 +113,8 @@ describe("the brand files in dist/brand", () => {
       expect(fillOf(svg, "t"), slug).toBe(tone.text);
       expect(fillOf(svg, "a"), slug).toBe(tone.deep);
       expect(fillOf(svg, "i"), slug).toBe(INK_LIGHT);
-      if (slug === "slash") expect(fillOf(svg, "m"), slug).toBe(MUTE_LIGHT);
     }
+    expect(fillOf(read("brand/slash-lockup-light.svg"), "m")).toBe(MUTE_LIGHT);
   });
 
   test("each dark lockup has its tool's pastel and the dark ink", () => {
@@ -123,8 +123,8 @@ describe("the brand files in dist/brand", () => {
       expect(fillOf(svg, "t"), slug).toBe(tone.pastel);
       expect(fillOf(svg, "a"), slug).toBe(tone.pastel);
       expect(fillOf(svg, "i"), slug).toBe(INK_DARK);
-      if (slug === "slash") expect(fillOf(svg, "m"), slug).toBe(MUTE_DARK);
     }
+    expect(fillOf(read("brand/slash-lockup-dark.svg"), "m")).toBe(MUTE_DARK);
   });
 
   test("the light text tones and the light mute measure at least 4.5:1 on the canvas and on white", () => {
@@ -152,12 +152,12 @@ describe("the brand files in dist/brand", () => {
   });
 });
 
-describe("the icon and the header on the built pages", () => {
-  const iconOf = (html: string): string | undefined => {
-    const link = html.match(/<link[^>]*rel="icon"[^>]*>/)?.[0] ?? "";
-    return link.match(/href="([^"]+)"/)?.[1];
-  };
+const iconOf = (html: string): string | undefined => {
+  const link = html.match(/<link[^>]*rel="icon"[^>]*>/)?.[0] ?? "";
+  return link.match(/href="([^"]+)"/)?.[1];
+};
 
+describe("the icon and the header on the built pages", () => {
   test("the suite's pages use the suite mark as the icon", () => {
     for (const page of ["index.html", "developers.html", "404.html"]) {
       expect(iconOf(read(page)), page).toBe("/brand/slash-mark.svg");

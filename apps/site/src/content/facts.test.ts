@@ -30,7 +30,7 @@ import * as psCompare from "#/pixelslash/pages/compare";
 import * as psHome from "#/pixelslash/pages/home";
 import * as psHowItWorks from "#/pixelslash/pages/how-it-works";
 import * as tools from "#/tools/tools";
-import { FACTS, type FactId, type FactsProduct, factKind, licenceLine, parseFacts } from "./facts";
+import { FACTS, type FactsProduct, factKind, isFactsProduct, licenceLine, parseFacts } from "./facts";
 
 const SITE = resolve(import.meta.dirname, "../..");
 const REPO = resolve(SITE, "../..");
@@ -76,52 +76,44 @@ type Found = {
   plannedContext: boolean;
 };
 
-function isClaim(value: unknown): value is { text: string; facts?: unknown; planned?: unknown; repo?: unknown } {
-  if (typeof value !== "object" || value === null) return false;
-  const object = value as Record<string, unknown>;
-  return typeof object.text === "string" && ("facts" in object || "planned" in object);
+type Context = { today: boolean; planned: boolean };
+type ClaimLike = { text: string; facts?: unknown; planned?: unknown; repo?: unknown };
+
+function isClaim(value: object): value is ClaimLike {
+  return "text" in value && typeof value.text === "string" && ("facts" in value || "planned" in value);
+}
+
+function found(claim: ClaimLike, where: string, context: Context): Found {
+  return {
+    where,
+    text: claim.text,
+    facts: Array.isArray(claim.facts) ? claim.facts : [],
+    ...(typeof claim.planned === "string" ? { planned: claim.planned } : {}),
+    repo: Array.isArray(claim.repo) ? claim.repo : [],
+    today: context.today,
+    plannedContext: context.planned,
+  };
 }
 
 /** Every claim under a value, with the labels it sits under. */
-function claimsIn(
-  value: unknown,
-  where: string,
-  context: { today: boolean; planned: boolean },
-  seen: Set<unknown>,
-  out: Found[],
-): void {
+function* claimsIn(value: unknown, where: string, context: Context, seen: Set<unknown>): Generator<Found> {
   if (typeof value !== "object" || value === null || seen.has(value)) return;
   if (isClaim(value)) {
-    out.push({
-      where,
-      text: value.text,
-      facts: Array.isArray(value.facts) ? value.facts : [],
-      ...(typeof value.planned === "string" ? { planned: value.planned } : {}),
-      repo: Array.isArray(value.repo) ? value.repo : [],
-      today: context.today,
-      plannedContext: context.planned,
-    });
+    yield found(value, where, context);
     return;
   }
   seen.add(value);
-  const object = value as Record<string, unknown>;
-  const planned = context.planned || object.stage === "planned";
-  for (const [key, child] of Object.entries(object)) {
-    claimsIn(
-      child,
-      `${where}.${key}`,
-      { today: context.today || TODAY_KEY.test(key), planned: planned || PLANNED_KEY.test(key) },
-      seen,
-      out,
-    );
+  const planned = context.planned || ("stage" in value && value.stage === "planned");
+  for (const [key, child] of Object.entries(value)) {
+    const inner = { today: context.today || TODAY_KEY.test(key), planned: planned || PLANNED_KEY.test(key) };
+    yield* claimsIn(child, `${where}.${key}`, inner, seen);
   }
 }
 
-const CLAIMS: { module: string; claims: Found[] }[] = Object.entries(MODULES).map(([module, namespace]) => {
-  const claims: Found[] = [];
-  claimsIn(namespace, module, { today: false, planned: false }, new Set(), claims);
-  return { module, claims };
-});
+const CLAIMS: { module: string; claims: Found[] }[] = Object.entries(MODULES).map(([module, namespace]) => ({
+  module,
+  claims: [...claimsIn(namespace, module, { today: false, planned: false }, new Set())],
+}));
 const ALL = CLAIMS.flatMap((entry) => entry.claims);
 
 describe("the facts files", () => {
@@ -160,9 +152,8 @@ describe("the facts files", () => {
 
 describe("every product claim", () => {
   test("is found in each module that holds claims", () => {
-    for (const { module, claims } of CLAIMS) {
-      if (!VIEWS.has(module)) expect(claims.length, `${module} holds no claim objects`).toBeGreaterThan(0);
-    }
+    const empty = CLAIMS.filter(({ module, claims }) => !VIEWS.has(module) && claims.length === 0);
+    expect(empty.map(({ module }) => `${module} holds no claim objects`)).toEqual([]);
   });
 
   test("cites at least one fact, or names an unbuilt tool", () => {
@@ -174,7 +165,7 @@ describe("every product claim", () => {
   test("cites only ids that are in its product's facts file at the pinned commit", () => {
     for (const claim of ALL) {
       for (const id of claim.facts) {
-        expect(factKind(id as FactId), `${claim.where} cites ${id}, which is in no facts file`).toBeDefined();
+        expect(factKind(id), `${claim.where} cites ${id}, which is in no facts file`).toBeDefined();
       }
     }
   });
@@ -186,19 +177,20 @@ describe("every product claim", () => {
   });
 
   test("never puts a Planned fact under a today label", () => {
-    for (const claim of ALL) {
-      const planned = claim.facts.filter((id) => factKind(id as FactId) === "planned");
-      if (planned.length > 0) expect(claim.today, `${claim.where} cites ${planned.join(", ")}`).toBe(false);
-    }
+    const wrong = ALL.flatMap((claim) => {
+      const planned = claim.facts.filter((id) => factKind(id) === "planned");
+      return claim.today && planned.length > 0 ? [`${claim.where} cites ${planned.join(", ")}`] : [];
+    });
+    expect(wrong).toEqual([]);
   });
 
   test("reads as planned when it cites a Planned fact or names an unbuilt tool", () => {
-    for (const claim of ALL) {
-      const planned = claim.facts.some((id) => factKind(id as FactId) === "planned") || claim.planned !== undefined;
-      if (planned) {
-        expect(claim.plannedContext || READS_PLANNED.test(claim.text), `${claim.where}: "${claim.text}"`).toBe(true);
-      }
-    }
+    const wrong = ALL.filter(
+      (claim) =>
+        (claim.facts.some((id) => factKind(id) === "planned") || claim.planned !== undefined) &&
+        !(claim.plannedContext || READS_PLANNED.test(claim.text)),
+    );
+    expect(wrong.map((claim) => `${claim.where}: "${claim.text}"`)).toEqual([]);
   });
 });
 
@@ -246,8 +238,9 @@ describe("the licence lines", () => {
   test("every licence line on the site is its facts file's licence text", () => {
     for (const file of PAGES) {
       for (const match of built(file).matchAll(/data-licence-line="([a-z]+)"[^>]*>([\s\S]*?)<\//g)) {
-        const product = match[1] as FactsProduct;
-        expect(text(match[2] ?? ""), `${file}: ${product}`).toBe(licenceLine(product));
+        const product = match[1] ?? "";
+        const want = isFactsProduct(product) ? licenceLine(product) : `(${product} has no facts file)`;
+        expect(text(match[2] ?? ""), `${file}: ${product}`).toBe(want);
       }
     }
   });

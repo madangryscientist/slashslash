@@ -6,13 +6,13 @@ import { BUILD_COMMIT_PATTERN } from "./build-commit";
 /** The built site to check. */
 const DIST = resolve(import.meta.dirname, "../../dist");
 
-describe("built pages", () => {
-  const pages = (): string[] => {
-    if (!existsSync(resolve(DIST, "404.html")))
-      throw new Error(`No built page in ${DIST}. Run the build first: bun run build.`);
-    return globSync("**/*.html", { cwd: DIST }).toSorted();
-  };
+const pages = (): string[] => {
+  if (!existsSync(resolve(DIST, "404.html")))
+    throw new Error(`No built page in ${DIST}. Run the build first: bun run build.`);
+  return globSync("**/*.html", { cwd: DIST }).toSorted();
+};
 
+describe("built pages", () => {
   test("every page carries one well-formed build-commit meta in its head, and nowhere else", () => {
     const wrong = pages().flatMap((page) => {
       const html = readFileSync(resolve(DIST, page), "utf8");
