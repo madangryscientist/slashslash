@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type APIRequestContext } from "@playwright/test";
 import { NotFound } from "@hackcove/ui-react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -28,28 +28,37 @@ const COMMIT_WAIT_MS = 120_000;
 const buildCommitOf = (html: string): string | undefined =>
   /<meta name="build-commit" content="([^"]*)"/.exec(html)?.[1];
 
-test("the home page names the commit it was built from", async ({ request }) => {
-  test.setTimeout(COMMIT_WAIT_MS + 30_000);
+type Reading = { status: number; seen: string | undefined };
+
+/**
+ * One fresh read of the home page's build commit: a new query each time, so no cache answers with an
+ * older copy. An error answer or a dropped connection before the deadline counts as not yet, like an
+ * older sha.
+ */
+async function readCommit(request: APIRequestContext, deadline: number): Promise<Reading> {
+  try {
+    const response = await request.get(`/?commit-check=${crypto.randomUUID()}`, { timeout: 15_000 });
+    return { status: response.status(), seen: response.ok() ? buildCommitOf(await response.text()) : undefined };
+  } catch (error) {
+    if (!EXPECT_COMMIT || Date.now() >= deadline) throw error;
+    return { status: 0, seen: undefined };
+  }
+}
+
+/** Reads the home page until it names EXPECT_COMMIT or the deadline passes; once when nothing is expected. */
+async function waitForCommit(request: APIRequestContext): Promise<Reading> {
   const deadline = Date.now() + (EXPECT_COMMIT ? COMMIT_WAIT_MS : 0);
-  let seen: string | undefined;
-  let status = 0;
   for (;;) {
-    // A fresh query each time, so no cache answers with an older copy of the page. An error answer or a
-    // dropped connection while the edge switches over counts as not yet, like an older sha.
-    try {
-      const response = await request.get(`/?commit-check=${crypto.randomUUID()}`, { timeout: 15_000 });
-      status = response.status();
-      seen = response.ok() ? buildCommitOf(await response.text()) : undefined;
-    } catch (error) {
-      if (!EXPECT_COMMIT || Date.now() >= deadline) throw error;
-      status = 0;
-      seen = undefined;
-    }
-    if (!EXPECT_COMMIT || seen === EXPECT_COMMIT || Date.now() >= deadline) break;
+    const reading = await readCommit(request, deadline);
+    if (!EXPECT_COMMIT || reading.seen === EXPECT_COMMIT || Date.now() >= deadline) return reading;
     await new Promise((done) => setTimeout(done, 5_000));
   }
-  console.log(`build-commit on the home page: ${seen ?? "(none)"} (HTTP ${status})`);
-  expect(status).toBe(200);
+}
+
+test("the home page names the commit it was built from", async ({ request }) => {
+  test.setTimeout(COMMIT_WAIT_MS + 30_000);
+  const { status, seen } = await waitForCommit(request);
+  expect(status, `HTTP ${status}, build-commit ${seen ?? "(none)"}`).toBe(200);
   expect(seen, "the home page has no build-commit meta").toBeDefined();
   expect(seen).toMatch(BUILD_COMMIT_PATTERN);
   if (EXPECT_COMMIT)

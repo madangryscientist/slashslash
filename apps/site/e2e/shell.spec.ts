@@ -65,7 +65,6 @@ for (const width of [768, 820, 1024, 1440]) {
         page: [document.documentElement.scrollWidth, document.documentElement.clientWidth],
       };
     });
-    console.log(`switcher at ${width}: ${JSON.stringify(reading)}`);
     expect(reading?.visible).toBe(true);
     expect(reading?.rows).toBe(1);
     expect(reading?.nav[0]).toBe(reading?.nav[1]);

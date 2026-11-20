@@ -12,64 +12,101 @@ import { HERO } from "../src/content/landing.ts";
 const THEMES = ["light", "dark"] as const;
 const STORED = "hackcove:colour-scheme";
 
+type Rgba = [number, number, number, number];
 /**
- * Every visible text in the hero's panes, with its contrast on the ground behind it. Colours go through a
- * canvas, so any CSS colour syntax reads as sRGB; a background with alpha is laid over the one under
- * it, up to the page's own.
+ * One text in the panes, with its box's area, whether it sits in a style, script or svg, its colour and
+ * each element from it up to the root, as CSS.
  */
-const paneContrasts = (page: Page): Promise<{ text: string; ratio: number }[]> =>
+type RawText = {
+  text: string;
+  area: number;
+  inert: boolean;
+  color: string;
+  layers: { background: string; opacity: string }[];
+};
+
+/** Every text in the hero's panes, with the CSS colours its contrast is worked out from. */
+const paneTexts = (page: Page): Promise<RawText[]> =>
   page.evaluate(() => {
-    const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
-    if (!ctx) throw new Error("no canvas");
-    const rgba = (css: string): [number, number, number, number] => {
-      ctx.clearRect(0, 0, 1, 1);
-      ctx.fillStyle = "rgba(0,0,0,0)";
-      ctx.fillStyle = css;
-      ctx.fillRect(0, 0, 1, 1);
-      const [r = 0, g = 0, b = 0, a = 0] = ctx.getImageData(0, 0, 1, 1).data;
-      return [r, g, b, a / 255];
-    };
-    const over = (top: number[], under: number[]): number[] =>
-      [0, 1, 2].map((i) => (top[i] ?? 0) * (top[3] ?? 1) + (under[i] ?? 0) * (1 - (top[3] ?? 1)));
-    const ground = (el: Element | null): number[] => {
-      const layers: number[][] = [];
-      for (let node = el; node; node = node.parentElement) {
-        const c = rgba(getComputedStyle(node).backgroundColor);
-        if (c[3] > 0) layers.push(c);
-        if (c[3] === 1) break;
-      }
-      return layers.reduceRight<number[]>((under, top) => over(top, under), [255, 255, 255]);
-    };
-    const lum = (c: number[]): number => {
-      const [r, g, b] = c.map((v) => {
-        const s = v / 255;
-        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-      });
-      return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0);
-    };
     const hero = document.querySelector(".panes");
     if (!hero) throw new Error("no panes");
-    const out: { text: string; ratio: number }[] = [];
+    const out: RawText[] = [];
     const walker = document.createTreeWalker(hero, NodeFilter.SHOW_TEXT);
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const el = node.parentElement;
-      const words = node.textContent?.trim() ?? "";
-      if (!el || words === "" || el.closest("style, script, svg")) continue;
+      if (!el) continue;
       const box = el.getBoundingClientRect();
-      if (box.width === 0 || box.height === 0) continue;
-      let hidden = false;
+      const layers: RawText["layers"] = [];
       for (let up: Element | null = el; up; up = up.parentElement) {
-        if (Number(getComputedStyle(up).opacity) === 0) hidden = true;
+        const style = getComputedStyle(up);
+        layers.push({ background: style.backgroundColor, opacity: style.opacity });
       }
-      if (hidden) continue;
-      const fg = rgba(getComputedStyle(el).color);
-      const bg = ground(el);
-      const a = lum(over(fg, bg));
-      const b = lum(bg);
-      out.push({ text: words, ratio: Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 100) / 100 });
+      out.push({
+        text: node.textContent?.trim() ?? "",
+        area: box.width * box.height,
+        inert: el.closest("style, script, svg") !== null,
+        color: getComputedStyle(el).color,
+        layers,
+      });
     }
     return out;
   });
+
+/** Each CSS colour as sRGB with alpha 0 to 1. A canvas reads them, so any CSS colour syntax works. */
+const toRgba = (page: Page, colours: string[]): Promise<Rgba[]> =>
+  page.evaluate((css) => {
+    const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+    if (!ctx) throw new Error("no canvas");
+    return css.map((colour): Rgba => {
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = "rgba(0,0,0,0)";
+      ctx.fillStyle = colour;
+      ctx.fillRect(0, 0, 1, 1);
+      const [r = 0, g = 0, b = 0, a = 0] = ctx.getImageData(0, 0, 1, 1).data;
+      return [r, g, b, a / 255];
+    });
+  }, colours);
+
+/** A colour with alpha laid over an opaque one. */
+const over = (top: Rgba, under: Rgba): Rgba => [
+  top[0] * top[3] + under[0] * (1 - top[3]),
+  top[1] * top[3] + under[1] * (1 - top[3]),
+  top[2] * top[3] + under[2] * (1 - top[3]),
+  1,
+];
+
+/** The ground behind a text: each background with alpha laid over the one under it, up to the first opaque one or white. */
+function ground(backgrounds: Rgba[]): Rgba {
+  const opaque = backgrounds.findIndex((c) => c[3] === 1);
+  const layers = opaque === -1 ? backgrounds : backgrounds.slice(0, opaque + 1);
+  return layers.reduceRight<Rgba>((under, top) => (top[3] > 0 ? over(top, under) : under), [255, 255, 255, 1]);
+}
+
+const channel = (v: number): number => {
+  const s = v / 255;
+  return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+};
+const lum = (c: Rgba): number => 0.2126 * channel(c[0]) + 0.7152 * channel(c[1]) + 0.0722 * channel(c[2]);
+
+/** The WCAG contrast of a text colour on its ground, to two decimals. */
+function contrast(fg: Rgba, bg: Rgba): number {
+  const a = lum(over(fg, bg));
+  const b = lum(bg);
+  return Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 100) / 100;
+}
+
+/** A text a reader sees: words in a box with an area, outside style, script and svg, with no ancestor at opacity 0. */
+const visible = (t: RawText): boolean =>
+  t.text !== "" && t.area > 0 && !t.inert && t.layers.every((l) => Number(l.opacity) !== 0);
+
+/** Every visible text in the hero's panes, with its contrast on the ground behind it. */
+async function paneContrasts(page: Page): Promise<{ text: string; ratio: number }[]> {
+  const shown = (await paneTexts(page)).filter(visible);
+  const colours = [...new Set(shown.flatMap((t) => [t.color, ...t.layers.map((l) => l.background)]))];
+  const rgba = new Map((await toRgba(page, colours)).map((c, i) => [colours[i], c]));
+  const of = (css: string): Rgba => rgba.get(css) ?? [0, 0, 0, 0];
+  return shown.map((t) => ({ text: t.text, ratio: contrast(of(t.color), ground(t.layers.map((l) => of(l.background)))) }));
+}
 
 for (const theme of THEMES) {
   test(`with motion on, the panes' start frame reads at 4.5:1 or more in ${theme}`, async ({ page }) => {
