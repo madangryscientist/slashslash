@@ -90,19 +90,23 @@ export function EditLink({ source }: { source: string }): ReactNode {
   );
 }
 
-function PrevNext({ slug }: { slug: string }): ReactNode {
-  const { prev, next } = neighbours(slug);
-  if (!prev && !next) return null;
-  const card = (page: DocPageDef, word: string, testid: string): ReactNode => (
+/** A link to the previous or next page, under its group's title. */
+function neighbourCard(page: DocPageDef, word: string, testid: string): ReactNode {
+  return (
     <Card href={pageHref(page)} title={`${word}: ${page.title}`} size="sm" data-testid={testid}>
       {GROUPS.find((group) => group.id === page.group)?.title}
     </Card>
   );
+}
+
+function PrevNext({ slug }: { slug: string }): ReactNode {
+  const { prev, next } = neighbours(slug);
+  if (!prev && !next) return null;
   return (
     <nav aria-label="Previous and next" data-testid="docs-prev-next">
       <CardGrid columns={2}>
-        {prev ? card(prev, "Previous", "docs-prev") : <div />}
-        {next ? card(next, "Next", "docs-next") : <div />}
+        {prev ? neighbourCard(prev, "Previous", "docs-prev") : <div />}
+        {next ? neighbourCard(next, "Next", "docs-next") : <div />}
       </CardGrid>
     </nav>
   );

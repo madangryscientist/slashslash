@@ -1,7 +1,7 @@
 import { PRODUCTS } from "#/content/products";
 import type { StageId } from "#/content/stages";
 import { PIPELINE, type StoryTool } from "#/content/story";
-import { markFor, SECTIONS, type SectionKey } from "#/shell/sections";
+import { isSectionKey, markFor, SECTIONS } from "#/shell/sections";
 
 /** One tool on the home: what it does, its release stage and its page here, if any. */
 export type ToolCard = {
@@ -19,7 +19,7 @@ export const TOOL_CARDS: readonly ToolCard[] = PIPELINE.stages
   .map(({ tool: name }): ToolCard => {
     const product = PRODUCTS.find((p) => p.name === name);
     const key = name.toLowerCase();
-    const href = key in SECTIONS ? SECTIONS[key as SectionKey].home : undefined;
+    const href = isSectionKey(key) ? SECTIONS[key].home : undefined;
     return {
       name,
       mark: markFor(name),

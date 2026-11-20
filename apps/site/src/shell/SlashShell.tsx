@@ -6,7 +6,7 @@ import { SITE_NAME } from "#/content/site";
 import { LANDING_HEADLINE } from "#/content/story";
 import { TRADEMARK } from "#/pixelslash/content/trademark";
 import { FooterColumns } from "#/stand-ins/footer-columns";
-import { SECTIONS, TOOL_KEYS, markFor, type SectionKey } from "#/shell/sections";
+import { SECTIONS, TOOL_KEYS, isSectionKey, markFor, type SectionKey } from "#/shell/sections";
 
 /** A mark beside a name: decoration, so the name alone is read out. */
 function Marked({ mark, children }: { mark: string; children: ReactNode }): ReactNode {
@@ -33,17 +33,25 @@ function Lockup(): ReactNode {
 function productItems(): ReactNode[] {
   return PRODUCTS.map((product) => {
     const key = product.name.toLowerCase();
-    const home = key in SECTIONS ? SECTIONS[key as SectionKey].home : product.page;
-    const name = <Marked mark={markFor(product.name)}>{product.name}</Marked>;
+    const home = isSectionKey(key) ? SECTIONS[key].home : product.page;
+    const name = (
+      <Marked key={product.name} mark={markFor(product.name)}>
+        {product.name}
+      </Marked>
+    );
     if (product.stage === "planned")
       return (
-        <Cluster as="span" gap="xs">
+        <Cluster key={product.name} as="span" gap="xs">
           {name}
           <Caption as="span">Planned</Caption>
         </Cluster>
       );
     if (home === undefined) return name;
-    return <TextLink href={home}>{name}</TextLink>;
+    return (
+      <TextLink key={product.name} href={home}>
+        {name}
+      </TextLink>
+    );
   });
 }
 
@@ -56,7 +64,7 @@ function licenceItems(): ReactNode[] {
     byLicence.set(licence, [...(byLicence.get(licence) ?? []), name]);
   }
   return [...byLicence].map(([licence, names]) => (
-    <span data-licence={licence}>
+    <span key={licence} data-licence={licence}>
       {`${licence}: ${names.join(", ")}`}
     </span>
   ));
@@ -76,14 +84,26 @@ function Footer(): ReactNode {
         {
           title: "Developers",
           items: [
-            <TextLink href="/developers">How it works in CI</TextLink>,
-            <TextLink href="/pixelslash/docs">PixelSlash docs</TextLink>,
-            <TextLink href="https://github.com/slashsuite" external>
+            <TextLink key="/developers" href="/developers">
+              How it works in CI
+            </TextLink>,
+            <TextLink key="/pixelslash/docs" href="/pixelslash/docs">
+              PixelSlash docs
+            </TextLink>,
+            <TextLink key="github" href="https://github.com/slashsuite" external>
               Source on GitHub
             </TextLink>,
           ],
         },
-        { title: "Licence", items: [...licenceItems(), <Text as="span">{TRADEMARK}</Text>] },
+        {
+          title: "Licence",
+          items: [
+            ...licenceItems(),
+            <Text key="trademark" as="span">
+              {TRADEMARK}
+            </Text>,
+          ],
+        },
       ]}
     />
   );

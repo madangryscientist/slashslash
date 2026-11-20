@@ -47,71 +47,100 @@ export type Facts = {
 
 const SECTIONS = ["What it is", "Today", "Planned", "Licence", "Where it runs"] as const;
 type SectionName = (typeof SECTIONS)[number];
+type ListName = Exclude<SectionName, "What it is">;
+
+/** Where a FACTS.md read has got to, line by line. */
+type Reading = {
+  fail: (line: number, why: string) => never;
+  title: boolean;
+  checkedAgainst: string;
+  section: SectionName | undefined;
+  what: string[];
+  lists: Record<ListName, Map<string, string>>;
+  seen: SectionName[];
+};
+
+function isListName(name: SectionName): name is ListName {
+  return name !== "What it is";
+}
+
+/** The title, then the Checked against line. True when the line was one of them. */
+function readPreamble(reading: Reading, n: number, line: string): boolean {
+  if (!reading.title) {
+    if (!/^# \S.* facts$/.test(line)) reading.fail(n, `expected the title "# <Name> facts", found "${line}"`);
+    reading.title = true;
+    return true;
+  }
+  if (reading.section !== undefined || reading.checkedAgainst !== "") return false;
+  const checked = line.match(/^Checked against (.+?)\.?$/)?.[1];
+  if (!checked) return reading.fail(n, `expected "Checked against ...", found "${line}"`);
+  reading.checkedAgainst = checked;
+  return true;
+}
+
+/** A `## ` heading, which must be the next section in order. True when the line was one. */
+function readHeading(reading: Reading, n: number, line: string): boolean {
+  const name = line.match(/^## (.+)$/)?.[1];
+  if (name === undefined) return false;
+  const expected = SECTIONS[reading.seen.length];
+  if (expected === undefined || name !== expected) {
+    return reading.fail(n, `expected the heading "## ${expected ?? "(none)"}", found "${line}"`);
+  }
+  reading.seen.push(expected);
+  reading.section = expected;
+  return true;
+}
+
+/** A line of the current section: What it is text, or a fact line in one of the lists. */
+function readBody(reading: Reading, n: number, line: string): void {
+  const section = reading.section;
+  if (section === undefined) return reading.fail(n, `text before the first section: "${line}"`);
+  if (!isListName(section)) {
+    reading.what.push(line.trim());
+    return;
+  }
+  const [, id, text] = line.match(/^- `([a-z0-9-]+)`: (.+)$/) ?? [];
+  if (!id || !text) return reading.fail(n, `expected a fact line "- \`id\`: text", found "${line}"`);
+  const list = reading.lists[section];
+  if (list.has(id)) reading.fail(n, `the id ${id} appears twice in ${section}`);
+  list.set(id, text);
+}
 
 /** Reads one FACTS.md. Throws naming the product and the line when the file is not the fixed shape. */
 export function parseFacts(product: FactsProduct, source: string): Facts {
-  const fail = (line: number, why: string): never => {
-    throw new Error(`${product} FACTS.md line ${line}: ${why}`);
+  const reading: Reading = {
+    fail: (line, why) => {
+      throw new Error(`${product} FACTS.md line ${line}: ${why}`);
+    },
+    title: false,
+    checkedAgainst: "",
+    section: undefined,
+    what: [],
+    lists: { Today: new Map(), Planned: new Map(), Licence: new Map(), "Where it runs": new Map() },
+    seen: [],
   };
   const lines = source.split("\n");
-  let title = false;
-  let checkedAgainst = "";
-  let section: SectionName | undefined;
-  const what: string[] = [];
-  const lists: Record<Exclude<SectionName, "What it is">, Map<string, string>> = {
-    Today: new Map(),
-    Planned: new Map(),
-    Licence: new Map(),
-    "Where it runs": new Map(),
-  };
-  const seen: SectionName[] = [];
   for (const [index, raw] of lines.entries()) {
-    const n = index + 1;
     const line = raw.trimEnd();
     if (line === "") continue;
-    if (!title) {
-      if (!/^# \S.* facts$/.test(line)) fail(n, `expected the title "# <Name> facts", found "${line}"`);
-      title = true;
-      continue;
-    }
-    if (section === undefined && checkedAgainst === "") {
-      const checked = line.match(/^Checked against (.+?)\.?$/);
-      if (!checked?.[1]) fail(n, `expected "Checked against ...", found "${line}"`);
-      checkedAgainst = checked?.[1] ?? "";
-      continue;
-    }
-    const heading = line.match(/^## (.+)$/);
-    if (heading) {
-      const name = heading[1] as SectionName;
-      const expected = SECTIONS[seen.length];
-      if (name !== expected) fail(n, `expected the heading "## ${expected ?? "(none)"}", found "${line}"`);
-      seen.push(name);
-      section = name;
-      continue;
-    }
-    if (section === undefined) fail(n, `text before the first section: "${line}"`);
-    if (section === "What it is") {
-      what.push(line.trim());
-      continue;
-    }
-    const fact = line.match(/^- `([a-z0-9-]+)`: (.+)$/);
-    if (!fact?.[1] || !fact[2]) fail(n, `expected a fact line "- \`id\`: text", found "${line}"`);
-    const list = lists[section as Exclude<SectionName, "What it is">];
-    const id = fact?.[1] ?? "";
-    if (list.has(id)) fail(n, `the id ${id} appears twice in ${section ?? ""}`);
-    list.set(id, fact?.[2] ?? "");
+    const n = index + 1;
+    if (readPreamble(reading, n, line) || readHeading(reading, n, line)) continue;
+    readBody(reading, n, line);
   }
+  const { lists, what, seen, fail } = reading;
   if (seen.length !== SECTIONS.length) fail(lines.length, `missing the section "## ${SECTIONS[seen.length] ?? ""}"`);
   if (what.length === 0) fail(lines.length, "the What it is section is empty");
   const licence = lists.Licence.get("licence");
-  if (licence === undefined || lists.Licence.size !== 1) fail(lines.length, "Licence must hold exactly one fact, `licence`");
+  if (licence === undefined || lists.Licence.size !== 1) {
+    return fail(lines.length, "Licence must hold exactly one fact, `licence`");
+  }
   return {
     product,
-    checkedAgainst,
+    checkedAgainst: reading.checkedAgainst,
     whatItIs: what.join(" "),
     today: lists.Today,
     planned: lists.Planned,
-    licence: licence ?? "",
+    licence,
     whereItRuns: lists["Where it runs"],
   };
 }
@@ -125,11 +154,16 @@ export const FACTS: Readonly<Record<FactsProduct, Facts>> = {
   omnislash: parseFacts("omnislash", omnislashSource),
 };
 
+/** Whether a string names a product with a facts file. */
+export function isFactsProduct(name: string): name is FactsProduct {
+  return Object.hasOwn(FACTS, name);
+}
+
 /** Where a fact sits in its file, or undefined when its product's file has no such id. */
 export function factKind(id: FactId): "what" | "today" | "planned" | "licence" | "where" | undefined {
-  const [product, key = ""] = id.split("/") as [FactsProduct, string?];
+  const [product = "", key = ""] = id.split("/");
+  if (!isFactsProduct(product)) return undefined;
   const facts = FACTS[product];
-  if (facts === undefined) return undefined;
   if (key === WHAT_IT_IS) return "what";
   if (facts.today.has(key)) return "today";
   if (facts.planned.has(key)) return "planned";

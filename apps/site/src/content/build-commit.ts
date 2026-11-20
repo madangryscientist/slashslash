@@ -28,13 +28,17 @@ function git(cwd: string, args: string[]): string | undefined {
   }
 }
 
-export function buildCommit({ env = process.env, cwd = process.cwd() }: Sources = {}): string {
+/** The commit BUILD_COMMIT names, or undefined when it is unset or blank. */
+function givenCommit(env: Record<string, string | undefined>): string | undefined {
   const given = env["BUILD_COMMIT"]?.trim();
-  if (given) {
-    if (!BUILD_COMMIT_PATTERN.test(given))
-      throw new Error(`BUILD_COMMIT is "${given}", not a 40-character hex sha (optionally ending -dirty).`);
-    return given;
-  }
+  if (!given) return undefined;
+  if (!BUILD_COMMIT_PATTERN.test(given))
+    throw new Error(`BUILD_COMMIT is "${given}", not a 40-character hex sha (optionally ending -dirty).`);
+  return given;
+}
+
+/** The checkout's HEAD, with `-dirty` when git status lists anything. */
+function checkoutCommit(cwd: string): string {
   const head = git(cwd, ["rev-parse", "HEAD"])?.trim();
   const status = git(cwd, ["status", "--porcelain"]);
   if (!head || !/^[0-9a-f]{40}$/.test(head) || status === undefined)
@@ -42,6 +46,10 @@ export function buildCommit({ env = process.env, cwd = process.cwd() }: Sources 
       `No build commit: BUILD_COMMIT is unset and \`git rev-parse HEAD\` gave no sha in ${cwd}. Set BUILD_COMMIT or build inside the git checkout.`,
     );
   return status.trim() === "" ? head : `${head}-dirty`;
+}
+
+export function buildCommit({ env = process.env, cwd = process.cwd() }: Sources = {}): string {
+  return givenCommit(env) ?? checkoutCommit(cwd);
 }
 
 let memo: string | undefined;
