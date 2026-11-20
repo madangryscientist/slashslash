@@ -41,7 +41,7 @@ const HOME = {
     "A change goes through the same steps, from the idea to the release. Each Slash product does one job at one of those steps. Start with the one that hurts most.",
     "Planned",
     "An idea becomes a ticket, and the ticket is drilled before any agent starts on it.",
-    "OmniSlash refuses to dispatch a ticket that has no drilled section, no done-when item or no recorded check, unless you override it and give a reason. Planned: each role runs on demand with its own inbox, and builders working in parallel are checked for conflicts.",
+    "OmniSlash refuses to dispatch a ticket that has no drilled section, no done-when item or no recorded check, unless you override it and give a reason. Planned: builders working in parallel are checked for conflicts.",
     "Written",
     "An agent builds the ticket on its own branch, in its own worktree, from ready parts.",
     "OmniSlash opens each builder in a git worktree on the ticket's own branch, and a lease lets only one holder work a ticket or a worktree at a time.",

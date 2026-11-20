@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { HOW_IT_WORKS_HEADLINE } from "#/content/how-it-works";
 import { HERO } from "#/content/story";
 import { OG_CARDS, ogCardFor, wornCard } from "#/content/og";
 import { PAGES } from "#/content/pages";
@@ -46,6 +47,10 @@ describe("the share card list", () => {
     expect(card("/toggleslash")?.headline).toBe(question("ToggleSlash"));
     expect(card("/taskslash")?.headline).toBe(question("TaskSlash"));
     expect(card("/pixelslash/pricing")?.headline).toBe(STATEMENT.text);
+  });
+
+  test("gives /how-it-works the page's h1 as its headline", () => {
+    expect(card("/how-it-works")).toMatchObject({ tool: "slash", headline: HOW_IT_WORKS_HEADLINE });
   });
 
   test("gives /omnislash the headline, its page's h1", () => {
