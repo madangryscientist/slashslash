@@ -65,7 +65,14 @@ test("the hint fits the field from lg up", async ({ page }, info) => {
       if (!context) throw new Error("no 2D canvas context");
       context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
       const textWidth = context.measureText(input.placeholder).width;
-      const contentWidth = input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      // The room between the paddings and borders, from the border-box width. clientWidth is not used: Chromium
+      // 158 (Playwright 1.65) already leaves the paddings out of an input's clientWidth, Chromium 156 did not.
+      const contentWidth =
+        input.offsetWidth -
+        parseFloat(style.borderLeftWidth) -
+        parseFloat(style.borderRightWidth) -
+        parseFloat(style.paddingLeft) -
+        parseFloat(style.paddingRight);
       return { textWidth, contentWidth, placeholder: input.placeholder };
     });
     expect(fit.placeholder, `at ${width}px`).toBe("Search the docs (press /)");
